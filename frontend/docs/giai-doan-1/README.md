@@ -1,7 +1,8 @@
 # Tài Liệu Giao Diện Giai Đoạn 1 – Bản Đồ Điều Hướng (Frontend Slices Map)
 
 > **Mô hình tài liệu**: Phân tách theo **Vertical Slices (S01–S13)** và **Nền tảng dùng chung (Foundations)**.  
-> **Nguyên tắc Agent**: Khi thực thi một task cụ thể, chỉ đọc thư mục tương ứng trong `slices/sxx-...` (kích thước ~10–20 KB) để tối ưu hóa Context Budget và ngăn chặn tình trạng tràn token.
+> **Nguyên tắc Agent**: Khi thực thi một task cụ thể, chỉ đọc thư mục tương ứng trong `slices/sxx-...` (kích thước ~10–20 KB) để tối ưu hóa Context Budget và ngăn chặn tình trạng tràn token.  
+> **Sổ tay Prompt thực thi**: [PROMPTS_PLAYBOOK.md](./PROMPTS_PLAYBOOK.md) chứa toàn bộ danh sách prompt mẫu chuẩn Harness cho 13 Slices.
 
 ---
 

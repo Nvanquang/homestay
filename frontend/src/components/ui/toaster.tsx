@@ -6,12 +6,21 @@ export function Toaster() {
   return (
     <SonnerToaster
       position="top-right"
+      richColors
       toastOptions={{
         className:
-          "bg-[var(--color-bg-inverse)] text-[var(--color-text-inverse)] border border-[var(--color-border-strong)] rounded-xl shadow-[var(--shadow-3)] text-sm font-medium",
+          "rounded-xl border shadow-[var(--shadow-3)] text-sm font-medium",
         style: {
-          background: "#222222",
+          background: "#059669",
           color: "#ffffff",
+          borderColor: "#047857",
+        },
+        classNames: {
+          toast: "rounded-xl text-sm font-medium shadow-[var(--shadow-3)]",
+          success: "!bg-emerald-600 !text-white !border-emerald-700",
+          error: "!bg-rose-600 !text-white !border-rose-700",
+          warning: "!bg-amber-600 !text-white !border-amber-700",
+          info: "!bg-blue-600 !text-white !border-blue-700",
         },
       }}
     />

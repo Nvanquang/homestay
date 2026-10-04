@@ -11,7 +11,7 @@
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Không có (Đã hoàn thành toàn bộ 4 chặng FE-Base nền tảng; Sẵn sàng cho Slice FE-S01 Auth)`
+- **Active Task**: `Không có (Đã hoàn thành FE-S01; Sẵn sàng nhận nhiệm vụ FE-S02)`
 - **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
 - **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe`
 
@@ -36,8 +36,8 @@ Quy ước trạng thái:
 
 ### Slice FE-S01: Đăng Ký, Xác Minh Email, Đăng Nhập, Quên Mật Khẩu (P06, P07, P08, P09)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s01-auth/README.md`*
-- [ ] **S01 Contract & Mock**: Zod schema form đăng ký/đăng nhập + Mock auth handlers (cookie session giả lập): `.\scripts\verify.ps1 -Target fe -Tier 1` -> `pending`
-- [ ] **S01 UI Implementation**: Màn hình P06 (Đăng nhập), P07 (Đăng ký), P08 (Quên/Đặt lại MK), P09 (Xác minh email): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [x] **S01 Contract & Mock**: Zod schema form đăng ký/đăng nhập + Mock auth handlers (cookie session giả lập): `.\scripts\verify.ps1 -Target fe -Tier 1` -> `passing`
+- [x] **S01 UI Implementation**: Màn hình P06 (Đăng nhập), P07 (Đăng ký), P08 (Quên/Đặt lại MK), P09 (Xác minh email): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `passing`
 
 ---
 

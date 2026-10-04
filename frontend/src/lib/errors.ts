@@ -128,8 +128,8 @@ export function normalizeProblemDetails(
   const rawCode = problem.code || (status === 401 ? "unauthenticated" : status === 403 ? "forbidden" : status === 404 ? "notFound" : "generic");
 
   const message =
-    getErrorMessageByCode(rawCode, locale) ||
     problem.detail ||
+    getErrorMessageByCode(rawCode, locale) ||
     problem.title ||
     fallbackMessage;
 

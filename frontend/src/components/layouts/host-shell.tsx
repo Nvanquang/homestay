@@ -1,0 +1,296 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import {
+  Building2,
+  ShieldCheck,
+  Calendar,
+  Luggage,
+  DollarSign,
+  Lock,
+  Menu,
+  X,
+  Globe,
+  ChevronDown,
+  User,
+  ChevronRight,
+} from "lucide-react";
+
+export type HostNavId = "listings" | "verification" | "calendar" | "bookings" | "earnings";
+
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+export interface HostShellProps {
+  children: React.ReactNode;
+  activeItem?: HostNavId;
+  breadcrumbs?: BreadcrumbItem[];
+  title?: string;
+  actionButton?: React.ReactNode;
+  userName?: string;
+  onSwitchToGuest?: () => void;
+}
+
+export function HostShell({
+  children,
+  activeItem = "listings",
+  breadcrumbs = [{ label: "Bảng điều khiển Host", href: "/host" }],
+  title,
+  actionButton,
+  userName = "Chủ nhà",
+  onSwitchToGuest,
+}: HostShellProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  const navigationItems = [
+    {
+      id: "listings" as const,
+      label: "Danh sách phòng",
+      href: "/host/listings",
+      icon: Building2,
+      locked: false,
+    },
+    {
+      id: "verification" as const,
+      label: "Xác minh Host",
+      href: "/host/verification",
+      icon: ShieldCheck,
+      locked: false,
+    },
+    {
+      id: "calendar" as const,
+      label: "Lịch phòng",
+      href: "/host/calendar",
+      icon: Calendar,
+      locked: false,
+    },
+    {
+      id: "bookings" as const,
+      label: "Đặt phòng",
+      href: "#",
+      icon: Luggage,
+      locked: true,
+      phaseNote: "Giai đoạn sau",
+    },
+    {
+      id: "earnings" as const,
+      label: "Thu nhập & Payout",
+      href: "#",
+      icon: DollarSign,
+      locked: true,
+      phaseNote: "Giai đoạn sau",
+    },
+  ];
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
+      {/* Top Navbar */}
+      <header className="sticky top-0 z-40 bg-[var(--color-bg-surface)] border-b border-[var(--color-border-subtle)] h-16 flex items-center justify-between px-4 sm:px-6 shadow-[var(--shadow-1)]">
+        {/* Left: Brand / Sidebar Toggle */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="md:hidden p-2 rounded-lg hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)]"
+            aria-label="Đóng mở menu Host"
+            aria-expanded={isSidebarOpen}
+          >
+            {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+
+          <Link
+            href="/host"
+            className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gray-900)] rounded-md"
+          >
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-50)] flex items-center justify-center text-[var(--color-brand-500)]">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <span className="font-bold text-lg tracking-tight hidden sm:inline">
+              homestay <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[var(--color-bg-subtle)] text-[var(--color-brand-600)]">Host</span>
+            </span>
+          </Link>
+        </div>
+
+        {/* Right: Switch mode, locale, user */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button
+            type="button"
+            onClick={onSwitchToGuest}
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full bg-[var(--color-bg-subtle)] hover:bg-[var(--color-bg-muted)] border border-[var(--color-border-subtle)] transition-colors"
+          >
+            <span>Chế độ Host</span>
+            <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
+          </button>
+
+          <button
+            type="button"
+            className="p-2 rounded-full hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)] transition-colors"
+            aria-label="Chọn ngôn ngữ"
+          >
+            <Globe className="w-4 h-4" />
+          </button>
+
+          {/* User profile dropdown trigger */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="flex items-center gap-2 p-1.5 rounded-full hover:bg-[var(--color-bg-subtle)]"
+              aria-label="Tài khoản Host"
+              aria-expanded={isUserMenuOpen}
+            >
+              <div className="w-8 h-8 rounded-full bg-[var(--color-gray-900)] text-white flex items-center justify-center text-xs font-semibold">
+                <User className="w-4 h-4" />
+              </div>
+            </button>
+
+            {isUserMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsUserMenuOpen(false)}
+                  aria-hidden="true"
+                />
+                <div
+                  role="menu"
+                  className="absolute right-0 mt-2 w-56 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] shadow-[var(--shadow-2)] py-2 z-50 animate-in fade-in slide-in-from-top-1"
+                >
+                  <div className="px-4 py-2 text-xs font-medium text-[var(--color-text-secondary)] border-b border-[var(--color-border-subtle)]">
+                    Host: {userName}
+                  </div>
+                  <Link
+                    href="/"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="block px-4 py-2 text-sm text-[var(--color-brand-600)] hover:bg-[var(--color-bg-subtle)] font-medium"
+                  >
+                    Chuyển sang chế độ Guest
+                  </Link>
+                  <Link
+                    href="/account/settings"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="block px-4 py-2 text-sm hover:bg-[var(--color-bg-subtle)]"
+                  >
+                    Cài đặt tài khoản
+                  </Link>
+                  <div className="my-1 border-t border-[var(--color-border-subtle)]" />
+                  <button
+                    type="button"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="w-full text-left px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Body: Sidebar + Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Backdrop for mobile drawer */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-20 md:hidden animate-in fade-in"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Sidebar Navigation */}
+        <aside
+          className={`fixed inset-y-0 left-0 z-30 w-64 bg-[var(--color-bg-surface)] border-r border-[var(--color-border-subtle)] pt-16 md:pt-0 transform transition-transform duration-200 ease-in-out md:static md:translate-x-0 ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+          aria-label="Thanh điều hướng Host"
+        >
+          <div className="p-4 space-y-1">
+            <div className="px-3 py-2 text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
+              Quản lý chỗ ở
+            </div>
+            {navigationItems.map((item) => {
+              const isActive = activeItem === item.id;
+              const Icon = item.icon;
+
+              if (item.locked) {
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-[var(--color-text-disabled)] opacity-60 cursor-not-allowed"
+                    title={item.phaseNote}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-4 h-4 text-[var(--color-text-disabled)]" />
+                      <span>{item.label}</span>
+                    </div>
+                    <Lock className="w-3.5 h-3.5 text-[var(--color-text-disabled)]" />
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative ${
+                    isActive
+                      ? "bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)] font-semibold before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-[var(--color-brand-600)] before:rounded-r"
+                      : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)]"
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? "text-[var(--color-brand-600)]" : ""}`} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </aside>
+
+        {/* Content Viewport */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-6xl mx-auto space-y-6">
+            {/* Breadcrumb & Title */}
+            <div>
+              {breadcrumbs.length > 0 && (
+                <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)] mb-2">
+                  {breadcrumbs.map((b, idx) => (
+                    <React.Fragment key={idx}>
+                      {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-[var(--color-text-disabled)]" />}
+                      {b.href && idx < breadcrumbs.length - 1 ? (
+                        <Link href={b.href} className="hover:underline">
+                          {b.label}
+                        </Link>
+                      ) : (
+                        <span className="text-[var(--color-text-primary)] font-medium">{b.label}</span>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </nav>
+              )}
+
+              {(title || actionButton) && (
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-1">
+                  {title && (
+                    <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-gray-900)] tracking-tight">
+                      {title}
+                    </h1>
+                  )}
+                  {actionButton && <div className="flex-shrink-0">{actionButton}</div>}
+                </div>
+              )}
+            </div>
+
+            {/* Page Main Content */}
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}

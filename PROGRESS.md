@@ -1,111 +1,118 @@
 # Nhật Ký Tiến Độ Dự Án (Project Progress Tracker)
 
+> **Chiến lược thực thi (ADR-006)**: **Frontend-First** – Xây dựng toàn bộ giao diện 13 Slices Giai đoạn 1 với Mock API & Zod Contracts trước khi chuyển sang làm Backend ở Giai đoạn 2.  
 > **Nguyên tắc quản lý trạng thái theo ACID**:  
-> - **Atomicity**: Một tính năng chỉ hoàn thành khi toàn bộ các bước kiểm thử liên quan đều đỗ.  
-> - **Consistency**: Trạng thái trong bảng phải phản ánh đúng kết quả thực tế từ câu lệnh xác minh.  
+> - **Atomicity**: Một slice hoàn thành khi toàn bộ form validation, giao diện và test component đỗ.  
+> - **Consistency**: Trạng thái trong bảng phản ánh đúng kết quả thực tế từ `.\scripts\verify.ps1 -Target fe`.  
 > - **Isolation**: Tuân thủ nghiêm ngặt **WIP = 1** (chỉ có duy nhất 1 mục `[-] in_progress`).  
-> - **Durability**: Mọi thay đổi trạng thái đều được lưu bền vững vào file này.
+> - **Durability**: Lưu trữ tiến độ bền vững vào tệp này.
 
 ---
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Không có (Đã hoàn thành thiết lập Harness & Sẵn sàng cho Slice S01)`
+- **Active Task**: `Không có (Đã hoàn thành FE-Base-02; Sẵn sàng cho FE-Base-03 i18n & Error Handling)`
 - **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
+- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe -Tier 1`
 
 ---
 
-## 2. Bảng Phân Rã Tính Năng (Feature Triple: Behavior | Verification | State)
+## 2. Giai Đoạn 1: Phát Triển Toàn Bộ Frontend (13 Vertical Slices + Foundations)
 
 Quy ước trạng thái:
 - `[ ] pending`: Chưa bắt đầu
-- `[-] in_progress`: Đang thực hiện (Tối đa 1 mục)
+- `[-] in_progress`: Đang thực hiện (Tối đa 1 mục duy nhất)
 - `[x] passing`: Đã vượt qua câu lệnh xác minh (Pass-State Gating)
 
-### Slice S00: Thiết Lập Hạ Tầng Harness & Khung Kiểm Thử (Infrastructure & Harness Setup)
-- [x] **Harness Setup**: Tạo cấu trúc 5 phân hệ, router AGENTS.md và tài liệu harness: `Test-Path AGENTS.md, docs/harness/architecture.md` -> `passing`
-- [x] **Frontend Harness**: Cài đặt test runner Vitest, smoke test và typecheck sạch: `.\scripts\verify.ps1 -Target fe` -> `passing`
-- [x] **Backend Harness**: Cấu hình Gradle, Java 21, Spring Boot test harness: `.\scripts\verify.ps1 -Target be` -> `passing`
-- [x] **Verification Script**: Tạo script xác minh 3 tầng tự động verify.ps1 và verify.sh: `.\scripts\verify.ps1 -Target all` -> `passing`
+### Nền Tảng: Thiết Lập Base Dự Án (FE Base Setup Checklist - docs/base)
+- [x] **Harness Setup**: Tạo cấu trúc 5 phân hệ, router AGENTS.md, module hóa tài liệu Giai đoạn 1: `Test-Path AGENTS.md` -> `passing`
+- [x] **Frontend Harness**: Khung kiểm thử Vitest, TypeScript strict check: `.\scripts\verify.ps1 -Target fe` -> `passing`
+- [x] **FE-Base-01 Cấu Trúc & Env**: Tổ chức thư mục theo `docs/base/03` (`features/`, `components/`, `lib/`), alias path, Zod env validation (`env.ts`): `.\scripts\verify.ps1 -Target fe -Tier 1` -> `passing`
+- [x] **FE-Base-02 Design Tokens & Shells**: Cấu hình token Tailwind v4 (`tokens.css`), hệ màu WCAG AA Airbnb-style, phông sans, 4 Layout Shells (`Public`, `Account`, `Host`, `Admin`): `.\scripts\verify.ps1 -Target fe -Tier 1` -> `passing`
+- [ ] **FE-Base-03 i18n & Error Handling**: Cấu hình `next-intl` định tuyến `[locale]` (vi/en), middleware chuyển hướng, chuẩn hoá lỗi Problem Details và tiện ích Money/Date: `.\scripts\verify.ps1 -Target fe -Tier 1` -> `pending`
+- [ ] **FE-Base-04 Cổng Vào Xây Giao Diện**: Trang thử nghiệm `/dev/ui` chứa đầy đủ Token, 4 Shells và các UI Primitives đầu tiên (CMP-01 đến CMP-12): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S01: Đăng Ký, Đăng Nhập & Quản Lý Phiên (Auth & Session Management)
-- [ ] **Auth Backend Schema**: Flyway migration tạo bảng `users`, `roles`, Spring Session JDBC: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
-- [ ] **Auth API**: Triển khai endpoint đăng ký, đăng nhập với mật khẩu Argon2: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
-- [ ] **Auth OpenAPI Sync**: Xuất OpenAPI spec và sinh client TypeScript cho Frontend: `cd frontend; npm run gen:api` -> `pending`
-- [ ] **Auth Frontend UI**: Trang đăng ký/đăng nhập Form với Zod validation & React Hook Form: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+### Slice FE-S01: Đăng Ký, Xác Minh Email, Đăng Nhập, Quên Mật Khẩu (P06, P07, P08, P09)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s01-auth/README.md`*
+- [ ] **S01 Contract & Mock**: Zod schema form đăng ký/đăng nhập + Mock auth handlers (cookie session giả lập): `.\scripts\verify.ps1 -Target fe -Tier 1` -> `pending`
+- [ ] **S01 UI Implementation**: Màn hình P06 (Đăng nhập), P07 (Đăng ký), P08 (Quên/Đặt lại MK), P09 (Xác minh email): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S02: Hồ Sơ Người Dùng & Xác Thực Danh Tính (Profile & Identity Verification)
-- [ ] **Profile API & Upload**: Upload giấy tờ tùy thân giả lên MinIO private bucket qua Presigned URL: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
-- [ ] **Identity Review UI**: Giao diện Back-office duyệt hồ sơ danh tính thủ công: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+### Slice FE-S02: Hồ Sơ Người Dùng & Cài Đặt Tài Khoản (C01, C02)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s02-account/README.md`*
+- [ ] **S02 Account UI**: Màn hình C01 (Hồ sơ), C02 (Cài đặt, đổi MK, chuyển đổi chế độ Host/Guest): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S03: Tạo Listing Phòng & Lưu Bản Nháp (Listing Creation Multi-step)
-- [ ] **Listing Data Model**: Migration bảng `listings`, ranh giới package Spring Modulith: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
-- [ ] **Listing Multi-Step Form**: Frontend form nhiều bước với dnd-kit sắp xếp ảnh và Zod auto-save draft: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+### Slice FE-S03: Back-office Đăng Nhập & Phân Quyền (A01, A18)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s03-admin-rbac/README.md`*
+- [ ] **S03 Admin UI**: Màn hình A01 (Admin Login), A18 (Quản lý nhân sự CSKH/Kế toán, phân quyền DataTable): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S04: Bảng Giá & Công Thức Tính Giá (Pricing Engine)
-- [ ] **Pricing Engine Core**: Module tính giá phòng theo đêm, cuối tuần, phí dọn dẹp, tiền tệ (bất biến): `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
-- [ ] **Pricing Quote API**: API báo giá chi tiết cho frontend hiển thị: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
+### Slice FE-S04: Xác Minh Danh Tính Host (P10, H02, C03, A03)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s04-host-verification/README.md`*
+- [ ] **S04 Host Onboarding UI**: P10 (Trang giới thiệu Host), H02/C03 (Tải giấy tờ CCCD/Passport), A03 (Admin duyệt danh tính kèm SecureImageViewer): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S05: Quản Lý Lịch Phòng & Ngày Khóa (Calendar & Availability)
-- [ ] **Calendar Exclusions**: Dữ liệu ngày chặn với PostgreSQL `daterange`: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
-- [ ] **Calendar UI**: Chọn khoảng ngày bằng react-day-picker hiển thị giá từng đêm: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+### Slice FE-S05: Host Tạo Listing Nháp: Cơ Bản, Vị Trí, Ảnh (H03, H04 Bước 1–3)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s05-listing-draft/README.md`*
+- [ ] **S05 Listing Step 1-3 UI**: H03 (Danh sách listing), H04 Wizard (Bước 1: Loại phòng; Bước 2: Ghim vị trí bản đồ; Bước 3: Upload ảnh kèm dnd-kit sắp xếp): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S06: Đặt Chỗ, Giữ Chỗ 15 Phút & Chống Đặt Trùng (Booking & Anti-Double Booking)
-- [ ] **Anti-Double Booking**: Giới hạn loại trừ `EXCLUSION USING gist` bắt lỗi `23P01`: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
-- [ ] **Hold Countdown UI**: Đếm ngược giữ phòng 15 phút theo giờ UTC server: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+### Slice FE-S06: Tiện Nghi, Quy Tắc Lưu Trú, Giá & Phí (H04 Bước 4–6)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s06-listing-amenities-pricing/README.md`*
+- [ ] **S06 Listing Step 4-6 UI**: H04 Wizard (Bước 4: Tiện nghi; Bước 5: Quy tắc lưu trú; Bước 6: Giá cơ bản & phí dọn dẹp kèm PriceBreakdown): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S07: Cổng Thanh Toán Giả Lập & Webhook (Payment Mock & Webhooks)
-- [ ] **Mock Gateway Service**: Dịch vụ giả lập thanh toán thẻ, MoMo, VNPay có chữ ký HMAC: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
-- [ ] **Payment Callback Handler**: Xử lý callback bất đồng bộ, chống xử lý trùng (Idempotency): `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
+### Slice FE-S07: Chính Sách Hủy, Pháp Lý & Gửi Duyệt (H04 Bước 7–8, H05)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s07-listing-policy-submit/README.md`*
+- [ ] **S07 Listing Step 7-8 UI**: H04 Wizard (Bước 7: Chính sách hủy & kiểu đặt; Bước 8: Giấy phép pháp lý; H05: Theo dõi trạng thái duyệt): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S08: Chính Sách Hủy & Hoàn Tiền (Cancellation & Refunds)
-- [ ] **Cancellation Calculator**: Tính toán tỷ lệ hoàn tiền theo chính sách và múi giờ listing: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
+### Slice FE-S08: Admin Thẩm Định & Duyệt Listing (A04)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s08-admin-review-listing/README.md`*
+- [ ] **S08 Admin Review UI**: A04 (Chi tiết duyệt phòng, kiểm tra ảnh/tiện nghi, phê duyệt hoặc từ chối có lý do): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S09: Sổ Cái Bất Biến & Quyết Toán Host (Ledger & Host Payouts)
-- [ ] **Immutable Double-Entry Ledger**: Bút toán Nợ/Có bất biến ghi nhận mọi dòng tiền: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
-- [ ] **Payout Worker**: Job giải ngân T+1 sau khi khách check-in thành công: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
+### Slice FE-S09: Lịch Listing & Chống Đặt Trùng (H06)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s09-listing-calendar/README.md`*
+- [ ] **S09 Host Calendar UI**: H06 (Lịch tháng, chọn khoảng ngày để chặn/mở, hiển thị trạng thái đã đặt, lưu tự động): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S10: Nhắn Tin Nội Bộ (Guest-Host Messaging)
-- [ ] **Messaging API**: Trò chuyện theo ngữ cảnh booking: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
-- [ ] **Messaging UI**: Chat panel với auto-scroll và polling: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+### Slice FE-S10: Giá Theo Mùa & Ngày Lễ (H08)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s10-seasonal-pricing/README.md`*
+- [ ] **S10 Pricing Rules UI**: H08 (Bảng quy tắc giá theo mùa/lễ/cuối tuần, thứ tự ưu tiên áp dụng): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S11: Tìm Kiếm Địa Lý & Bản Đồ (Geospatial Search & Map)
-- [ ] **PostGIS Search**: Truy vấn `ST_DWithin` kết hợp khoảng ngày và số khách: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
-- [ ] **Mapbox Interactive UI**: Bản đồ đồng bộ marker nhãn giá và bộ lọc URL qua `nuqs`: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+### Slice FE-S11: Trang Chủ, Tìm Kiếm & Bản Đồ (P01, P02)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s11-home-search/README.md`*
+- [ ] **S11 Home & Search UI**: P01 (Trang chủ, thanh tìm kiếm viên thuốc), P02 (Kết quả tìm kiếm, bộ lọc nuqs URL, danh sách + bản đồ Mapbox marker giá): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S12: Đánh Giá Hai Chiều (Blind Reviews)
-- [ ] **Blind Review Logic**: Khóa đánh giá cho đến khi cả hai bên gửi hoặc hết hạn 14 ngày: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
+### Slice FE-S12: Chi Tiết Listing, Hồ Sơ Host & Chính Sách Hủy (P03, P04, P05)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s12-listing-detail/README.md`*
+- [ ] **S12 Listing Detail UI**: P03 (Lưới ảnh 1+4, Sticky Booking Box, tính giá qua Mock API), P04 (Hồ sơ Host công khai), P05 (Trang chính sách hủy): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S13: Xử Lý Khiếu Nại & Quản Trị (Disputes & Back-office)
-- [ ] **Dispute Workflow**: Luồng can thiệp của CSKH/Admin và ghi nhật ký kiểm toán: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
+### Slice FE-S13: Đa Tiền Tệ & Bảng Tỷ Giá (C02, P02, P03 Mở Rộng)
+*Đặc tả: `frontend/docs/giai-doan-1/slices/s13-currency-exchange/README.md`*
+- [ ] **S13 Currency Switcher UI**: Menu đổi tiền tệ (VND, USD, EUR...), chuyển đổi hiển thị định dạng số tự động: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---
 
-### Slice S14: Đồng Bộ Lịch iCal Hai Chiều (iCal Sync Worker)
-- [ ] **iCal Sync Engine**: Phân tích và phát sinh feed iCal với ical4j qua ShedLock: `.\scripts\verify.ps1 -Target be -Tier 2` -> `pending`
+## 3. Giai Đoạn 2: Phát Triển Backend (Spring Boot 4 Modular Monolith)
+*(Tạm thời hoãn lại cho đến khi hoàn thành nghiệm thu toàn bộ 13 Slice Giai đoạn 1 của Frontend)*
+- [ ] **Backend Slices**: S01 đến S14 (Flyway migrations, Spring Modulith packages, PostgreSQL PostGIS exclusion constraints, Outbox events, Mock Gateway).

@@ -48,3 +48,16 @@ Tệp này quy định các chuẩn mực phát triển giao diện phía máy k
   ```powershell
   .\..\scripts\verify.ps1 -Target fe
   ```
+
+---
+
+## 4. Quy Tắc Tra Cứu Đặc Tả Giao Diện (Slice-Doc Isolation Rule)
+- **Mục tiêu**: Ngăn ngừa hiện tượng tràn ngữ cảnh (*Token Blowout*) và thoái hóa độ hiểu (*Lost in the Middle*).
+- **Quy tắc bắt buộc đối với Agent**:
+  1. **Không nạp toàn bộ thư mục docs**: Tuyệt đối không đọc toàn bộ thư mục `docs/` trong cùng một lượt.
+  2. **Tra cứu nền tảng (Foundations)**: Khi cần thiết lập Tokens, Layout Shells, hoặc tra cứu 34 UI Components dùng chung, chỉ đọc các tệp tương ứng trong `docs/giai-doan-1/00-foundations/`.
+  3. **Tra cứu theo Slice (WIP = 1)**: Khi thực thi nhiệm vụ thuộc Slice `Sxx`:
+     - Đọc trực tiếp tệp tổng hợp `docs/giai-doan-1/slices/sxx-<name>/README.md` (chỉ ~10–20 KB) hoặc đọc riêng từng khía cạnh: `flow.md`, `wireframes.md`, `ux-behavior.md`, `data.md`.
+     - Sử dụng `data.md` làm căn cứ để định nghĩa Zod Schema và Mock API contract.
+  4. **Kiểm tra nghiệm thu**: Sử dụng `docs/giai-doan-1/appendices/e2e-journeys.md` cho các bài kiểm tra E2E liên slice.
+

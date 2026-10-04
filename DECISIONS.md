@@ -44,3 +44,15 @@ Tệp này thuộc **Phân hệ Trạng thái (State Subsystem)** của Harness,
 - **Ngày quyết định**: 2026-10-04
 - **Bối cảnh**: Lưu trữ phiên đăng nhập bền vững trên local mà không cần triển khai thêm Redis.
 - **Quyết định**: Sử dụng Spring Session lưu vào PostgreSQL qua JDBC. Cookie HttpOnly với thuộc tính `SameSite=Lax`. Next.js đóng vai trò proxy chuyển hướng `/api/*` về backend cùng origin.
+
+---
+
+## ADR-006: Chiến Lược Phát Triển Toàn Bộ Frontend Trước (Frontend-First via Contract & Mock)
+- **Ngày quyết định**: 2026-10-04
+- **Bối cảnh**: Nhóm phát triển muốn hoàn thiện toàn bộ trải nghiệm người dùng, mẫu tương tác kiểu Airbnb, thiết kế giao diện và luồng nghiệp vụ 13 slice Giai đoạn 1 trước khi xây dựng Backend.
+- **Quyết định**:
+  - Tập trung 100% nguồn lực hoàn thành **Giai đoạn 1: Frontend (S01 đến S13)**.
+  - Sử dụng tầng **Mock API & Zod Schemas** dựa trên hợp đồng dữ liệu tại `docs/giai-doan-1/slices/sxx/data.md` để đảm bảo khi ghép Backend ở Giai đoạn 2 sẽ không bị lệch giao tiếp (Interface Mismatch).
+  - Vẫn tuân thủ bất biến: Frontend không tự tính giá hay tự chạy đồng hồ, mà nhận kết quả tính toán từ Mock layer (đóng vai trò `PricingEngine` ảo).
+  - Cổng kiểm soát nghiệm thu chính trong giai đoạn này là `.\scripts\verify.ps1 -Target fe`.
+

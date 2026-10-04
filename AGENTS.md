@@ -14,8 +14,9 @@ Mọi phiên Agent mới khi bắt đầu làm việc phải tự trả lời đ
 | **1** | **Hệ thống là gì?** | Marketplace đặt phòng homestay kiểu Airbnb (Guest, Host, Admin, CSKH, Kế toán), 14 module nghiệp vụ. | [dac-ta-nghiep-vu-he-thong-dat-phong.md](file:///e:/github-tutorio-demo/homestaybooking/docs/homestay/dac-ta-nghiep-vu-he-thong-dat-phong.md) |
 | **2** | **Kiến trúc ra sao?** | Modular Monolith (Spring Boot 4.1 / Java 21) + Next.js 16 (React 19, TypeScript), PostgreSQL PostGIS, MinIO, Mailpit. | [docs/harness/architecture.md](file:///e:/github-tutorio-demo/homestaybooking/docs/harness/architecture.md) |
 | **3** | **Chạy thế nào?** | `docker compose up -d` -> Backend: `./gradlew bootRun` -> Frontend: `npm run dev`. | [docs/harness/environment.md](file:///e:/github-tutorio-demo/homestaybooking/docs/harness/environment.md) |
-| **4** | **Xác minh thế nào?** | Quy trình 3 tầng: `.\scripts\verify.ps1 -Target all` (hoặc `-Target fe` / `-Target be`). | [docs/harness/verification.md](file:///e:/github-tutorio-demo/homestaybooking/docs/harness/verification.md) |
-| **5** | **Tiến độ ở đâu?** | Theo dõi tại `PROGRESS.md` (WIP=1) và các quyết định kỹ thuật tại `DECISIONS.md`. | [PROGRESS.md](file:///e:/github-tutorio-demo/homestaybooking/PROGRESS.md) |
+| **4** | **Xác minh thế nào?** | Quy trình xác minh đa tầng: `.\scripts\verify.ps1 -Target fe` (hiện tại) hoặc `-Target all`. | [docs/harness/verification.md](file:///e:/github-tutorio-demo/homestaybooking/docs/harness/verification.md) |
+| **5** | **Tiến độ ở đâu?** | Giai đoạn 1: **100% Frontend (S01–S13)** với Mock layer theo [ADR-006](file:///e:/github-tutorio-demo/homestaybooking/DECISIONS.md) tại [PROGRESS.md](file:///e:/github-tutorio-demo/homestaybooking/PROGRESS.md). | [PROGRESS.md](file:///e:/github-tutorio-demo/homestaybooking/PROGRESS.md) |
+
 
 ---
 
@@ -43,3 +44,5 @@ Mọi phiên Agent mới khi bắt đầu làm việc phải tự trả lời đ
 - **Kế hoạch 14 Vertical Slices**: [docs/harness/slices-plan.md](file:///e:/github-tutorio-demo/homestaybooking/docs/harness/slices-plan.md)
 - **Chỉ dẫn chi tiết Frontend**: [frontend/AGENTS.md](file:///e:/github-tutorio-demo/homestaybooking/frontend/AGENTS.md)
 - **Chỉ dẫn chi tiết Backend**: [backend/AGENTS.md](file:///e:/github-tutorio-demo/homestaybooking/backend/AGENTS.md)
+- **Đặc tả giao diện Frontend Giai đoạn 1**: [frontend/docs/giai-doan-1/README.md](file:///e:/github-tutorio-demo/homestaybooking/frontend/docs/giai-doan-1/README.md)
+

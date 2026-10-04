@@ -11,9 +11,9 @@
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Không có (Đã hoàn thành FE-Base-02; Sẵn sàng cho FE-Base-03 i18n & Error Handling)`
+- **Active Task**: `Không có (Đã hoàn thành FE-Base-03; Sẵn sàng cho FE-Base-04 Cổng Vào Xây Giao Diện)`
 - **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
-- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe -Tier 1`
+- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe`
 
 ---
 
@@ -29,7 +29,7 @@ Quy ước trạng thái:
 - [x] **Frontend Harness**: Khung kiểm thử Vitest, TypeScript strict check: `.\scripts\verify.ps1 -Target fe` -> `passing`
 - [x] **FE-Base-01 Cấu Trúc & Env**: Tổ chức thư mục theo `docs/base/03` (`features/`, `components/`, `lib/`), alias path, Zod env validation (`env.ts`): `.\scripts\verify.ps1 -Target fe -Tier 1` -> `passing`
 - [x] **FE-Base-02 Design Tokens & Shells**: Cấu hình token Tailwind v4 (`tokens.css`), hệ màu WCAG AA Airbnb-style, phông sans, 4 Layout Shells (`Public`, `Account`, `Host`, `Admin`): `.\scripts\verify.ps1 -Target fe -Tier 1` -> `passing`
-- [ ] **FE-Base-03 i18n & Error Handling**: Cấu hình `next-intl` định tuyến `[locale]` (vi/en), middleware chuyển hướng, chuẩn hoá lỗi Problem Details và tiện ích Money/Date: `.\scripts\verify.ps1 -Target fe -Tier 1` -> `pending`
+- [x] **FE-Base-03 i18n & Error Handling**: Cấu hình `next-intl` định tuyến `[locale]` (vi/en), middleware chuyển hướng, chuẩn hoá lỗi Problem Details và tiện ích Money/Date: `.\scripts\verify.ps1 -Target fe` -> `passing`
 - [ ] **FE-Base-04 Cổng Vào Xây Giao Diện**: Trang thử nghiệm `/dev/ui` chứa đầy đủ Token, 4 Shells và các UI Primitives đầu tiên (CMP-01 đến CMP-12): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
 
 ---

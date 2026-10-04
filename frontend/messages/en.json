@@ -1,0 +1,43 @@
+{
+  "common": {
+    "appName": "Homestay Booking",
+    "search": "Search",
+    "searchAnywhere": "Anywhere",
+    "searchAnyWeek": "Any week",
+    "addGuests": "Add guests",
+    "becomeHost": "Become a Host",
+    "login": "Log in",
+    "register": "Sign up",
+    "logout": "Log out",
+    "account": "Account",
+    "profile": "Personal Profile",
+    "settings": "Settings & Security",
+    "verification": "Identity Verification",
+    "switchToHost": "Host Mode",
+    "switchToGuest": "Guest Mode",
+    "help": "Help Center",
+    "explore": "Explore",
+    "wishlist": "Wishlists",
+    "trips": "Trips",
+    "inbox": "Inbox",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "errors": {
+    "generic": "An unexpected error occurred. Please try again later.",
+    "network": "Unable to connect to the server. Please check your network connection.",
+    "unauthenticated": "Your session has expired. Please sign in again.",
+    "forbidden": "You do not have permission to perform this action.",
+    "notFound": "The requested resource was not found.",
+    "validation": "Invalid input data. Please check the highlighted fields.",
+    "conflict": "Data was modified by another session. Please refresh the page.",
+    "rateLimited": "Too many requests. Please wait a moment before trying again.",
+    "locked": "The account or resource is temporarily locked.",
+    "calendarUnavailable": "These dates are already booked or blocked by the host.",
+    "holdExpired": "The 15-minute booking hold has expired. Please select your dates again.",
+    "minNights": "The selected stay does not meet the minimum night requirement.",
+    "paymentDeclined": "Payment was declined. Please try another payment method."
+  }
+}

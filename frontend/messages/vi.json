@@ -1,0 +1,43 @@
+{
+  "common": {
+    "appName": "Homestay Booking",
+    "search": "Tìm kiếm",
+    "searchAnywhere": "Địa điểm bất kỳ",
+    "searchAnyWeek": "Tuần bất kỳ",
+    "addGuests": "Thêm khách",
+    "becomeHost": "Trở thành Host",
+    "login": "Đăng nhập",
+    "register": "Đăng ký tài khoản",
+    "logout": "Đăng xuất",
+    "account": "Tài khoản",
+    "profile": "Hồ sơ cá nhân",
+    "settings": "Cài đặt & Bảo mật",
+    "verification": "Xác minh danh tính",
+    "switchToHost": "Chế độ Host",
+    "switchToGuest": "Chế độ Khách",
+    "help": "Trung tâm trợ giúp",
+    "explore": "Khám phá",
+    "wishlist": "Yêu thích",
+    "trips": "Chuyến đi",
+    "inbox": "Hộp thư",
+    "loading": "Đang tải...",
+    "retry": "Thử lại",
+    "confirm": "Xác nhận",
+    "cancel": "Huỷ"
+  },
+  "errors": {
+    "generic": "Đã có lỗi xảy ra. Vui lòng thử lại sau.",
+    "network": "Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại đường truyền.",
+    "unauthenticated": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+    "forbidden": "Bạn không có quyền thực hiện thao tác này.",
+    "notFound": "Không tìm thấy dữ liệu yêu cầu.",
+    "validation": "Dữ liệu nhập vào chưa hợp lệ. Vui lòng kiểm tra lại các trường thông tin.",
+    "conflict": "Dữ liệu đã bị thay đổi bởi phiên khác. Vui lòng làm mới trang.",
+    "rateLimited": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng đợi trong giây lát rồi thử lại.",
+    "locked": "Tài khoản hoặc tài nguyên đang tạm thời bị khoá.",
+    "calendarUnavailable": "Phòng đã có khách đặt hoặc bị chặn trong khoảng thời gian này.",
+    "holdExpired": "Thời gian giữ phòng 15 phút đã hết hạn. Vui lòng chọn lại ngày đặt.",
+    "minNights": "Số đêm lưu trú chưa đạt mức tối thiểu theo quy định của chỗ ở.",
+    "paymentDeclined": "Giao dịch thanh toán bị từ chối. Vui lòng thử lại với phương thức khác."
+  }
+}

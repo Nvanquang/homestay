@@ -12,6 +12,8 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
   flyway:
     enabled: false
+  session:
+    store-type: none
 
 app:
   name: "Homestay Booking Platform (Test)"

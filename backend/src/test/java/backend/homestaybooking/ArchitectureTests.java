@@ -49,8 +49,13 @@ public class ArchitectureTests {
         .areAnnotatedWith("org.springframework.stereotype.Repository")
         .orShould().dependOnClassesThat()
         .haveSimpleNameEndingWith("Repository")
-        .orShould().dependOnClassesThat()
-        .haveSimpleNameEndingWith("Entity")
+        .orShould().dependOnClassesThat(
+            com.tngtech.archunit.base.DescribedPredicate.describe(
+                "have simple name ending with Entity (excluding ResponseEntity)",
+                javaClass -> javaClass.getSimpleName().endsWith("Entity")
+                    && !javaClass.getSimpleName().equals("ResponseEntity")
+            )
+        )
         .allowEmptyShould(true)
         .because("Controller không được import Repository hoặc Entity trực tiếp; phải thông qua Service/DTO");
 

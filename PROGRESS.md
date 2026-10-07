@@ -38,6 +38,7 @@ Quy ước trạng thái:
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s01-auth/README.md`*
 - [x] **S01 Contract & Mock**: Zod schema form đăng ký/đăng nhập + Mock auth handlers (cookie session giả lập): `.\scripts\verify.ps1 -Target fe -Tier 1` -> `passing`
 - [x] **S01 UI Implementation**: Màn hình P06 (Đăng nhập), P07 (Đăng ký), P08 (Quên/Đặt lại MK), P09 (Xác minh email): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `passing`
+- [x] **S01 DB Schema & OpenAPI Contract**: Flyway migration `V1__create_auth_schema.sql`, ER diagram `db-design.md`, OpenAPI 3.1 `openapi.yaml`: `Code-check` -> `passing`
 
 ---
 

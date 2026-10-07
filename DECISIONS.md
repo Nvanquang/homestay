@@ -56,3 +56,20 @@ Tệp này thuộc **Phân hệ Trạng thái (State Subsystem)** của Harness,
   - Vẫn tuân thủ bất biến: Frontend không tự tính giá hay tự chạy đồng hồ, mà nhận kết quả tính toán từ Mock layer (đóng vai trò `PricingEngine` ảo).
   - Cổng kiểm soát nghiệm thu chính trong giai đoạn này là `.\scripts\verify.ps1 -Target fe`.
 
+---
+
+## ADR-007: Xử Lý Rủi Ro Lộ Tài Khoản (User Enumeration) Khi Đăng Ký Tài Khoản
+- **Ngày quyết định**: 2026-10-05
+- **Bối cảnh**:
+  - Khi người dùng đăng ký với email đã tồn tại (`POST /api/v1/auth/register`), hệ thống đứng trước 2 phương án đối nghịch giữa Tính bảo mật (Privacy/Security) và Trải nghiệm người dùng (UX):
+    + *Phương án A*: Trả về `409 Conflict` ("Email đã tồn tại"), hiển thị inline banner kèm đường dẫn "Đăng nhập ngay" hoặc "Quên mật khẩu". Nhược điểm: Kẻ tấn công có thể kiểm tra danh sách email xem email nào đã có tài khoản trên sàn.
+    + *Phương án B*: Luôn trả về `201 Created` giả định và gửi email thông báo "Tài khoản đã tồn tại" tới địa chỉ đó. Nhược điểm: Tăng tỷ lệ rời bỏ (drop-off) do khách hàng không nhận được email ngay hoặc email rơi vào thư rác (spam box), gây bối rối và làm giảm chuyển đổi người dùng mới.
+- **Quyết định**: Chọn **Phương án A (Chấp nhận trả lời 409 Conflict rõ ràng khi Đăng ký)** kết hợp với cơ chế phòng vệ nhiều lớp:
+  1. **Rate Limiting nghiêm ngặt**: Áp dụng giới hạn tối đa 5 yêu cầu đăng ký/phút từ cùng 1 địa chỉ IP và 10 yêu cầu/giờ trên cùng subnet qua API Gateway.
+  2. **Thử thách bảo mật (Invisible CAPTCHA/Turnstile)**: Kích hoạt khi phát hiện tần suất cao hoặc IP lạ trước khi gọi endpoint đăng ký.
+  3. **Bảo mật tuyệt đối ở luồng Quên mật khẩu**: Endpoint `POST /api/v1/auth/forgot-password` bắt buộc trả về `202 Accepted` trung tính, không để lộ email có tồn tại hay không.
+- **Lý do**:
+  - Homestay Marketplace là nền tảng thương mại dịch vụ B2C, người dùng thường đăng ký tài khoản từ lâu và quên mất. Việc báo lỗi ngay trên màn hình P07 kèm nút "Đăng nhập ngay" giúp phục hồi người dùng lập tức mà không làm đứt gãy luồng đặt phòng.
+  - Rủi ro user enumeration ở luồng đăng ký được triệt tiêu hiệu quả bằng Rate Limiting ở tầng Reverse Proxy / Gateway mà không làm suy giảm UX cốt lõi.
+
+

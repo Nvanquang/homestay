@@ -1,0 +1,715 @@
+openapi: 3.0.3
+info:
+  title: Homestay Booking API - Phân hệ Xác thực & Phân quyền (Auth & RBAC)
+  description: |
+    API Contract chính thức cho Slice S01 (Auth) thuộc hệ thống Homestay Marketplace.
+    Tài liệu này đóng vai trò là Nguồn Sự Thật Duy Nhất (Single Source of Truth - SSOT) cho giao tiếp Client-Server.
+    Các lỗi API tuân thủ tiêu chuẩn RFC 9457 (Problem Details for HTTP APIs).
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: API Gateway Reverse Proxy
+
+paths:
+  /auth/register:
+    post:
+      summary: Đăng ký tài khoản người dùng mới (P07)
+      operationId: register
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Đăng ký thành công, email kích hoạt đã được gửi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+        '429':
+          $ref: '#/components/responses/RateLimited429'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /auth/login:
+    post:
+      summary: Đăng nhập hệ thống (P06)
+      description: Xác thực người dùng bằng email và mật khẩu. Đặt cookie session HttpOnly nếu thành công.
+      operationId: login
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Đăng nhập thành công, trả về thông tin chủ thể
+          headers:
+            Set-Cookie:
+              description: Cookie session HttpOnly (SameSite=Lax, Path=/)
+              schema:
+                type: string
+                example: "SESSION=dGVzdC1zZXNzaW9uLWlk; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '423':
+          $ref: '#/components/responses/Locked423'
+        '429':
+          $ref: '#/components/responses/RateLimited429'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /auth/logout:
+    post:
+      summary: Đăng xuất người dùng (P06/Header)
+      description: Hủy phiên làm việc trên server và xóa HttpOnly session cookie.
+      operationId: logout
+      tags:
+        - Authentication
+      security:
+        - CookieAuth: []
+      responses:
+        '204':
+          description: Đăng xuất thành công, phiên làm việc đã bị hủy
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /auth/verify-email:
+    post:
+      summary: Xác minh địa chỉ email qua token (P09)
+      description: Được gọi một lần duy nhất khi người dùng mở liên kết kích hoạt từ email.
+      operationId: verifyEmail
+      tags:
+        - Verification
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+      responses:
+        '200':
+          description: Kết quả kiểm tra xác minh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyEmailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '410':
+          $ref: '#/components/responses/Gone410'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /auth/resend-verification:
+    post:
+      summary: Gửi lại email xác minh tài khoản (P07, P06, P09)
+      operationId: resendVerification
+      tags:
+        - Verification
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+      responses:
+        '200':
+          description: Yêu cầu gửi lại đã được chấp thuận
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResendVerificationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '429':
+          $ref: '#/components/responses/RateLimited429'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /auth/forgot-password:
+    post:
+      summary: Yêu cầu liên kết đặt lại mật khẩu (P08 Bước 1)
+      description: |
+        Gửi email chứa liên kết đặt lại mật khẩu nếu email tồn tại.
+        Luôn trả về HTTP 202 Accepted trung tính để ngăn ngừa kỹ thuật tấn công User Enumeration.
+      operationId: forgotPassword
+      tags:
+        - Password Reset
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '202':
+          description: Yêu cầu đã được tiếp nhận và xử lý ngầm định
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgotPasswordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '429':
+          $ref: '#/components/responses/RateLimited429'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /auth/reset-password/validate:
+    get:
+      summary: Kiểm tra tính hợp lệ của token đặt lại mật khẩu (P08 Bước 2)
+      description: Được frontend gọi ngay khi mở trang reset-password để kiểm tra token trước khi người dùng nhập form.
+      operationId: validateResetToken
+      tags:
+        - Password Reset
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          description: Token ngẫu nhiên được gửi trong email
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+            example: "rtok_a1b2c3d4e5f67890"
+      responses:
+        '200':
+          description: Kết quả kiểm tra token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateResetTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '410':
+          $ref: '#/components/responses/Gone410'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /auth/reset-password:
+    post:
+      summary: Đặt mật khẩu mới (P08 Bước 2)
+      description: Cập nhật mật khẩu mới qua token hợp lệ, sau đó hủy toàn bộ phiên đăng nhập cũ của tài khoản.
+      operationId: resetPassword
+      tags:
+        - Password Reset
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '204':
+          description: Đặt lại mật khẩu thành công
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '410':
+          $ref: '#/components/responses/Gone410'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /auth/me:
+    get:
+      summary: Lấy thông tin người dùng hiện tại từ session
+      description: Khởi tạo phiên làm việc cho frontend từ cookie xác thực.
+      operationId: getCurrentUser
+      tags:
+        - Authentication
+      security:
+        - CookieAuth: []
+      responses:
+        '200':
+          description: Thông tin người dùng hiện tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+components:
+  securitySchemes:
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: SESSION
+      description: Spring Session JDBC HttpOnly Cookie
+
+  responses:
+    BadRequest400:
+      description: Dữ liệu gửi lên không hợp lệ hoặc vi phạm kiểm tra form (Validation Failure)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://api.homestay.test/errors/VALIDATION_ERROR"
+            title: "Dữ liệu không hợp lệ"
+            status: 400
+            code: "VALIDATION_ERROR"
+            detail: "Dữ liệu gửi lên không đúng định dạng. Vui lòng kiểm tra lại các trường thông tin."
+            instance: "/api/v1/auth/register"
+            traceId: "req-98a72b-1029c"
+            fieldErrors:
+              - field: "email"
+                code: "invalid_email"
+                message: "Email chưa đúng định dạng"
+
+    Unauthorized401:
+      description: Thông tin đăng nhập không chính xác hoặc phiên đã hết hạn
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://api.homestay.test/errors/INVALID_CREDENTIALS"
+            title: "Đăng nhập thất bại"
+            status: 401
+            code: "INVALID_CREDENTIALS"
+            detail: "Email hoặc mật khẩu không chính xác."
+            instance: "/api/v1/auth/login"
+            traceId: "req-01b87a-3341d"
+
+    Forbidden403:
+      description: Tài khoản chưa hoàn tất kích hoạt qua email
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://api.homestay.test/errors/EMAIL_NOT_VERIFIED"
+            title: "Chưa xác minh email"
+            status: 403
+            code: "EMAIL_NOT_VERIFIED"
+            detail: "Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email để xác minh."
+            instance: "/api/v1/auth/login"
+            traceId: "req-44e21b-8712f"
+
+    Conflict409:
+      description: Email đăng ký đã tồn tại trong hệ sinh thái
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://api.homestay.test/errors/EMAIL_ALREADY_EXISTS"
+            title: "Email đã tồn tại"
+            status: 409
+            code: "EMAIL_ALREADY_EXISTS"
+            detail: "Địa chỉ email này đã được sử dụng. Vui lòng đăng nhập hoặc dùng email khác."
+            instance: "/api/v1/auth/register"
+            traceId: "req-18a72b-9921e"
+            fieldErrors:
+              - field: "email"
+                code: "conflict"
+                message: "Email này đã được đăng ký. Bạn có thể đăng nhập ngay."
+
+    Gone410:
+      description: Token xác minh hoặc đặt lại mật khẩu đã hết hạn hoặc đã được sử dụng
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://api.homestay.test/errors/TOKEN_EXPIRED_OR_USED"
+            title: "Liên kết hết hạn"
+            status: 410
+            code: "TOKEN_EXPIRED_OR_USED"
+            detail: "Liên kết đã hết hạn hoặc đã được sử dụng. Vui lòng yêu cầu liên kết mới."
+            instance: "/api/v1/auth/verify-email"
+            traceId: "req-62c11a-0982b"
+
+    Locked423:
+      description: Tài khoản bị tạm khóa do nhập sai mật khẩu quá số lần cho phép
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://api.homestay.test/errors/ACCOUNT_LOCKED"
+            title: "Tài khoản bị tạm khoá"
+            status: 423
+            code: "ACCOUNT_LOCKED"
+            detail: "Tài khoản đang bị tạm khoá do thử sai nhiều lần. Vui lòng thử lại sau 15 phút."
+            instance: "/api/v1/auth/login"
+            traceId: "req-99f12d-4531a"
+            lockedUntil: "2026-10-05T10:15:00Z"
+
+    RateLimited429:
+      description: Vượt quá tần suất yêu cầu cho phép (Rate Limit)
+      headers:
+        Retry-After:
+          description: Số giây máy khách cần chờ trước khi được phép thử lại
+          schema:
+            type: integer
+            example: 60
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://api.homestay.test/errors/RATE_LIMITED"
+            title: "Quá nhiều yêu cầu"
+            status: 429
+            code: "RATE_LIMITED"
+            detail: "Bạn đã gửi quá nhiều yêu cầu. Vui lòng đợi trong giây lát rồi thử lại."
+            instance: "/api/v1/auth/resend-verification"
+            traceId: "req-77d44c-1123e"
+            retryAfterSec: 60
+
+    InternalServerError500:
+      description: Lỗi máy chủ không mong muốn
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://api.homestay.test/errors/INTERNAL_SERVER_ERROR"
+            title: "Lỗi hệ thống"
+            status: 500
+            code: "INTERNAL_SERVER_ERROR"
+            detail: "Đã có lỗi bất ngờ xảy ra trên hệ thống. Đội ngũ kỹ thuật đã được thông báo."
+            instance: "/api/v1/auth/login"
+            traceId: "req-999aaa-888bbb"
+
+  schemas:
+    RegisterRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - fullName
+        - email
+        - password
+        - acceptTerms
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 80
+          example: "Nguyễn Văn Khách"
+          description: Họ và tên đầy đủ của người dùng (2–80 ký tự)
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          example: "guest@demo.test"
+          description: Địa chỉ email duy nhất (chuẩn hoá chữ thường)
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          pattern: '^(?=.*[a-zA-Z])(?=.*[0-9])'
+          example: "Password123"
+          description: Mật khẩu từ 8–128 ký tự, bao gồm ít nhất một chữ cái và một chữ số
+        acceptTerms:
+          type: boolean
+          enum: [true]
+          example: true
+          description: Bắt buộc đồng ý Điều khoản dịch vụ và Chính sách bảo mật
+
+    RegisterResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - emailMasked
+        - resendAvailableIn
+      properties:
+        emailMasked:
+          type: string
+          example: "gu***@demo.test"
+          description: Địa chỉ email đã được che dấu để hiển thị an toàn trên màn hình P07
+        resendAvailableIn:
+          type: integer
+          example: 60
+          description: Số giây cần chờ trước khi người dùng có thể gửi lại email kích hoạt
+
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          example: "guest@demo.test"
+          description: Email tài khoản (chuẩn hoá chữ thường)
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+          example: "Password123"
+          description: Mật khẩu tài khoản
+        rememberMe:
+          type: boolean
+          default: false
+          example: true
+          description: Tùy chọn duy trì đăng nhập dài hạn (30 ngày)
+
+    AuthUserResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - fullName
+        - email
+        - emailVerified
+        - isHost
+        - staffRole
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          example: "usr_guest_01"
+          description: Mã định danh công khai của người dùng
+        fullName:
+          type: string
+          example: "Nguyễn Văn Khách"
+        email:
+          type: string
+          format: email
+          example: "guest@demo.test"
+        emailVerified:
+          type: boolean
+          example: true
+        isHost:
+          type: boolean
+          example: false
+        staffRole:
+          type: string
+          nullable: true
+          enum: ["ADMIN", "SUPPORT", "ACCOUNTANT"]
+          example: null
+          description: Vai trò nhân viên nội bộ nếu có (null với người dùng thông thường)
+        status:
+          type: string
+          enum: ["UNVERIFIED", "ACTIVE", "LOCKED", "SUSPENDED"]
+          example: "ACTIVE"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-01T00:00:00Z"
+
+    VerifyEmailRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 128
+          example: "vtok_f91a28cb7e4d"
+          description: Mã token ngẫu nhiên nhận được qua email
+
+    VerifyEmailResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - result
+      properties:
+        result:
+          type: string
+          enum: ["VERIFIED", "EXPIRED", "USED", "INVALID"]
+          example: "VERIFIED"
+          description: Trạng thái kết quả xác minh token
+        message:
+          type: string
+          example: "Email đã được xác minh thành công."
+
+    ResendVerificationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          example: "guest@demo.test"
+
+    ResendVerificationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - success
+        - resendAvailableIn
+      properties:
+        success:
+          type: boolean
+          example: true
+        resendAvailableIn:
+          type: integer
+          example: 60
+          description: Số giây đếm ngược đến lần gửi tiếp theo
+
+    ForgotPasswordRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          example: "guest@demo.test"
+
+    ForgotPasswordResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Nếu email tồn tại trong hệ thống, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu."
+
+    ValidateResetTokenResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - valid
+      properties:
+        valid:
+          type: boolean
+          example: true
+        reason:
+          type: string
+          nullable: true
+          enum: ["EXPIRED", "USED", "INVALID"]
+          example: null
+          description: Lý do cụ thể nếu token không hợp lệ
+
+    ResetPasswordRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - token
+        - password
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 128
+          example: "rtok_a1b2c3d4e5f6"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          pattern: '^(?=.*[a-zA-Z])(?=.*[0-9])'
+          example: "NewPassword2026"
+          description: Mật khẩu mới thỏa mãn chính sách tối thiểu 8 ký tự kèm chữ và số
+
+    ApiFieldError:
+      type: object
+      additionalProperties: false
+      required:
+        - field
+        - code
+      properties:
+        field:
+          type: string
+          example: "email"
+          description: Tên trường dữ liệu gặp lỗi
+        code:
+          type: string
+          example: "conflict"
+          description: Mã định danh lỗi chuẩn hóa cho trường dữ liệu
+        message:
+          type: string
+          example: "Email này đã được đăng ký. Bạn có thể đăng nhập ngay."
+
+    ProblemDetails:
+      type: object
+      additionalProperties: true
+      required:
+        - type
+        - title
+        - status
+        - code
+      properties:
+        type:
+          type: string
+          format: uri
+          example: "https://api.homestay.test/errors/EMAIL_ALREADY_EXISTS"
+          description: URI tham chiếu định danh loại lỗi theo RFC 9457
+        title:
+          type: string
+          example: "Email đã tồn tại"
+          description: Tiêu đề ngắn gọn mô tả bản chất của lỗi
+        status:
+          type: integer
+          example: 409
+          description: Mã trạng thái HTTP
+        code:
+          type: string
+          example: "EMAIL_ALREADY_EXISTS"
+          description: Mã lỗi định danh nghiệp vụ ổn định (Stable machine-readable code) dành cho Client xử lý nhánh logic
+        detail:
+          type: string
+          example: "Địa chỉ email này đã được sử dụng. Vui lòng đăng nhập hoặc dùng email khác."
+          description: Giải thích chi tiết về lỗi xảy ra
+        instance:
+          type: string
+          example: "/api/v1/auth/register"
+          description: Đường dẫn URI phát sinh lỗi
+        traceId:
+          type: string
+          example: "req-98a72b-1029c"
+          description: Mã truy vết request phục vụ giám sát và hỗ trợ kỹ thuật
+        fieldErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiFieldError'
+          description: Danh sách lỗi chi tiết theo từng trường (nếu có)
+        retryAfterSec:
+          type: integer
+          example: 60
+          description: Số giây đếm ngược nếu bị áp dụng giới hạn tần suất
+        lockedUntil:
+          type: string
+          format: date-time
+          example: "2026-10-05T10:15:00Z"
+          description: Mốc thời gian hết hạn khóa tài khoản (UTC)

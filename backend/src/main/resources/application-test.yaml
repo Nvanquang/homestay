@@ -20,3 +20,9 @@ app:
   environment: "test"
   security:
     session-cookie-name: "HOMESTAY_TEST_SESSION"
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

@@ -43,3 +43,15 @@ Tệp này quy định các chuẩn mực kiến trúc và quy tắc triển kha
   ```powershell
   .\..\scripts\verify.ps1 -Target be
   ```
+
+---
+
+## 4. Quy Tắc Xây Dựng Backend Base (BE Base Isolation Rule)
+- **Mục tiêu**: Đảm bảo toàn bộ 10 tài liệu nền tảng trong `docs/base/` được hiện thực hóa đầy đủ trước khi viết code nghiệp vụ bất kỳ slice nào.
+- **Tài liệu Router**: [backend/docs/base/README.md](file:///e:/github-tutorio-demo/homestaybooking/backend/docs/base/README.md).
+- **Sổ tay lệnh thực thi 5 chặng**: [backend/docs/base/PROMPTS_PLAYBOOK.md](file:///e:/github-tutorio-demo/homestaybooking/backend/docs/base/PROMPTS_PLAYBOOK.md).
+- **Quy tắc Agent**:
+  1. Tuân thủ tuyệt đối quy tắc **WIP = 1**: Chỉ thực thi từng chặng (`BE-Base-01` $\rightarrow$ `BE-Base-05`).
+  2. Bắt buộc vượt qua cổng kiểm tra `.\scripts\verify.ps1 -Target be` trước khi chuyển sang chặng tiếp theo.
+  3. Chỉ khi toàn bộ tiêu chí tại "Cổng vào viết nghiệp vụ" đạt 100%, mới bắt đầu triển khai code cho Slice S01 Backend.
+

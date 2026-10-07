@@ -11,9 +11,9 @@
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Không có (Đã hoàn thành FE-S01; Sẵn sàng nhận nhiệm vụ FE-S02)`
+- **Active Task**: `Không có (Đã hoàn thành BE-Base-01; Sẵn sàng nhận nhiệm vụ BE-Base-02)`
 - **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
-- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe`
+- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target be`
 
 ---
 
@@ -115,5 +115,15 @@ Quy ước trạng thái:
 ---
 
 ## 3. Giai Đoạn 2: Phát Triển Backend (Spring Boot 4 Modular Monolith)
-*(Tạm thời hoãn lại cho đến khi hoàn thành nghiệm thu toàn bộ 13 Slice Giai đoạn 1 của Frontend)*
+
+### Nền Tảng: Thiết Lập Base Backend (BE Base Setup Checklist - docs/base)
+*Đặc tả: `backend/docs/base/PROMPTS_PLAYBOOK.md`*
+- [x] **BE-Base-01 Cấu Trúc Khung & Modulith**: Spring Modulith packages, bean `Clock`/`MutableClock`, ArchUnit test rules: `.\scripts\verify.ps1 -Target be` -> `passing`
+- [ ] **BE-Base-02 DB Flyway & Money VO**: Flyway migration `V1` (extensions `btree_gist`, `postgis`, bảng nền), JPA config, Value Object `Money` bất biến: `.\scripts\verify.ps1 -Target be` -> `pending`
+- [ ] **BE-Base-03 Problem Details & Idempotency**: Danh mục ErrorCode, GlobalExceptionHandler RFC 7807, `X-Request-Id` MDC filter, hạ tầng `@Idempotent`: `.\scripts\verify.ps1 -Target be` -> `pending`
+- [ ] **BE-Base-04 Bảo Mật Nền Tảng**: Spring Security 7 (mặc định từ chối), Argon2id, Spring Session JDBC, CSRF cookie repo, Rate limiting Bucket4j, endpoint `me` & `health`: `.\scripts\verify.ps1 -Target be` -> `pending`
+- [ ] **BE-Base-05 Audit & Cổng Vào Nghiệp Vụ**: `AuditService` cùng transaction, RestClient chống SSRF, Concurrency Test Harness, springdoc OpenAPI, nghiệm thu Cổng vào: `.\scripts\verify.ps1 -Target be` -> `pending`
+
+### Slices Nghiệp Vụ Backend (S01 đến S14)
 - [ ] **Backend Slices**: S01 đến S14 (Flyway migrations, Spring Modulith packages, PostgreSQL PostGIS exclusion constraints, Outbox events, Mock Gateway).
+

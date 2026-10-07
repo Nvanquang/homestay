@@ -1,0 +1,5 @@
+app:
+  name: "Homestay Booking Platform (Local)"
+  environment: "local"
+  security:
+    session-cookie-name: "HOMESTAY_LOCAL_SESSION"

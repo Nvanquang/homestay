@@ -1,0 +1,5 @@
+app:
+  name: "Homestay Booking Platform (Test)"
+  environment: "test"
+  security:
+    session-cookie-name: "HOMESTAY_TEST_SESSION"

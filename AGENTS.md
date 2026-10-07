@@ -45,4 +45,6 @@ Mọi phiên Agent mới khi bắt đầu làm việc phải tự trả lời đ
 - **Chỉ dẫn chi tiết Frontend**: [frontend/AGENTS.md](file:///e:/github-tutorio-demo/homestaybooking/frontend/AGENTS.md)
 - **Chỉ dẫn chi tiết Backend**: [backend/AGENTS.md](file:///e:/github-tutorio-demo/homestaybooking/backend/AGENTS.md)
 - **Đặc tả giao diện Frontend Giai đoạn 1**: [frontend/docs/giai-doan-1/README.md](file:///e:/github-tutorio-demo/homestaybooking/frontend/docs/giai-doan-1/README.md)
+- **Đặc tả nền tảng Backend Base**: [backend/docs/base/README.md](file:///e:/github-tutorio-demo/homestaybooking/backend/docs/base/README.md)
+
 

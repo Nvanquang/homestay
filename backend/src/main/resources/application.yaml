@@ -1,3 +1,11 @@
 spring:
   application:
-    name: backend
+    name: homestay-backend
+  profiles:
+    active: local
+
+app:
+  name: "Homestay Booking Platform"
+  environment: "default"
+  security:
+    session-cookie-name: "HOMESTAY_SESSION"

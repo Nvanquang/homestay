@@ -1,3 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/homestay_db
+    username: homestay_user
+    password: homestay_password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      max-lifetime: 1800000
+
 app:
   name: "Homestay Booking Platform (Local)"
   environment: "local"

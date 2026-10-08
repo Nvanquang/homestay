@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import {
   ShieldCheck,
   FileCheck2,
@@ -15,7 +16,10 @@ import {
   Lock,
   LogOut,
   Bell,
+  Globe,
 } from "lucide-react";
+
+import { useLocale, useTranslations } from "next-intl";
 
 export type AdminNavId = "identity-reviews" | "listing-reviews" | "staff" | "reports";
 
@@ -37,44 +41,60 @@ export function AdminShell({
   title,
   description,
   actionButton,
-  adminName = "Quản trị viên",
-  adminRole = "Admin Tổng",
+  adminName,
+  adminRole,
   onLogout,
   onSearch,
 }: AdminShellProps) {
+  const t = useTranslations("admin.shell");
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const displayAdminName = adminName || t("defaultAdminName");
+  const displayAdminRole = adminRole || t("defaultAdminRole");
+
+  const handleToggleLocale = () => {
+    const nextLocale = locale === "vi" ? "en" : "vi";
+    if (pathname) {
+      const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`);
+      router.push(newPath);
+    }
+  };
+
   const navigationItems = [
     {
       id: "identity-reviews" as const,
-      label: "Duyệt danh tính (A03)",
-      href: "/admin/identity-verification",
+      label: t("navIdentity"),
+      href: `/${locale}/admin/identity-verification`,
       icon: ShieldCheck,
       locked: false,
     },
     {
       id: "listing-reviews" as const,
-      label: "Duyệt tin đăng (A04)",
-      href: "/admin/listings-review",
+      label: t("navListing"),
+      href: `/${locale}/admin/listings-review`,
       icon: FileCheck2,
       locked: false,
     },
     {
       id: "staff" as const,
-      label: "Quản lý nhân sự (A18)",
-      href: "/admin/staff",
+      label: t("navStaff"),
+      href: `/${locale}/admin/staff`,
       icon: Users,
       locked: false,
     },
     {
       id: "reports" as const,
-      label: "Báo cáo & Nhật ký",
+      label: t("navReports"),
       href: "#",
       icon: BarChart3,
       locked: true,
-      phaseNote: "Giai đoạn sau",
+      phaseNote: t("phaseNote"),
     },
   ];
 
@@ -93,14 +113,14 @@ export function AdminShell({
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="lg:hidden p-2 rounded-lg hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)]"
-            aria-label="Đóng mở menu Admin"
+            aria-label={t("toggleMenuAria")}
             aria-expanded={isSidebarOpen}
           >
             {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
           <Link
-            href="/admin"
+            href={`/${locale}/admin`}
             className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gray-900)] rounded-md"
           >
             <div className="w-8 h-8 rounded-lg bg-[var(--color-gray-900)] text-white flex items-center justify-center font-bold text-sm">
@@ -108,10 +128,10 @@ export function AdminShell({
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-sm tracking-tight text-[var(--color-gray-900)]">
-                Admin Console
+                {t("consoleTitle")}
               </span>
               <span className="text-[10px] text-[var(--color-text-secondary)] -mt-1">
-                Homestay Back-office
+                {t("consoleSubtitle")}
               </span>
             </div>
           </Link>
@@ -125,18 +145,30 @@ export function AdminShell({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm nhanh hồ sơ, phòng, người dùng..."
+              placeholder={t("searchPlaceholder")}
               className="w-full pl-9 pr-4 py-1.5 text-sm bg-[var(--color-bg-subtle)] border border-[var(--color-border-default)] rounded-lg focus:outline-none focus:bg-[var(--color-bg-surface)] focus:border-[var(--color-border-strong)] transition-all placeholder:text-[var(--color-text-secondary)]"
             />
           </form>
         </div>
 
-        {/* Right: Notifications & Admin Profile */}
-        <div className="flex items-center gap-3">
+        {/* Right: Language, Notifications & Admin Profile */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Language Switcher */}
+          <button
+            type="button"
+            onClick={handleToggleLocale}
+            className="p-1.5 sm:px-2.5 sm:py-1 rounded-full hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1.5 text-xs font-semibold transition-colors"
+            aria-label={t("switchLangAria")}
+            title={locale === "vi" ? "Switch to English" : "Chuyển sang Tiếng Việt"}
+          >
+            <Globe className="w-4 h-4" />
+            <span className="uppercase">{locale === "vi" ? "EN" : "VI"}</span>
+          </button>
+
           <button
             type="button"
             className="p-2 rounded-full hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] relative"
-            aria-label="Thông báo hệ thống"
+            aria-label={t("notificationsLabel")}
           >
             <Bell className="w-4 h-4" />
           </button>
@@ -146,7 +178,7 @@ export function AdminShell({
               type="button"
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-[var(--color-bg-subtle)] transition-colors"
-              aria-label="Menu tài khoản quản trị"
+              aria-label={t("accountMenuLabel")}
               aria-expanded={isUserMenuOpen}
             >
               <div className="w-7 h-7 rounded-full bg-[var(--color-gray-900)] text-white flex items-center justify-center text-xs font-semibold">
@@ -154,10 +186,10 @@ export function AdminShell({
               </div>
               <div className="hidden md:flex flex-col text-left">
                 <span className="text-xs font-semibold text-[var(--color-gray-900)] leading-none">
-                  {adminName}
+                  {displayAdminName}
                 </span>
                 <span className="text-[11px] text-[var(--color-text-secondary)] mt-0.5 leading-none">
-                  {adminRole}
+                  {displayAdminRole}
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
@@ -175,8 +207,8 @@ export function AdminShell({
                   className="absolute right-0 mt-2 w-52 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] shadow-[var(--shadow-2)] py-1.5 z-50 animate-in fade-in slide-in-from-top-1"
                 >
                   <div className="px-4 py-2 border-b border-[var(--color-border-subtle)] md:hidden">
-                    <p className="text-xs font-semibold text-[var(--color-gray-900)]">{adminName}</p>
-                    <p className="text-[11px] text-[var(--color-text-secondary)]">{adminRole}</p>
+                    <p className="text-xs font-semibold text-[var(--color-gray-900)]">{displayAdminName}</p>
+                    <p className="text-[11px] text-[var(--color-text-secondary)]">{displayAdminRole}</p>
                   </div>
                   <button
                     type="button"
@@ -187,7 +219,7 @@ export function AdminShell({
                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[var(--color-error-fg)] hover:bg-[var(--color-bg-subtle)]"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>Đăng xuất</span>
+                    <span>{t("logoutBtn")}</span>
                   </button>
                 </div>
               </>
@@ -212,11 +244,11 @@ export function AdminShell({
           className={`fixed inset-y-0 left-0 z-30 w-64 bg-[var(--color-bg-surface)] border-r border-[var(--color-border-subtle)] pt-16 lg:pt-0 transform transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
-          aria-label="Thanh điều hướng Quản trị"
+          aria-label={t("navAria")}
         >
           <div className="p-4 space-y-1">
             <div className="px-3 py-2 text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
-              Nghiệp vụ Back-office
+              {t("navSectionTitle")}
             </div>
             {navigationItems.map((item) => {
               const isActive = activeItem === item.id;

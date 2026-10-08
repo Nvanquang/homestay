@@ -51,7 +51,8 @@ Quy ước trạng thái:
 
 ### Slice FE-S03: Back-office Đăng Nhập & Phân Quyền (A01, A18)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s03-admin-rbac/README.md`*
-- [ ] **S03 Admin UI**: Màn hình A01 (Admin Login), A18 (Quản lý nhân sự CSKH/Kế toán, phân quyền DataTable): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [x] **S03 Admin UI**: Màn hình A01 (Admin Login), A18 (Quản lý nhân sự CSKH/Kế toán, phân quyền DataTable): `.\scripts\verify.ps1 -Target fe` -> `passing`
+- [x] **S03 DB Schema & OpenAPI Contract**: ER diagram `db-design.md`, OpenAPI 3.1 `openapi.yaml`: `Code-check` -> `passing`
 
 ---
 

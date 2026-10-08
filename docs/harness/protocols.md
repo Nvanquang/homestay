@@ -46,19 +46,23 @@ Mọi tính năng hoặc nhiệm vụ trong `PROGRESS.md` bắt buộc phải tu
   - **Evaluator Phase**: Đóng vai trò Checker độc lập, kiểm tra lại ranh giới:
     - Có vi phạm ranh giới 14 package trong Spring Modulith không?
     - Frontend có lén tính giá hoặc giữ giờ không?
+    - Frontend có bỏ quên i18n hoặc hardcode chuỗi giao diện thay vì dùng `messages/vi.json` & `messages/en.json` không?
     - Dữ liệu tiền có dùng đúng số nguyên và loại tiền không?
     - Test có chạy thật trên PostgreSQL PostGIS hay bị mock qua loa?
 
 ---
 
-## 5. Bàn Giao Trạng Thái Sạch (Clean State Handoff)
+## 5. Bàn Giao Trạng Thái Sạch (Clean State Handoff) & Hợp Đồng FE-to-BE
 
-Trước khi kết thúc bất kỳ phiên làm việc nào, Agent bắt buộc phải đảm bảo **5 điều kiện bàn giao sạch**:
+Trước khi kết thúc bất kỳ phiên làm việc nào, Agent bắt buộc phải đảm bảo **các điều kiện bàn giao sạch**:
 1. **Build Pass**: Cả Frontend (`npm run build` hoặc `npm run lint`) và Backend (`gradlew compileJava`) đều biên dịch thành công.
 2. **Test Pass**: Mọi bài test liên quan đến phần vừa làm đều đạt màu xanh (`passing`).
-3. **Xóa File Rác**: Không để lại file tạm, log debug rải rác ngoài thư mục `scratch/`.
-4. **Cập nhật Tiến độ**: Cập nhật `PROGRESS.md` và `DECISIONS.md` phản ánh trung thực hiện trạng.
-5. **Sẵn Sàng Cho Phiên Mới**: Đảm bảo phiên Agent tiếp theo có thể chạy bài kiểm thử Fresh Session (đọc `AGENTS.md` và bắt đầu ngay mà không cần con người giải thích lại).
+3. **FE-to-BE Handover Contract**: Sau khi hoàn tất triển khai và kiểm thử Frontend cho mỗi Slice (từ FE-S01 đến FE-S13), Agent **bắt buộc tự động sinh 2 tệp hợp đồng kỹ thuật** tại thư mục `frontend/docs/giai-doan-1/slices/sXX-.../` để chuẩn bị cho giai đoạn Backend (BE):
+   - `db-design.md`: Thiết kế CSDL chi tiết (Sơ đồ ER Mermaid, cấu trúc bảng PostgreSQL/PostGIS, chỉ mục đánh chỉ số, ràng buộc toàn vẹn, Flyway migration DDL).
+   - `openapi.yaml`: Đặc tả OpenAPI 3.0/3.1 Contract chuẩn (paths, schemas, response status, headers, chuẩn lỗi RFC 9457 Problem Details) để BE làm theo mà không bị lệch hợp đồng.
+4. **Xóa File Rác**: Không để lại file tạm, log debug rải rác ngoài thư mục `scratch/`.
+5. **Cập nhật Tiến độ**: Cập nhật `PROGRESS.md` và `DECISIONS.md` phản ánh trung thực hiện trạng.
+6. **Sẵn Sàng Cho Phiên Mới**: Đảm bảo phiên Agent tiếp theo có thể chạy bài kiểm thử Fresh Session (đọc `AGENTS.md` và bắt đầu ngay mà không cần con người giải thích lại).
 
 ---
 

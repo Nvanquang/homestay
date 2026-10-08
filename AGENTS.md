@@ -29,7 +29,7 @@ Mọi phiên Agent mới khi bắt đầu làm việc phải tự trả lời đ
    - **Giá tiền**: Frontend KHÔNG BAO GIỜ tự tính giá, phụ phí, thuế hay hoàn tiền. Toàn bộ logic giá nằm tại `PricingEngine` (Backend).
    - **Chống đặt trùng**: Bắt buộc dùng `daterange` + PostGIS exclusion constraint (`23P01`).
    - **Phiên đăng nhập**: Backend sở hữu auth và session qua Spring Session JDBC.
-5. **Clean State Handoff**: Cuối mỗi phiên làm việc, bắt buộc đảm bảo 5 điều kiện: Build pass, Test pass, Dọn sạch file tạm, Cập nhật `PROGRESS.md`, và sẵn sàng cho phiên tiếp theo.
+5. **Clean State Handoff & FE-to-BE Handover Contract**: Cuối mỗi phiên làm việc, bắt buộc đảm bảo: Build pass, Test pass, tự động sinh 2 file hợp đồng kỹ thuật cho Backend (`db-design.md` và `openapi.yaml`) tại thư mục slice tương ứng, dọn sạch file tạm, cập nhật `PROGRESS.md`, và sẵn sàng cho phiên tiếp theo.
 
 ---
 

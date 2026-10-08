@@ -11,7 +11,7 @@
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Không có (Đã hoàn thành FE-S01; Sẵn sàng nhận nhiệm vụ FE-S02)`
+- **Active Task**: `Không có (Đã hoàn thành FE-S02; Sẵn sàng nhận nhiệm vụ tiếp theo)`
 - **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
 - **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe`
 
@@ -44,7 +44,8 @@ Quy ước trạng thái:
 
 ### Slice FE-S02: Hồ Sơ Người Dùng & Cài Đặt Tài Khoản (C01, C02)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s02-account/README.md`*
-- [ ] **S02 Account UI**: Màn hình C01 (Hồ sơ), C02 (Cài đặt, đổi MK, chuyển đổi chế độ Host/Guest): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [x] **S02 Account UI**: Màn hình C01 (Hồ sơ), C02 (Cài đặt, đổi MK, chuyển đổi chế độ Host/Guest): `.\scripts\verify.ps1 -Target fe` -> `passing`
+- [x] **S02 DB Schema & OpenAPI Contract**: ER diagram `db-design.md`, OpenAPI 3.0 `openapi.yaml`: `Code-check` -> `passing`
 
 ---
 

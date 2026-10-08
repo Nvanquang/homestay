@@ -21,6 +21,11 @@ describe("Layout Shells Suite", () => {
       expect(screen.getByTestId("public-content")).toBeDefined();
       expect(screen.getAllByText("Trở thành Host").length).toBeGreaterThan(0);
       expect(screen.getByText("Địa điểm bất kỳ")).toBeDefined();
+      // Footer i18n sections
+      expect(screen.getByText("Về Homestay")).toBeDefined();
+      expect(screen.getByText("Đón tiếp khách")).toBeDefined();
+      expect(screen.getByText("Hỗ trợ")).toBeDefined();
+      expect(screen.getByText("Điều khoản & Pháp lý")).toBeDefined();
     });
 
     it("renders logged in username when provided", () => {

@@ -31,6 +31,7 @@ Tệp này quy định các chuẩn mực phát triển giao diện phía máy k
 2. **Không dựa vào đồng hồ máy khách**: Đếm ngược giữ phòng 15 phút phải dựa vào thời điểm `expiresAt` (UTC) của backend.
 3. **Không tự làm Auth phía Next.js**: Phiên đăng nhập thuộc quyền sở hữu của Backend Spring Boot qua HttpOnly Cookie. Next.js rewrite `/api/*` về `http://localhost:8080/api/*`.
 4. **Không tự ý gõ tay kiểu dữ liệu API**: Luôn đồng bộ kiểu API từ backend bằng `npm run gen:api`.
+5. **Bắt buộc i18n song ngữ đầy đủ (No Hardcoded UI Strings)**: Tuyệt đối không viết chuỗi hiển thị tĩnh/cứng trong code component hoặc trang. Mọi tính năng khi xây dựng BẮT BUỘC phải khai báo cặp khóa song ngữ đầy đủ trong cả `messages/vi.json` và `messages/en.json`, và sử dụng `useTranslations()` từ `next-intl`.
 
 ---
 
@@ -60,4 +61,11 @@ Tệp này quy định các chuẩn mực phát triển giao diện phía máy k
      - Đọc trực tiếp tệp tổng hợp `docs/giai-doan-1/slices/sxx-<name>/README.md` (chỉ ~10–20 KB) hoặc đọc riêng từng khía cạnh: `flow.md`, `wireframes.md`, `ux-behavior.md`, `data.md`.
      - Sử dụng `data.md` làm căn cứ để định nghĩa Zod Schema và Mock API contract.
   4. **Kiểm tra nghiệm thu**: Sử dụng `docs/giai-doan-1/appendices/e2e-journeys.md` cho các bài kiểm tra E2E liên slice.
+
+---
+
+## 5. Quy Chuẩn Tự Động Bàn Giao Kỹ Thuật Cho Backend (FE-to-BE Handover)
+- Sau khi hoàn thành xong giao diện một Slice và vượt qua cổng xác minh `.\scripts\verify.ps1 -Target fe`, Agent **bắt buộc phải tự động sinh 2 tệp** tại thư mục `frontend/docs/giai-doan-1/slices/sXX-.../` để đội ngũ Backend (BE) sử dụng:
+  1. `db-design.md`: Thiết kế CSDL quan hệ chi tiết (ER Diagram Mermaid, bảng, kiểu dữ liệu PostgreSQL, chỉ mục, ràng buộc logic, Flyway DDL).
+  2. `openapi.yaml`: Đặc tả OpenAPI 3.0/3.1 Contract chuẩn (REST endpoints, Request/Response payloads, Query params, HTTP status codes theo RFC 9457 Problem Details).
 

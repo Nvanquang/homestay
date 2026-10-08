@@ -16,6 +16,12 @@
 3. **Chạy thủ công vs Lệnh tự động `/goal`**:
    - Chạy từng bước: Copy toàn bộ nội dung trong khung Markdown của từng Slice gửi cho Agent.
    - Chạy tự động: Thêm `/goal` vào đầu prompt để Agent tự chạy khép kín từ Code $\rightarrow$ Test $\rightarrow$ Cập nhật tiến độ.
+4. **Tự Động Bàn Giao Kỹ Thuật Cho Backend (FE-to-BE Handover Contract)**:
+   - Sau khi verify pass, Agent **bắt buộc tự động sinh 2 tệp** tại thư mục đặc tả của slice (`frontend/docs/giai-doan-1/slices/sXX-.../`):
+     + `db-design.md`: Thiết kế CSDL quan hệ chi tiết (ER Diagram Mermaid, định nghĩa bảng PostgreSQL/PostGIS, chỉ mục, ràng buộc logic, trigger/Flyway migration).
+     + `openapi.yaml`: Đặc tả OpenAPI 3.0/3.1 Contract chuẩn (REST endpoints, Request/Response body, headers, mã lỗi Problem Details RFC 9457) để BE xây dựng trực tiếp mà không cần đoán mò.
+5. **Bắt Buộc Kèm Theo i18n Song Ngữ (No Hardcoded Strings)**:
+   - Khi xây dựng bất kỳ màn hình hoặc component nào, **bắt buộc phải khai báo đầy đủ khóa ngôn ngữ song ngữ** trong cả hai tệp `messages/vi.json` và `messages/en.json`, sử dụng hook `useTranslations()` từ `next-intl`. Tuyệt đối không viết chuỗi tiếng Việt/tiếng Anh cứng trên giao diện.
 
 ---
 

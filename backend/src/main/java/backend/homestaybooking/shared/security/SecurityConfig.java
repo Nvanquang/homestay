@@ -57,8 +57,7 @@ public class SecurityConfig {
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
                 .ignoringRequestMatchers(
-                    "/api/v1/auth/login",
-                    "/api/v1/auth/register",
+                    "/api/v1/auth/**",
                     "/api/v1/webhooks/**"
                 )
             )
@@ -73,7 +72,8 @@ public class SecurityConfig {
                     "/api/v1/auth/verify-email",
                     "/api/v1/auth/resend-verification",
                     "/api/v1/auth/forgot-password",
-                    "/api/v1/auth/reset-password/**"
+                    "/api/v1/auth/reset-password/**",
+                    "/api/v1/auth/logout"
                 ).permitAll()
 
                 // Tài liệu API Swagger & OpenAPI
@@ -85,6 +85,7 @@ public class SecurityConfig {
 
                 // Endpoint người dùng đã xác thực
                 .requestMatchers("/api/v1/me/**").authenticated()
+                .requestMatchers("/api/v1/auth/me").authenticated()
 
                 // Endpoint kiểm thử
                 .requestMatchers("/test-api/**").permitAll()

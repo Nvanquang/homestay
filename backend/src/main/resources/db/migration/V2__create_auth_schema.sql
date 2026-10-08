@@ -1,6 +1,6 @@
 -- ==============================================================================
--- FLYWAY MIGRATION V1: AUTH SCHEMA
--- Slice: FE-S01 / BE-M01 (Authentication & Authorization)
+-- FLYWAY MIGRATION V2: AUTH & AUTHORIZATION SCHEMA
+-- Slice: FE-S01 / BE-M01 (Authentication & RBAC)
 -- Target Database: PostgreSQL 16+
 -- ==============================================================================
 
@@ -28,6 +28,11 @@ CREATE TABLE users (
     status VARCHAR(20) NOT NULL DEFAULT 'UNVERIFIED',
     email_verified_at TIMESTAMPTZ,
     locked_until TIMESTAMPTZ,
+    phone VARCHAR(20),
+    avatar_url VARCHAR(512),
+    bio VARCHAR(300),
+    language VARCHAR(5) NOT NULL DEFAULT 'vi',
+    display_currency VARCHAR(3) NOT NULL DEFAULT 'VND',
     created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
 
@@ -90,7 +95,7 @@ CREATE TABLE verification_tokens (
 );
 
 -- Chỉ mục tìm kiếm token nhanh theo giá trị băm và loại token
-CREATE INDEX idx_tokens_lookup ON verification_tokens(token_hash, token_type);
+CREATE INDEX idx_verification_tokens_lookup ON verification_tokens(token_hash, token_type);
 -- Chỉ mục phục vụ tra cứu token của một user
 CREATE INDEX idx_tokens_user_id ON verification_tokens(user_id, token_type);
 
@@ -107,8 +112,9 @@ CREATE TABLE login_attempts (
     attempted_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
 );
 
--- Chỉ mục tổng hợp phục vụ đếm số lần sai theo email và IP trong cửa sổ thời gian
-CREATE INDEX idx_login_attempts_email_ip ON login_attempts(email, ip_address, attempted_at DESC);
+-- Chỉ mục tổng hợp phục vụ đếm số lần sai theo email và thành công trong cửa sổ thời gian
+CREATE INDEX idx_login_attempts_email_success ON login_attempts(email, success, attempted_at DESC);
+CREATE INDEX idx_login_attempts_ip_time ON login_attempts(ip_address, attempted_at DESC);
 CREATE INDEX idx_login_attempts_email_recent ON login_attempts(email, attempted_at DESC);
 
 -- ==============================================================================

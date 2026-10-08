@@ -2,7 +2,7 @@
 
 Tài liệu này đặc tả thiết kế cấu trúc dữ liệu quan hệ cho phân hệ Xác thực & Phân quyền (**Authentication & Authorization**), tương ứng với Slice `FE-S01` (Giao diện) và Module `BE-M01` (Backend Modular Monolith).
 
-Tệp migration tương ứng: [`V1__create_auth_schema.sql`](file:///e:/github-tutorio-demo/homestaybooking/backend/src/main/resources/db/migration/V1__create_auth_schema.sql).
+Tệp migration tương ứng: [`V2__create_auth_schema.sql`](file:///e:/github-tutorio-demo/homestaybooking/backend/src/main/resources/db/migration/V2__create_auth_schema.sql).
 
 ---
 
@@ -145,3 +145,25 @@ RETURNING user_id;
   ```
 - Khi đăng nhập, nếu `locked_until > clock_timestamp()`, backend lập tức từ chối và trả về HTTP `423 Locked` kèm thời gian `lockedUntil`.
 - Khi `clock_timestamp() >= locked_until`, backend tự động mở khóa trạng thái tài khoản.
+
+---
+
+## 5. Cấu Trúc Mã Nguồn Backend & Quy Ước Lombok (Package: backend.homestaybooking.auth)
+
+Hệ thống tuân thủ mô hình phân lớp rõ ràng (Clean Layered Architecture) và ứng dụng thư viện **Lombok** để triệt tiêu boilerplate code (loại bỏ toàn bộ getter, setter, constructor thủ công):
+
+- **`entity/`**:
+  - `UserEntity`, `RoleEntity`, `VerificationTokenEntity`, `LoginAttemptEntity`, `UserConsentEntity`.
+  - Sử dụng các annotation Lombok: `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder`.
+- **`repository/`**:
+  - `UserRepository`, `RoleRepository`, `VerificationTokenRepository`, `LoginAttemptRepository`, `UserConsentRepository`.
+  - Kế thừa `JpaRepository` với các truy vấn chuyên biệt (atomic update, đếm brute-force theo cửa sổ thời gian).
+- **`service/`**:
+  - Giao diện nghiệp vụ (Interfaces): `AuthService`, `TokenService`.
+- **`service/impl/`**:
+  - Triển khai cụ thể: `AuthServiceImpl`, `TokenServiceImpl`.
+  - Sử dụng Lombok `@RequiredArgsConstructor` (tự động tiêm phụ thuộc constructor injection) và `@Slf4j` (ghi log nghiệp vụ / audit).
+- **`dto/`**:
+  - Định nghĩa dữ liệu truyền tải theo dạng bất biến (Java `record`) khớp 100% với `openapi.yaml`.
+- **`web/`**:
+  - `AuthController`, `MeController` sử dụng `@RequiredArgsConstructor`, chỉ giao tiếp qua Service và DTO.

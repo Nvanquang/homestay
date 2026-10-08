@@ -8,203 +8,197 @@ Mục tiêu: người mới biết đặt mã ở đâu, và kiến trúc không
 
 ```
 backend/
-├── pom.xml                     # parent: BOM, Enforcer, Spotless, phiên bản plugin
-├── api/                        # ứng dụng Spring Boot (chạy ở chế độ api hoặc worker bằng profile)
-│   └── src/
-│       ├── main/java/com/booking/
-│       │   ├── BookingApplication.java
-│       │   ├── shared/         # nhân dùng chung: Clock, Money, ErrorCode, ngoại lệ, audit, idempotency, web chung
-│       │   ├── accounts/       # tài khoản, xác thực, vai trò, quyền
-│       │   ├── listings/  calendar/  pricing/  bookings/  payments/  ledger/  payouts/
-│       │   ├── search/  messaging/  reviews/  disputes/  promotions/
-│       │   ├── compliance/  files/  notifications/  admin/  reports/
-│       └── main/resources/
-│           ├── application.yml  application-local.yml  application-test.yml  application-prod.yml
-│           └── db/migration/<module>/V…__mo-ta.sql
-├── mock-gateway/               # cổng thanh toán giả (module Maven riêng)
-├── infra/                      # docker-compose, script sao lưu/phục hồi, khởi tạo DB
-└── docs/                       # adr/, threat-model.md
+├── build.gradle                # Cấu hình Gradle: Java 21, Spring Boot 4.1.1, Modulith, Lombok
+├── gradlew / gradlew.bat       # Gradle Wrapper
+├── src/
+│   ├── main/
+│   │   ├── java/backend/homestaybooking/
+│   │   │   ├── BackendApplication.java
+│   │   │   ├── shared/         # Nhân dùng chung: Clock, Money, ErrorCode, GlobalExceptionHandler, SecurityConfig, AuditService, Idempotency
+│   │   │   ├── auth/           # Module S01: Xác thực, phân quyền RBAC, token, phiên đăng nhập
+│   │   │   ├── listing/        # Module Listing, tiện nghi, quy tắc, chính sách
+│   │   │   ├── pricing/        # Module Tính giá, bảng giá theo mùa, khuyến mãi
+│   │   │   ├── booking/        # Module Đặt phòng, giữ chỗ, máy trạng thái
+│   │   │   ├── payment/        # Module Thanh toán, webhook cổng thanh toán
+│   │   │   ├── search/         # Module Tìm kiếm, lọc, toạ độ không gian
+│   │   │   ├── messaging/      # Module Tin nhắn giữa Host và Guest
+│   │   │   ├── review/         # Module Đánh giá và phản hồi
+│   │   │   ├── dispute/        # Module Tranh chấp và khiếu nại
+│   │   │   ├── admin/          # Module Quản trị hệ thống, phê duyệt listing/KYC
+│   │   │   ├── finance/        # Module Kế toán, sổ cái đối soát doanh thu, payout
+│   │   │   ├── notification/   # Module Thông báo (email, push, SMS)
+│   │   │   ├── report/         # Module Báo cáo thống kê
+│   │   │   └── audit/          # Module Kiểm toán sự kiện hệ thống
+│   │   └── resources/
+│   │       ├── application.yaml  application-local.yaml  application-test.yaml
+│   │       └── db/migration/   # Flyway migrations: V1__init..., V2__create_auth...
+│   └── test/                   # Unit tests, Integration tests, ModulithTests, ArchitectureTests
+└── docs/                       # Tài liệu thiết kế kiến trúc và đặc tả base
 ```
 
-- Các module nghiệp vụ nằm ngay dưới gói gốc để **Spring Modulith** nhận diện. Danh sách trên là gợi ý, đối chiếu lại với 14 module của đặc tả (tách hoặc gộp cho khớp).
-- `shared` là «nhân» nhỏ, **không chứa nghiệp vụ**; chỉ những thứ thật sự dùng chung (kiểu tiền, thời gian, mã lỗi, nền tảng web, audit, idempotency).
-- Gói gốc của module là **giao diện công khai** của module; mọi gói con là nội bộ.
+- Các module nghiệp vụ nằm ngay dưới gói gốc `backend.homestaybooking.*` để **Spring Modulith** nhận diện tự động.
+- `shared` là «nhân» dùng chung (shared kernel), **không chứa nghiệp vụ cụ thể**; chỉ cung cấp các nền tảng dùng chung (tiền tệ, đồng hồ thời gian, mã lỗi, bảo mật, audit, idempotency).
+- Gói gốc và giao diện service của module là **giao diện công khai**; các gói implementation (`impl`), repository, entity là nội bộ của module.
 
-### 1.1. Bên trong một module
+### 1.1. Cấu trúc chuẩn bên trong một module nghiệp vụ
+
+Mọi module nghiệp vụ (ví dụ: `auth`, `listing`, `booking`...) được chuẩn hóa phân chia theo các thư mục chức năng:
 
 ```
-com.booking.bookings/
-├── BookingsApi.java            # cổng vào công khai cho module khác (use case dạng interface)
-├── BookingConfirmed.java       # sự kiện công khai (record, chỉ mang định danh và dữ liệu tối thiểu)
-├── package-info.java           # đánh dấu @NullMarked
-├── web/                        # controller, request/response DTO, mapper
-├── application/                # dịch vụ use case (@Transactional), command, query
-├── domain/                     # entity, value object, dịch vụ miền, policy, giao diện repository
-└── infrastructure/             # repository JPA, truy vấn jOOQ, adapter ngoài, listener sự kiện
+backend.homestaybooking.<module>/
+├── entity/                 # Các thực thể JPA (@Entity) ánh xạ bảng CSDL; sử dụng Lombok
+├── repository/             # Các interface Spring Data JPA Repository
+├── service/                # Giao diện dịch vụ nghiệp vụ (Interfaces)
+│   └── impl/               # Lớp triển khai cụ thể (@Service, @RequiredArgsConstructor, @Slf4j)
+├── dto/                    # Các Java record bất biến phục vụ Request/Response contract (khớp OpenAPI)
+├── web/                    # REST Controllers (@RestController, @RequestMapping)
+└── package-info.java       # Khai báo ranh giới module Spring Modulith
 ```
-
-Không phải module nào cũng đủ cả bốn gói; chỉ tạo khi cần.
 
 ---
 
 ## 2. Kiến trúc phân lớp
 
+Luồng phụ thuộc một chiều chuẩn mực:
+
 ```
-web  →  application  →  domain  ←  infrastructure
+web (Controller)  →  service (Interface)  →  service.impl (Service Implementation)
+                             ↓                         ↓
+                            dto               repository  →  entity
 ```
 
 | Lớp | Trách nhiệm | Không được làm |
 |---|---|---|
-| `web` | Nhận và kiểm tra cú pháp yêu cầu, gọi một use case, ánh xạ kết quả ra DTO, trả mã HTTP | Chứa logic nghiệp vụ, mở transaction, gọi repository, trả entity |
-| `application` | Một use case một phương thức: kiểm tra quyền (đối tượng), điều phối miền và hạ tầng, **ranh giới transaction**, ghi audit, phát sự kiện | Biết HTTP (`HttpServletRequest`, mã trạng thái), chứa quy tắc nghiệp vụ chi tiết |
-| `domain` | Quy tắc nghiệp vụ, bất biến, máy trạng thái, tính toán (giá, hoàn tiền), policy phân quyền theo đối tượng | Phụ thuộc Spring MVC, HTTP, jOOQ, thư viện ngoài; thực hiện I/O |
-| `infrastructure` | Cài đặt lưu trữ, truy vấn, adapter dịch vụ ngoài, listener | Chứa quy tắc nghiệp vụ |
+| `web` | Nhận và kiểm tra cú pháp yêu cầu (`@Valid`), gọi `service`, ánh xạ kết quả ra DTO, trả mã HTTP RFC 9457 | Chứa logic nghiệp vụ, mở transaction, gọi `repository`, import hay trả `entity` ra client |
+| `service` | Khai báo hợp đồng nghiệp vụ (Interface): use case rõ ràng, nhận/trả DTO hoặc kiểu miền | Phụ thuộc chi tiết hạ tầng hay công nghệ lưu trữ |
+| `service.impl` | Triển khai use case: kiểm tra quyền, điều phối miền và repository, **ranh giới transaction (`@Transactional`)**, ghi audit log, phát sự kiện | Biết HTTP (`HttpServletRequest`, mã HTTP), chứa logic format view của client |
+| `repository` | Cài đặt truy vấn CSDL qua Spring Data JPA, thực hiện các câu lệnh cập nhật nguyên tử (atomic update) chống race condition | Chứa quy tắc nghiệp vụ phức tạp |
+| `entity` | Thực thể JPA đại diện cho mô hình dữ liệu quan hệ; ứng dụng **Lombok** để loại bỏ boilerplate | Bị lộ ra tầng `web` hoặc serialize trực tiếp thành JSON response |
+| `dto` | Java `record` bất biến mang dữ liệu qua các tầng; kiểm tra hợp lệ bằng Jakarta Validation | Mang logic xử lý CSDL hay nghiệp vụ phức tạp |
 
-Quy tắc phụ thuộc:
-- Chỉ phụ thuộc theo chiều mũi tên; `domain` không import `web`, `application`, `infrastructure`.
-- Thực dụng: entity JPA được phép mang annotation JPA ở `domain`, nhưng không mang annotation web (Jackson, Spring MVC).
-- **Giữa các module:** chỉ gọi qua `*Api` công khai hoặc nghe sự kiện công khai; không import gói con của module khác; không truy cập bảng của module khác bằng JOIN (đọc chéo module qua `*Api` hoặc một read model được phép). `ApplicationModules.verify()` kiểm tra điều này trong test.
-- Phụ thuộc vòng giữa module bị cấm; phá vòng bằng sự kiện hoặc đẩy khái niệm chung xuống `shared`.
+Quy tắc phụ thuộc và bất biến kiến trúc (được kiểm tra tự động bởi ArchUnit):
+- **Controller không phụ thuộc Entity/Repository:** Controller chỉ được phép phụ thuộc vào `service` và `dto`.
+- **Ranh giới module:** Giữa các module chỉ giao tiếp qua Service interface công khai hoặc sự kiện; không import trực tiếp repository, entity hoặc lớp nội bộ (`impl`) của module khác.
+- **Tính độc lập của `shared`:** Package `shared` là nhân nền tảng, tuyệt đối không phụ thuộc vào bất kỳ module nghiệp vụ cụ thể nào.
+- **Bất biến thời gian:** Mọi thao tác lấy thời gian bắt buộc qua bean `java.time.Clock`, cấm gọi trực tiếp `Instant.now()`, `LocalDateTime.now()`.
 
 ---
 
 ## 3. Tách DTO và Entity
 
-**Bắt buộc, không ngoại lệ:** entity không rời khỏi tầng `application`/`domain` của module.
+**Bắt buộc, không ngoại lệ:** entity không rời khỏi tầng `service`/`repository` của module.
 
 | Đối tượng | Nơi | Rời module được? | Ghi chú |
 |---|---|---|---|
-| Request DTO | `web` | Không | `record`, có annotation kiểm tra, **mỗi use case một DTO** |
-| Command, Query | `application` | Không | Đã được kiểm tra và chuẩn hoá; không chứa trường server quyết định (người dùng hiện tại lấy từ ngữ cảnh bảo mật) |
-| Entity, Value Object | `domain` | **Không** | Không có annotation Jackson; không có `getXxx()` trả ra danh sách thay đổi được |
-| Read model, projection | `application` hoặc `infrastructure` | Không | Dùng cho truy vấn đọc (tìm kiếm, báo cáo) |
-| Response DTO | `web` | Không | `record`, chỉ chứa trường được phép hiển thị cho **vai trò đó**; có thể có nhiều DTO cho cùng đối tượng (`GuestBookingView`, `HostBookingView`) |
-| DTO/Interface công khai của module | Gói gốc module | Có | Kiểu tối thiểu cho module khác (ví dụ `BookingSummary`) |
-| Sự kiện | Gói gốc module | Có | `record` bất biến, mang định danh và dữ liệu tối thiểu, **không mang entity, không mang dữ liệu cá nhân thừa** |
+| Request DTO | `dto` | Không | `record`, có annotation validation (`@NotBlank`, `@Size`, `@Email`...) |
+| Response DTO | `dto` | Có (nếu là kiểu trả về của Service) | `record`, chỉ chứa trường được phép hiển thị cho vai trò đó; không lộ thông tin nhạy cảm |
+| Entity | `entity` | **Không** | `@Entity` JPA, dùng Lombok (`@Getter`, `@Setter`, `@Builder`); tuyệt đối không trả ra controller |
+| Projection / Read model | `dto` hoặc `repository` | Không | Dùng cho truy vấn đọc tối ưu (báo cáo, tìm kiếm) |
+| Sự kiện Modulith | Gói gốc module | Có | `record` bất biến, mang định danh và dữ liệu tối thiểu, không mang entity |
 
 Quy tắc chống gán hàng loạt (mass assignment):
-- Cấm gán thẳng DTO vào entity bằng phản chiếu (`BeanUtils.copyProperties`, ánh xạ tự động hai chiều). Cập nhật qua **phương thức nghiệp vụ** của entity (`booking.cancel(reason, actor)`), không qua setter công khai.
-- Request DTO **không bao giờ** chứa các trường: `id` của đối tượng đang tạo, `role`, `status`, `price`, `fee`, `ownerId`/`hostId`/`guestId` (lấy từ phiên), `createdAt`, `version`, cờ xác minh.
-- Cấu hình Jackson **từ chối trường lạ** ở yêu cầu vào; thêm trường không khai báo bị 400 thay vì bị bỏ qua.
-- Mapping bằng MapStruct hoặc phương thức tĩnh; mỗi mapper có test cho từng trường nhạy cảm không lọt ra.
-- Có test tự động: serialize mọi Response DTO và khẳng định không chứa tên trường cấm (`passwordHash`, `token`, `secret`, `idDocument`, `iban`, …).
+- Cấm sao chép tự động DTO vào entity bằng phản chiếu (`BeanUtils.copyProperties`).
+- Request DTO **không bao giờ** chứa các trường do máy chủ quyết định: `id` của đối tượng đang tạo, `role`, `status`, `price`, `ownerId`/`userId` (luôn lấy từ phiên đăng nhập), `createdAt`, `lockedUntil`.
+- Cấu hình Jackson từ chối trường lạ ở yêu cầu vào (HTTP 400 thay vì âm thầm bỏ qua).
 
 ---
 
-## 4. Áp dụng SOLID
+## 4. Áp dụng SOLID & Thiết kế Hướng Giao Diện
 
 | Nguyên tắc | Áp dụng cụ thể trong dự án |
 |---|---|
-| **S**ingle Responsibility | Một lớp một lý do thay đổi: `PricingEngine` chỉ tính giá; `RefundCalculator` chỉ tính hoàn tiền; `BookingStateMachine` chỉ quyết định chuyển trạng thái; `LedgerService` là nơi duy nhất ghi bút toán |
-| **O**pen/Closed | Mở rộng bằng dữ liệu hoặc chiến lược, không sửa lõi: quy tắc giá là chuỗi quy tắc có thứ tự ưu tiên; chính sách huỷ là **bảng mốc theo dữ liệu**; thêm phương thức thanh toán là thêm một adapter |
-| **L**iskov Substitution | Adapter thật và adapter giả của `PaymentGateway`, `FileStorage`, `Mailer` đều phải qua **cùng một bộ test hợp đồng** để thay nhau được |
-| **I**nterface Segregation | Cổng nhỏ theo nhu cầu (`PaymentGateway` chỉ có khởi tạo thanh toán, truy vấn trạng thái, hoàn tiền); không tạo interface «thần thánh» |
-| **D**ependency Inversion | `application` phụ thuộc interface do `domain` hoặc `application` định nghĩa; `infrastructure` cài đặt; dùng constructor injection |
-
-Không tạo interface cho thứ chỉ có một cài đặt và không có ranh giới ngoài (ví dụ `BookingServiceImpl` đi kèm `BookingService`).
+| **S**ingle Responsibility | Một lớp một lý do thay đổi: `PricingEngine` chỉ tính giá; `TokenService` chỉ quản lý token; `AuthService` điều phối phiên; `LedgerService` ghi sổ cái |
+| **O**pen/Closed | Mở rộng qua cấu hình và chiến lược: quy tắc giá theo thứ tự ưu tiên; chính sách hủy theo bảng mốc dữ liệu; phương thức thanh toán thêm adapter mới |
+| **L**iskov Substitution | Adapter thật và adapter mock (ví dụ: cổng thanh toán, gửi mail giả lập) đều thỏa mãn cùng một Interface hợp đồng |
+| **I**nterface Segregation | Tách nhỏ interface theo nhu cầu (`TokenService` tách riêng với `AuthService`); Controller chỉ phụ thuộc vào Interface nghiệp vụ cần thiết |
+| **D**ependency Inversion | Tầng `web` phụ thuộc vào Interface `service`; triển khai nằm ở `service.impl`; sử dụng constructor injection thông qua Lombok `@RequiredArgsConstructor` |
 
 ---
 
 ## 5. DRY, KISS, YAGNI
 
-### DRY: không lặp lại **tri thức**
+### DRY: Không lặp lại tri thức nghiệp vụ
 
-Mỗi luật nghiệp vụ có đúng **một nơi** cài đặt:
+Mỗi luật nghiệp vụ có đúng **một nơi** cài đặt duy nhất:
 
 | Tri thức | Nơi duy nhất |
 |---|---|
-| Cách tính giá, phí, thuế | `PricingEngine` (tìm kiếm, báo giá, thanh toán, đổi booking đều gọi) |
-| Chuyển trạng thái booking | `BookingStateMachine` |
-| Ghi tiền | `LedgerService` |
-| Làm tròn, định dạng tiền | `Money` |
-| Mã lỗi và mã HTTP tương ứng | `ErrorCode` |
-| Kiểm tra quyền theo đối tượng | Các lớp policy ở `domain` |
-| Lấy thời gian hiện tại | `Clock` |
+| Cách tính giá, phụ phí, thuế | `PricingEngine` (Backend làm chủ quyền tính giá theo Invariant) |
+| Chuyển trạng thái đặt phòng | `BookingStateMachine` |
+| Ghi sổ cái và tiền | `LedgerService` |
+| Làm tròn, quy đổi tiền tệ | Value Object `Money` |
+| Danh mục mã lỗi và HTTP status | Enum `ErrorCode` chuẩn hóa |
+| Xác thực, cấp token, mã hóa mật khẩu | `AuthService` & `TokenService` |
+| Lấy thời gian hiện tại | Bean `java.time.Clock` |
 
-Nhưng **không** ép DRY cho trùng lặp ngẫu nhiên: mỗi use case có DTO riêng, test có dữ liệu riêng. Quy tắc «ba lần»: lặp hai lần thì chấp nhận, lần thứ ba mới trừu tượng hoá.
+### KISS: Đơn giản và Thực dụng
 
-### KISS
+- Chọn cách đơn giản nhất thỏa mãn bất biến: dùng ràng buộc PostgreSQL (như `chk_users_email_lowercase`, exclusion constraint `btree_gist`) thay cho thuật toán kiểm tra phức tạp và dễ gặp race condition trong code.
+- Áp dụng phân lớp rõ ràng: `entity`, `repository`, `service`, `impl`, `dto`, `web` giúp cấu trúc dự án đồng nhất, dễ đọc, dễ bảo trì.
 
-- Chọn cách đơn giản nhất thoả bất biến: ràng buộc DB thay cho thuật toán phức tạp ở code.
-- Không dùng mẫu thiết kế khi một hàm là đủ; không tạo lớp trừu tượng khi chỉ có một lựa chọn.
-- Một use case đọc từ trên xuống dưới được; nếu cần sơ đồ để hiểu một phương thức, hãy tách nhỏ.
+### YAGNI: Những thứ chưa làm khi chưa có nhu cầu thực tế
 
-### YAGNI: những thứ **chưa làm** và điều kiện xem lại
-
-| Chưa làm | Làm khi |
-|---|---|
-| Message broker (Kafka, RabbitMQ) | Cần giao tiếp giữa nhiều tiến trình độc lập hoặc khối lượng sự kiện vượt khả năng một DB |
-| Redis, cache phân tán | Chạy nhiều instance cần giới hạn tốc độ/phiên/cache chung, hoặc đo thấy DB là nút cổ chai |
-| CQRS, event sourcing | Mô hình đọc thật sự tách khỏi ghi với khối lượng lớn (sổ cái đã chỉ-thêm là đủ) |
-| OAuth2/OIDC/JWT | Cần đăng nhập bên thứ ba, ứng dụng di động, hoặc nhiều dịch vụ độc lập |
-| Bộ máy chính sách (OPA, Cedar) | Luật phân quyền nhiều tới mức khó giữ trong code |
-| Row-level security của PostgreSQL | Nhiều tenant dùng chung bảng |
-| Tách microservice | Khác biệt rõ về quy mô hoặc đội ngũ, kèm bằng chứng |
-| Feature flag | Cần phát hành từng phần cho người dùng thật |
-| Multi-tenancy | Có yêu cầu nhiều doanh nghiệp trên cùng nền tảng |
+- Chưa dùng Kafka/RabbitMQ khi PostgreSQL Outbox + Spring Modulith Events là đủ.
+- Chưa dùng Redis phân tán khi Spring Session JDBC và Bucket4j in-memory đáp ứng tốt yêu cầu hiện tại.
+- Chưa dùng JWT/OAuth2 phức tạp khi hệ thống dùng Session Cookie HttpOnly chuẩn OWASP.
 
 ---
 
-## 6. Quy ước viết mã
+## 6. Quy ước viết mã (Clean Code Guidelines)
 
-### 6.1. Đặt tên và cỡ
+### 6.1. Đặt tên và cấu trúc
 
 | Mục | Quy tắc |
 |---|---|
-| Tên | Tiếng Anh, theo ngôn ngữ nghiệp vụ (`checkIn`, `holdExpiresAt`), tên nói lên ý định; không viết tắt khó hiểu |
-| Lớp use case | Động từ: `HoldBooking`, `CancelBooking`, `ConfirmPayment` (hoặc `BookingCommands` gom theo nhóm nhỏ) |
-| Phương thức | Ngắn, một việc; khoảng 30 dòng là ngưỡng nên tách; tối đa 4 tham số (nhiều hơn thì gom thành đối tượng) |
-| Cờ boolean làm tham số | Tránh; tách thành hai phương thức hoặc dùng enum |
-| Hằng số | Không số hoặc chuỗi «ma thuật»; giá trị nghiệp vụ nằm trong cấu hình (`SystemConfig`), giá trị kỹ thuật nằm trong hằng có tên |
-| Chú thích | Giải thích **vì sao**, không giải thích **cái gì**; tài liệu Javadoc cho giao diện công khai của module |
+| Ngôn ngữ mã nguồn | Tiếng Anh thống nhất (`UserEntity`, `AuthService`, `LoginRequest`) |
+| Gói và thư mục | Chữ thường, phân chia rõ ràng: `entity`, `repository`, `service`, `service.impl`, `dto`, `web` |
+| Phương thức | Ngắn gọn, tập trung một nhiệm vụ; tối đa 4 tham số (nhiều hơn gom thành đối tượng/record) |
+| Hằng số | `UPPER_SNAKE_CASE`, nằm trong cấu hình hoặc lớp liên quan; không dùng chuỗi/số ma thuật |
+| Chú thích | Tập trung giải thích **vì sao** (lý do thiết kế, quyết định kiến trúc), không giải thích cú pháp hiển nhiên |
 
-### 6.2. Java
+### 6.2. Ứng dụng Lombok & Java Hiện Đại
 
-- **Bất biến mặc định:** `record` cho DTO, command, sự kiện, value object; trường `final`; bộ sưu tập trả ra là không sửa được.
-- **Constructor injection** duy nhất; cấm field injection (`@Autowired` trên trường); không trạng thái tĩnh có thể thay đổi.
-- **Không Lombok** (đã chốt ở kiến trúc): dùng `record` và mã tường minh.
-- **Null:** đánh dấu gói `@NullMarked` (JSpecify); trả về `Optional` chỉ cho kết quả có thể vắng mặt ở giao diện, không dùng làm tham số hay trường.
-- **Thời gian:** `Instant` cho thời điểm, `LocalDate` cho ngày lưu trú, `ZoneId` của listing cho quy đổi; **không** gọi `now()` trực tiếp, luôn qua `Clock`.
-- **Tiền:** chỉ qua `Money`; cấm `double`/`float` cho tiền.
-- **Số ngẫu nhiên và mã:** `SecureRandom` cho mọi giá trị liên quan bảo mật.
-- **Stream:** dùng vừa phải, không lồng sâu; ưu tiên vòng lặp rõ ràng khi có tác dụng phụ.
-- **`equals`/`hashCode` của entity:** dựa trên định danh; tránh dùng entity làm khoá map khi chưa có id.
-- **Phạm vi truy cập:** mặc định package-private; chỉ `public` khi thuộc giao diện module hoặc framework yêu cầu.
+- **Lombok trên Entity:**
+  - Bắt buộc dùng `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder` trên các lớp `@Entity`.
+  - **Tuyệt đối không viết getter/setter thủ công**, giữ entity ngắn gọn và tập trung vào các trường dữ liệu và ràng buộc JPA.
+  - Các phương thức nghiệp vụ đặc thù (như `isEmailVerified()`, `isHost()`, kiểm tra logic) được viết tường minh bên trong entity.
+- **Lombok trên Service và Controller:**
+  - Bắt buộc dùng `@RequiredArgsConstructor` để tự động sinh constructor injection cho toàn bộ các trường `private final`.
+  - Cấm sử dụng Field Injection (`@Autowired` trên trường).
+  - Sử dụng `@Slf4j` cho việc ghi log nghiệp vụ và kiểm toán.
+- **DTO và Value Object:**
+  - Bắt buộc dùng Java `record` bất biến; không dùng Lombok cho DTO.
+- **Thời gian & Tiền tệ:**
+  - Luôn inject `Clock` để lấy thời gian (`clock.instant()`). Cấm gọi `Instant.now()`, `LocalDateTime.now()`.
+  - Toàn bộ giá trị tiền tệ sử dụng Value Object `Money` bất biến.
 
-### 6.3. Ngoại lệ (tóm tắt; chi tiết ở file 03)
+### 6.3. Ngoại lệ và Xử lý lỗi
 
-- Ném ngoại lệ miền **không kiểm tra (unchecked)** có mã lỗi; không ném `Exception`/`RuntimeException` trần.
-- Không bắt `Exception` rộng để nuốt lỗi; không dùng ngoại lệ để điều khiển luồng bình thường.
-
-### 6.4. Cấu hình
-
-- Cấu hình có kiểu: `@ConfigurationProperties` bằng `record`, có `@Validated`; không rải `@Value` trong mã nghiệp vụ.
-- Không giá trị nghiệp vụ viết cứng (phí, thuế, thời hạn, ngưỡng): đọc từ `SystemConfig`/`CountryConfig` có hiệu lực theo thời điểm.
+- Ném ngoại lệ nghiệp vụ `BusinessException` đi kèm `ErrorCode` định danh.
+- Tất cả lỗi trả về client đều được bắt tự động bởi `GlobalExceptionHandler` theo chuẩn **RFC 9457 Problem Details**.
 
 ---
 
-## 7. Công cụ kiểm tra tự động
+## 7. Công cụ kiểm tra tự động và Cổng chất lượng
 
-| Công cụ | Việc |
+Hệ sinh thái kiểm thử đảm bảo kiến trúc không bị thoái hóa:
+
+| Công cụ | Nhiệm vụ xác minh |
 |---|---|
-| Spotless | Định dạng thống nhất; kiểm tra trong `verify` |
-| Maven Enforcer | Phiên bản Java/Maven, hội tụ phụ thuộc, cấm phụ thuộc xấu |
-| Cờ biên dịch | Bật cảnh báo đầy đủ, coi cảnh báo là lỗi |
-| Spring Modulith | `ApplicationModules.verify()` |
-| ArchUnit | Quy tắc lớp: controller không import entity/repository; `domain` không import web/infrastructure; cấm `now()`; cấm `@Autowired` trên trường; cấm `printStackTrace` |
-| SpotBugs + FindSecBugs | Phân tích tĩnh có luật bảo mật (chạy trong CI) |
-| Error Prone + NullAway | Tuỳ chọn, bật khi nền ổn định |
+| **Gradle Compiler** | `cmd /c "gradlew.bat compileJava compileTestJava"` kiểm tra cú pháp và xử lý annotation Lombok |
+| **ArchUnit (`ArchitectureTests`)** | Cấm controller phụ thuộc entity/repository; cấm gọi `now()` trực tiếp; cấm `shared` phụ thuộc module nghiệp vụ |
+| **Spring Modulith (`ModulithTests`)** | Kiểm tra tính đóng gói và ranh giới giữa 14 module nghiệp vụ |
+| **Verification Runner (`verify.ps1`)** | Script chạy kiểm thử đa tầng tự động: `.\scripts\verify.ps1 -Target be` |
 
 ---
 
-## 8. Danh sách kiểm tra cho người review
+## 8. Danh sách kiểm tra khi Review Code (Checklist)
 
-- [ ] Logic nghiệp vụ nằm ở `domain`/`application`, không ở controller hay repository?
-- [ ] Có entity rời khỏi module hoặc lọt ra response không? Response DTO chỉ chứa trường được phép?
-- [ ] Request DTO có chứa trường mà server phải quyết định (role, status, price, owner)?
-- [ ] Module gọi module khác chỉ qua `*Api` hoặc sự kiện?
-- [ ] Luật nghiệp vụ mới có bị cài đặt ở hai nơi? Có dùng `PricingEngine`, `LedgerService`, `BookingStateMachine`, `Money`, `Clock` chưa?
-- [ ] Có giá trị nghiệp vụ viết cứng không?
-- [ ] Constructor injection, bất biến, không `Lombok`, không `now()` trực tiếp?
-- [ ] Phương thức quá dài hoặc quá nhiều tham số?
-- [ ] Có thêm thư viện hoặc trừu tượng chưa cần (vi phạm YAGNI)?
+- [ ] Thực thể JPA nằm trong `entity/`, sử dụng Lombok (`@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`), không có getter/setter thủ công?
+- [ ] Repository nằm trong `repository/`, kế thừa `JpaRepository`?
+- [ ] Nghiệp vụ được khai báo Interface trong `service/` và triển khai trong `service/impl/`?
+- [ ] Lớp triển khai Service và Controller sử dụng `@RequiredArgsConstructor` và `@Slf4j`?
+- [ ] DTO là Java `record` nằm trong `dto/`, không có entity nào bị lọt ra ngoài controller?
+- [ ] Controller trong `web/` chỉ phụ thuộc vào `service` và `dto`, tuyệt đối không gọi `repository` hay `entity`?
+- [ ] Mọi thao tác lấy thời gian đều qua `Clock`, không có lời gọi `Instant.now()` trực tiếp?
+- [ ] Toàn bộ test của Gradle (`ArchitectureTests`, `ModulithTests`, Unit tests) đều đạt chuẩn với exit code 0?

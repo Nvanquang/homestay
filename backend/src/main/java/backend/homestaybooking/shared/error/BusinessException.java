@@ -1,5 +1,6 @@
 package backend.homestaybooking.shared.error;
 
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -8,6 +9,7 @@ import java.util.Objects;
 public class BusinessException extends RuntimeException {
 
     private final ErrorCode errorCode;
+    private Instant lockedUntil;
 
     public BusinessException(ErrorCode errorCode) {
         super(Objects.requireNonNull(errorCode, "errorCode must not be null").getDefaultMessage());
@@ -19,6 +21,12 @@ public class BusinessException extends RuntimeException {
         this.errorCode = Objects.requireNonNull(errorCode, "errorCode must not be null");
     }
 
+    public BusinessException(ErrorCode errorCode, String customMessage, Instant lockedUntil) {
+        super(customMessage != null && !customMessage.isBlank() ? customMessage : errorCode.getDefaultMessage());
+        this.errorCode = Objects.requireNonNull(errorCode, "errorCode must not be null");
+        this.lockedUntil = lockedUntil;
+    }
+
     public BusinessException(ErrorCode errorCode, String customMessage, Throwable cause) {
         super(customMessage != null && !customMessage.isBlank() ? customMessage : errorCode.getDefaultMessage(), cause);
         this.errorCode = Objects.requireNonNull(errorCode, "errorCode must not be null");
@@ -26,5 +34,9 @@ public class BusinessException extends RuntimeException {
 
     public ErrorCode getErrorCode() {
         return errorCode;
+    }
+
+    public Instant getLockedUntil() {
+        return lockedUntil;
     }
 }

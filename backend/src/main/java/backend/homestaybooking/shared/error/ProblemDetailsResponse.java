@@ -16,8 +16,22 @@ public record ProblemDetailsResponse(
     String detail,
     String code,
     String instance,
-    List<InvalidParam> invalidParams
+    List<InvalidParam> invalidParams,
+    String lockedUntil,
+    Integer retryAfterSec
 ) {
+    public ProblemDetailsResponse(
+        URI type,
+        String title,
+        int status,
+        String detail,
+        String code,
+        String instance,
+        List<InvalidParam> invalidParams
+    ) {
+        this(type, title, status, detail, code, instance, invalidParams, null, null);
+    }
+
     public record InvalidParam(
         String field,
         String code,

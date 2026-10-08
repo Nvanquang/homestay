@@ -108,12 +108,12 @@ class SecurityConfigTest {
     void shouldReturn429WhenRateLimitExceeded() throws Exception {
         String testRateLimitUrl = "/api/v1/auth/login";
 
-        // 5 lần đầu thành công trong hạn mức
+        // 5 lần đầu thành công trong hạn mức (qua Rate Limiter, đến AuthController trả 401 Unauthorized)
         for (int i = 0; i < 5; i++) {
             mockMvc.perform(post(testRateLimitUrl)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("{\"email\":\"user@example.com\",\"password\":\"wrong\"}"))
-                .andExpect(status().isNotFound()); // Vì controller auth thật sẽ implement ở S01
+                .andExpect(status().isUnauthorized());
         }
 
         // Lần thứ 6: Bị chặn bởi Rate Limiter

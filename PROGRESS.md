@@ -9,9 +9,7 @@
 
 ---
 
-## 1. Công Việc Đang Thực Hiện (Current Active Task)
-
-- **Active Task**: Không có (Đã hoàn thành toàn bộ BE-Base-01 đến BE-Base-05; Sẵn sàng cho Slice S01 Backend!)
+- **Active Task**: Không có (Hoàn tất Slice BE-S01 Auth & Phân quyền; Sẵn sàng cho Slice BE-S02 Account & Profile!)
 - **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
 - **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target be`
 
@@ -125,5 +123,7 @@ Quy ước trạng thái:
 - [x] **BE-Base-05 Audit & Cổng Vào Nghiệp Vụ**: `AuditService` cùng transaction, RestClient chống SSRF, Concurrency Test Harness, springdoc OpenAPI, nghiệm thu Cổng vào: `.\scripts\verify.ps1 -Target be` -> `passing`
 
 ### Slices Nghiệp Vụ Backend (S01 đến S14)
-- [ ] **Backend Slices**: S01 đến S14 (Flyway migrations, Spring Modulith packages, PostgreSQL PostGIS exclusion constraints, Outbox events, Mock Gateway).
+- [x] **BE-S01 Auth & Phân quyền**: Đăng ký, xác minh email, đăng nhập, quên mật khẩu, phân quyền RBAC: `.\scripts\verify.ps1 -Target be` -> `passing`
+- [ ] **BE-S02 Account & Profile**: Hồ sơ cá nhân, cài đặt tài khoản, chuyển đổi Host/Guest: `.\scripts\verify.ps1 -Target be` -> `pending`
+- [ ] **BE Slices còn lại**: S03 đến S14 theo lộ trình nghiệp vụ.
 

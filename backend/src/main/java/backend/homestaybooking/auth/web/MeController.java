@@ -1,9 +1,10 @@
-package backend.homestaybooking.shared.web;
+package backend.homestaybooking.auth.web;
 
-import java.util.List;
+import backend.homestaybooking.auth.dto.UserResponse;
+import backend.homestaybooking.auth.service.AuthService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,35 +12,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Endpoint thông tin phiên người dùng hiện tại (Yêu cầu xác thực phiên đăng nhập).
+ * Endpoint thông tin phiên người dùng hiện tại tại /api/v1/me.
+ * Nạp thông tin người dùng từ cơ sở dữ liệu thật và trả về hồ sơ UserResponse đầy đủ.
  */
 @RestController
 @RequestMapping("/api/v1/me")
+@RequiredArgsConstructor
 public class MeController {
 
-    public record CurrentUserResponse(
-        String username,
-        List<String> authorities
-    ) {}
+    private final AuthService authService;
 
     public record UpdateProfileRequest(
         String fullName
     ) {}
 
     @GetMapping
-    public ResponseEntity<CurrentUserResponse> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).build();
         }
 
-        List<String> authorities = authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .toList();
-
-        return ResponseEntity.ok(new CurrentUserResponse(
-            authentication.getName(),
-            authorities
-        ));
+        UserResponse userResponse = authService.getCurrentUser(authentication.getName());
+        return ResponseEntity.ok(userResponse);
     }
 
     /**

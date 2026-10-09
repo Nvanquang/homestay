@@ -3,7 +3,6 @@ package backend.homestaybooking.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -70,26 +69,24 @@ class AuthServiceTest {
         clock = Clock.fixed(fixedNow, ZoneId.of("UTC"));
 
         authService = new AuthServiceImpl(
-            userRepository,
-            roleRepository,
-            loginAttemptRepository,
-            userConsentRepository,
-            tokenService,
-            passwordEncoder,
-            auditService,
-            clock
-        );
+                userRepository,
+                roleRepository,
+                loginAttemptRepository,
+                userConsentRepository,
+                tokenService,
+                passwordEncoder,
+                auditService,
+                clock);
     }
 
     @Test
     @DisplayName("Đăng ký thành công: Lưu user, băm mật khẩu Argon2, sinh verification token và ẩn email")
     void shouldRegisterSuccessfully() {
         RegisterRequest request = new RegisterRequest(
-            "Nguyễn Văn Khách",
-            "guest@demo.test",
-            "Password123",
-            true
-        );
+                "Nguyễn Văn Khách",
+                "guest@demo.test",
+                "Password123",
+                true);
 
         when(userRepository.existsByEmailIgnoreCase("guest@demo.test")).thenReturn(false);
         when(passwordEncoder.encode("Password123")).thenReturn("argon2_hashed_pass");
@@ -116,20 +113,19 @@ class AuthServiceTest {
     @DisplayName("Đăng ký thất bại: Email đã tồn tại ném lỗi 409 EMAIL_ALREADY_EXISTS")
     void shouldFailRegisterWhenEmailAlreadyExists() {
         RegisterRequest request = new RegisterRequest(
-            "Nguyễn Văn Khách",
-            "guest@demo.test",
-            "Password123",
-            true
-        );
+                "Nguyễn Văn Khách",
+                "guest@demo.test",
+                "Password123",
+                true);
 
         when(userRepository.existsByEmailIgnoreCase("guest@demo.test")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.register(request, "127.0.0.1", "TestAgent"))
-            .isInstanceOf(BusinessException.class)
-            .satisfies(ex -> {
-                BusinessException be = (BusinessException) ex;
-                assertThat(be.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS);
-            });
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> {
+                    BusinessException be = (BusinessException) ex;
+                    assertThat(be.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS);
+                });
     }
 
     @Test
@@ -145,11 +141,11 @@ class AuthServiceTest {
         when(userRepository.findByEmailIgnoreCase("locked@demo.test")).thenReturn(Optional.of(lockedUser));
 
         assertThatThrownBy(() -> authService.login(request, "127.0.0.1", "TestAgent", null))
-            .isInstanceOf(BusinessException.class)
-            .satisfies(ex -> {
-                BusinessException be = (BusinessException) ex;
-                assertThat(be.getErrorCode()).isEqualTo(ErrorCode.ACCOUNT_LOCKED);
-            });
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> {
+                    BusinessException be = (BusinessException) ex;
+                    assertThat(be.getErrorCode()).isEqualTo(ErrorCode.ACCOUNT_LOCKED);
+                });
     }
 
     @Test
@@ -160,15 +156,16 @@ class AuthServiceTest {
         UserEntity user = new UserEntity("user@demo.test", "Test User", "hash", fixedNow);
         user.setId(2L);
         when(userRepository.findByEmailIgnoreCase("user@demo.test")).thenReturn(Optional.of(user));
-        when(loginAttemptRepository.countByEmailIgnoreCaseAndSuccessFalseAndAttemptedAtAfter(eq("user@demo.test"), any(Instant.class)))
-            .thenReturn(5L);
+        when(loginAttemptRepository.countByEmailIgnoreCaseAndSuccessFalseAndAttemptedAtAfter(eq("user@demo.test"),
+                any(Instant.class)))
+                .thenReturn(5L);
 
         assertThatThrownBy(() -> authService.login(request, "127.0.0.1", "TestAgent", null))
-            .isInstanceOf(BusinessException.class)
-            .satisfies(ex -> {
-                BusinessException be = (BusinessException) ex;
-                assertThat(be.getErrorCode()).isEqualTo(ErrorCode.ACCOUNT_LOCKED);
-            });
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> {
+                    BusinessException be = (BusinessException) ex;
+                    assertThat(be.getErrorCode()).isEqualTo(ErrorCode.ACCOUNT_LOCKED);
+                });
 
         verify(userRepository).save(user);
         assertThat(user.getStatus()).isEqualTo("LOCKED");
@@ -183,16 +180,17 @@ class AuthServiceTest {
         UserEntity user = new UserEntity("user@demo.test", "Test User", "hash", fixedNow);
         user.setId(2L);
         when(userRepository.findByEmailIgnoreCase("user@demo.test")).thenReturn(Optional.of(user));
-        when(loginAttemptRepository.countByEmailIgnoreCaseAndSuccessFalseAndAttemptedAtAfter(eq("user@demo.test"), any(Instant.class)))
-            .thenReturn(1L);
+        when(loginAttemptRepository.countByEmailIgnoreCaseAndSuccessFalseAndAttemptedAtAfter(eq("user@demo.test"),
+                any(Instant.class)))
+                .thenReturn(1L);
         when(passwordEncoder.matches("WrongPass", "hash")).thenReturn(false);
 
         assertThatThrownBy(() -> authService.login(request, "127.0.0.1", "TestAgent", null))
-            .isInstanceOf(BusinessException.class)
-            .satisfies(ex -> {
-                BusinessException be = (BusinessException) ex;
-                assertThat(be.getErrorCode()).isEqualTo(ErrorCode.INVALID_CREDENTIALS);
-            });
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> {
+                    BusinessException be = (BusinessException) ex;
+                    assertThat(be.getErrorCode()).isEqualTo(ErrorCode.INVALID_CREDENTIALS);
+                });
 
         verify(loginAttemptRepository).save(any(LoginAttemptEntity.class));
     }
@@ -208,16 +206,17 @@ class AuthServiceTest {
         user.setEmailVerifiedAt(null);
 
         when(userRepository.findByEmailIgnoreCase("unverified@demo.test")).thenReturn(Optional.of(user));
-        when(loginAttemptRepository.countByEmailIgnoreCaseAndSuccessFalseAndAttemptedAtAfter(eq("unverified@demo.test"), any(Instant.class)))
-            .thenReturn(0L);
+        when(loginAttemptRepository.countByEmailIgnoreCaseAndSuccessFalseAndAttemptedAtAfter(eq("unverified@demo.test"),
+                any(Instant.class)))
+                .thenReturn(0L);
         when(passwordEncoder.matches("CorrectPass", "hash")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.login(request, "127.0.0.1", "TestAgent", null))
-            .isInstanceOf(BusinessException.class)
-            .satisfies(ex -> {
-                BusinessException be = (BusinessException) ex;
-                assertThat(be.getErrorCode()).isEqualTo(ErrorCode.EMAIL_NOT_VERIFIED);
-            });
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> {
+                    BusinessException be = (BusinessException) ex;
+                    assertThat(be.getErrorCode()).isEqualTo(ErrorCode.EMAIL_NOT_VERIFIED);
+                });
     }
 
     @Test
@@ -233,8 +232,9 @@ class AuthServiceTest {
         user.getRoles().add(role);
 
         when(userRepository.findByEmailIgnoreCase("active@demo.test")).thenReturn(Optional.of(user));
-        when(loginAttemptRepository.countByEmailIgnoreCaseAndSuccessFalseAndAttemptedAtAfter(eq("active@demo.test"), any(Instant.class)))
-            .thenReturn(0L);
+        when(loginAttemptRepository.countByEmailIgnoreCaseAndSuccessFalseAndAttemptedAtAfter(eq("active@demo.test"),
+                any(Instant.class)))
+                .thenReturn(0L);
         when(passwordEncoder.matches("CorrectPass", "hash")).thenReturn(true);
 
         UserResponse response = authService.login(request, "127.0.0.1", "TestAgent", null);
@@ -255,9 +255,9 @@ class AuthServiceTest {
         user.setId(5L);
 
         when(tokenService.validateToken("vtok_valid123", VerificationTokenEntity.TYPE_EMAIL_VERIFY))
-            .thenReturn(new TokenService.TokenValidationStatus(true, null, user));
+                .thenReturn(new TokenService.TokenValidationStatus(true, null, user));
         when(tokenService.consumeTokenAtomic("vtok_valid123", VerificationTokenEntity.TYPE_EMAIL_VERIFY))
-            .thenReturn(Optional.of(user));
+                .thenReturn(Optional.of(user));
 
         VerifyEmailResponse response = authService.verifyEmail(request);
 
@@ -275,17 +275,18 @@ class AuthServiceTest {
         when(userRepository.findByEmailIgnoreCase("reset@demo.test")).thenReturn(Optional.of(user));
         when(tokenService.createPasswordResetToken(user)).thenReturn("rtok_xyz789");
 
-        ForgotPasswordResponse forgotResponse = authService.forgotPassword(new ForgotPasswordRequest("reset@demo.test"));
+        ForgotPasswordResponse forgotResponse = authService
+                .forgotPassword(new ForgotPasswordRequest("reset@demo.test"));
         assertThat(forgotResponse.success()).isTrue();
 
         when(tokenService.validateToken("rtok_xyz789", VerificationTokenEntity.TYPE_PASSWORD_RESET))
-            .thenReturn(new TokenService.TokenValidationStatus(true, null, user));
+                .thenReturn(new TokenService.TokenValidationStatus(true, null, user));
 
         TokenValidationResponse valResponse = authService.validateResetToken("rtok_xyz789");
         assertThat(valResponse.valid()).isTrue();
 
         when(tokenService.consumeTokenAtomic("rtok_xyz789", VerificationTokenEntity.TYPE_PASSWORD_RESET))
-            .thenReturn(Optional.of(user));
+                .thenReturn(Optional.of(user));
         when(passwordEncoder.encode("NewPassword2026")).thenReturn("newHashedPassword");
 
         authService.resetPassword(new ResetPasswordRequest("rtok_xyz789", "NewPassword2026"));

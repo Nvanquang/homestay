@@ -36,44 +36,44 @@ class GlobalExceptionHandlerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-            .addFilter(requestIdFilter)
-            .build();
+                .addFilter(requestIdFilter)
+                .build();
     }
 
     @Test
     @DisplayName("Bắt lỗi validation trường và trả về Problem Details RFC 7807 với invalidParams")
     void shouldReturnProblemDetailsOnValidationException() throws Exception {
         String invalidPayload = """
-            {
-                "name": "",
-                "quantity": 0
-            }
-            """;
+                {
+                    "name": "",
+                    "quantity": 0
+                }
+                """;
 
         mockMvc.perform(post("/test-api/validation")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidPayload))
-            .andExpect(status().isUnprocessableEntity())
-            .andExpect(header().exists("X-Request-Id"))
-            .andExpect(jsonPath("$.type", is("about:blank")))
-            .andExpect(jsonPath("$.title", is("Unprocessable Entity")))
-            .andExpect(jsonPath("$.status", is(422)))
-            .andExpect(jsonPath("$.code", is("VALIDATION_FAILED")))
-            .andExpect(jsonPath("$.invalidParams", notNullValue()))
-            .andExpect(jsonPath("$.invalidParams[*].field", hasItem("name")))
-            .andExpect(jsonPath("$.invalidParams[*].field", hasItem("quantity")));
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(header().exists("X-Request-Id"))
+                .andExpect(jsonPath("$.type", is("about:blank")))
+                .andExpect(jsonPath("$.title", is("Unprocessable Entity")))
+                .andExpect(jsonPath("$.status", is(422)))
+                .andExpect(jsonPath("$.code", is("VALIDATION_FAILED")))
+                .andExpect(jsonPath("$.invalidParams", notNullValue()))
+                .andExpect(jsonPath("$.invalidParams[*].field", hasItem("name")))
+                .andExpect(jsonPath("$.invalidParams[*].field", hasItem("quantity")));
     }
 
     @Test
     @DisplayName("Bắt lỗi BusinessException và định dạng Problem Details đúng mã nghiệp vụ")
     void shouldReturnProblemDetailsOnBusinessException() throws Exception {
         mockMvc.perform(get("/test-api/business-error"))
-            .andExpect(status().isNotFound())
-            .andExpect(header().exists("X-Request-Id"))
-            .andExpect(jsonPath("$.title", is("Not Found")))
-            .andExpect(jsonPath("$.status", is(404)))
-            .andExpect(jsonPath("$.code", is("RESOURCE_NOT_FOUND")))
-            .andExpect(jsonPath("$.detail", is("Không tìm thấy phòng kiểm thử")));
+                .andExpect(status().isNotFound())
+                .andExpect(header().exists("X-Request-Id"))
+                .andExpect(jsonPath("$.title", is("Not Found")))
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.code", is("RESOURCE_NOT_FOUND")))
+                .andExpect(jsonPath("$.detail", is("Không tìm thấy phòng kiểm thử")));
     }
 
     @Test
@@ -83,6 +83,6 @@ class GlobalExceptionHandlerTest {
 
         mockMvc.perform(get("/test-api/business-error")
                 .header("X-Request-Id", customRequestId))
-            .andExpect(header().string("X-Request-Id", customRequestId));
+                .andExpect(header().string("X-Request-Id", customRequestId));
     }
 }

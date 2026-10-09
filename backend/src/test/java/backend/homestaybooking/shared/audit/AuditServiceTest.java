@@ -12,13 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Service;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import({TimeConfig.class, AuditServiceTest.TestConfig.class})
+@Import({ TimeConfig.class, AuditServiceTest.TestConfig.class })
 @DisplayName("Kiểm thử dịch vụ AuditService cùng Transaction (Atomicity)")
 class AuditServiceTest {
 
@@ -40,17 +39,17 @@ class AuditServiceTest {
     @DisplayName("Ghi audit log thành công với đầy đủ thuộc tính")
     void shouldRecordAuditEventSuccessfully() {
         auditService.recordEvent(
-            "user-123",
-            "HOST",
-            "LISTING_CREATED",
-            "LISTING",
-            "listing-456",
-            Map.of("title", "Cozy Homestay Da Lat", "price", 1000000),
-            "1.2.3.4",
-            "Mozilla/5.0"
-        );
+                "user-123",
+                "HOST",
+                "LISTING_CREATED",
+                "LISTING",
+                "listing-456",
+                Map.of("title", "Cozy Homestay Da Lat", "price", 1000000),
+                "1.2.3.4",
+                "Mozilla/5.0");
 
-        List<ActivityLogEntity> logs = activityLogRepository.findByEntityTypeAndEntityIdOrderByCreatedAtDesc("LISTING", "listing-456");
+        List<ActivityLogEntity> logs = activityLogRepository.findByEntityTypeAndEntityIdOrderByCreatedAtDesc("LISTING",
+                "listing-456");
         assertThat(logs).hasSize(1);
 
         ActivityLogEntity entry = logs.get(0);
@@ -67,10 +66,11 @@ class AuditServiceTest {
     @DisplayName("Nghiệp vụ bị rollback - Audit log trong cùng transaction cũng tự động rollback")
     void shouldRollbackAuditLogWhenBusinessTransactionRollsBack() {
         assertThatThrownBy(() -> sampleService.performFailingBusinessAction("order-999"))
-            .isInstanceOf(RuntimeException.class)
-            .hasMessageContaining("Lỗi nghiệp vụ mô phỏng gây rollback!");
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Lỗi nghiệp vụ mô phỏng gây rollback!");
 
-        List<ActivityLogEntity> logs = activityLogRepository.findByEntityTypeAndEntityIdOrderByCreatedAtDesc("ORDER", "order-999");
+        List<ActivityLogEntity> logs = activityLogRepository.findByEntityTypeAndEntityIdOrderByCreatedAtDesc("ORDER",
+                "order-999");
         assertThat(logs).isEmpty();
     }
 
@@ -93,15 +93,14 @@ class AuditServiceTest {
         @Transactional
         public void performFailingBusinessAction(String orderId) {
             auditService.recordEvent(
-                "actor-001",
-                "GUEST",
-                "ORDER_SUBMITTED",
-                "ORDER",
-                orderId,
-                Map.of("amount", 500000),
-                "127.0.0.1",
-                "AppClient"
-            );
+                    "actor-001",
+                    "GUEST",
+                    "ORDER_SUBMITTED",
+                    "ORDER",
+                    orderId,
+                    Map.of("amount", 500000),
+                    "127.0.0.1",
+                    "AppClient");
 
             // Ném ngoại lệ cố tình để kích hoạt transaction rollback
             throw new RuntimeException("Lỗi nghiệp vụ mô phỏng gây rollback!");

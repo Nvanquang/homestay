@@ -1,0 +1,442 @@
+openapi: 3.0.3
+info:
+  title: UrbanNest Host Listing Draft Management API (Slice S05)
+  description: >
+    API đặc tả quản lý chỗ nghỉ nháp dành cho Chủ nhà (Host), bao gồm tạo nháp bước 1,
+    vị trí toạ độ địa lý (PostGIS), vùng bảo vệ riêng tư (BR-SRC-04), và quản lý thư viện hình ảnh kéo thả.
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: Mock and Local API Gateway
+
+paths:
+  /host/listings:
+    get:
+      summary: Lấy danh sách chỗ nghỉ của Host (H03)
+      operationId: getHostListings
+      tags:
+        - Host Listings
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ALL, DRAFT, PENDING_APPROVAL, PUBLISHED, UNLISTED, REJECTED]
+            default: ALL
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Danh sách chỗ nghỉ thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ListingItem'
+                  total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Khởi tạo bản ghi nháp chỗ nghỉ mới (H04 Bước 1)
+      operationId: createDraftListing
+      tags:
+        - Host Listings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicInfoInput'
+      responses:
+        '201':
+          description: Khởi tạo nháp thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingItem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: Host chưa được duyệt danh tính
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /host/listings/{id}:
+    get:
+      summary: Nạp chi tiết bản nháp chỗ nghỉ (H04 Wizard)
+      operationId: getListingDetail
+      tags:
+        - Host Listings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Thông tin chi tiết chỗ nghỉ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingItem'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Cập nhật thông tin bản nháp (Auto-save & Step Navigation)
+      operationId: updateListingDraft
+      tags:
+        - Host Listings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateListingDraftInput'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingItem'
+        '409':
+          description: Xung đột phiên bản (Hai tab cùng sửa - Version mismatch)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Xoá bản nháp (Chỉ áp dụng khi status = DRAFT)
+      operationId: deleteDraftListing
+      tags:
+        - Host Listings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Đã xoá bản nháp thành công
+        '400':
+          description: Không thể xoá phòng đã đăng hoặc có booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /host/listings/{id}/photos:
+    post:
+      summary: Tải ảnh chỗ ở lên (H04 Bước 3)
+      operationId: uploadListingPhoto
+      tags:
+        - Listing Photos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Tải ảnh thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingPhoto'
+        '400':
+          description: Tệp quá 10MB hoặc sai định dạng JPG/PNG/WebP
+
+  /host/listings/{id}/photos/order:
+    put:
+      summary: Cập nhật thứ tự sắp xếp toàn bộ ảnh (Batch reorder)
+      operationId: reorderListingPhotos
+      tags:
+        - Listing Photos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - photoIds
+              properties:
+                photoIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Cập nhật thứ tự thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListingPhoto'
+
+  /host/listings/{id}/photos/{photoId}:
+    patch:
+      summary: Cập nhật chú thích ảnh (caption)
+      operationId: updatePhotoCaption
+      tags:
+        - Listing Photos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: photoId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                caption:
+                  type: string
+                  maxLength: 120
+      responses:
+        '200':
+          description: Cập nhật chú thích thành công
+
+    delete:
+      summary: Xoá ảnh khỏi chỗ nghỉ
+      operationId: deleteListingPhoto
+      tags:
+        - Listing Photos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: photoId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Đã xoá ảnh thành công
+
+components:
+  schemas:
+    BasicInfoInput:
+      type: object
+      required:
+        - propertyType
+        - title
+        - description
+        - maxGuests
+        - bedrooms
+        - beds
+        - bathrooms
+        - checkInTime
+        - checkOutTime
+        - currency
+      properties:
+        propertyType:
+          type: string
+          enum: [ENTIRE_PLACE, PRIVATE_ROOM]
+        title:
+          type: string
+          minLength: 10
+          maxLength: 80
+        description:
+          type: string
+          minLength: 50
+          maxLength: 2000
+        maxGuests:
+          type: integer
+          minimum: 1
+          maximum: 30
+        bedrooms:
+          type: integer
+          minimum: 0
+          maximum: 20
+        beds:
+          type: integer
+          minimum: 1
+          maximum: 30
+        bathrooms:
+          type: number
+          minimum: 0.5
+          maximum: 10
+        checkInTime:
+          type: string
+          example: '14:00'
+        checkOutTime:
+          type: string
+          example: '12:00'
+        currency:
+          type: string
+          default: 'VND'
+
+    LocationInput:
+      type: object
+      required:
+        - province
+        - district
+        - exactAddress
+        - exactLat
+        - exactLng
+      properties:
+        province:
+          type: string
+        district:
+          type: string
+        exactAddress:
+          type: string
+          maxLength: 200
+        exactLat:
+          type: number
+        exactLng:
+          type: number
+
+    UpdateListingDraftInput:
+      type: object
+      required:
+        - version
+      properties:
+        version:
+          type: integer
+          description: Khóa lạc quan chống ghi đè khi sửa ở nhiều tab
+        basicInfo:
+          $ref: '#/components/schemas/BasicInfoInput'
+        location:
+          $ref: '#/components/schemas/LocationInput'
+        currentStep:
+          type: string
+
+    ListingPhoto:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+        order:
+          type: integer
+        caption:
+          type: string
+        status:
+          type: string
+          enum: [READY, UPLOADING, ERROR]
+
+    ListingItem:
+      type: object
+      properties:
+        id:
+          type: string
+        hostId:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, PENDING_APPROVAL, PUBLISHED, UNLISTED, REJECTED]
+        version:
+          type: integer
+        basicInfo:
+          $ref: '#/components/schemas/BasicInfoInput'
+        location:
+          $ref: '#/components/schemas/LocationInput'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListingPhoto'
+        coverPhotoUrl:
+          type: string
+        draftProgress:
+          type: object
+          properties:
+            completedSteps:
+              type: integer
+            totalSteps:
+              type: integer
+            resumeStep:
+              type: string
+        capabilities:
+          type: object
+          properties:
+            canEdit:
+              type: boolean
+            canPreview:
+              type: boolean
+            canDelete:
+              type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+
+  responses:
+    Unauthorized:
+      description: Chưa xác thực
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Dữ liệu không hợp lệ
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Không tìm thấy tài nguyên
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

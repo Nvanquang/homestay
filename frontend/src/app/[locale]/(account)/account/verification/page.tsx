@@ -9,11 +9,14 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "account.nav" });
+  const t = await getTranslations({ locale, namespace: "account.verification" });
 
   return {
-    title: `${t("verification")} | UrbanNest`,
-    description: "Xác minh danh tính tài khoản để trở thành Host hoặc nâng cao hạn mức tài khoản.",
+    title: `${t("title")} | UrbanNest`,
+    description:
+      locale === "vi"
+        ? "Xác minh danh tính tài khoản để trở thành Host hoặc nâng cao hạn mức tài khoản."
+        : "Verify your identity to become a host and increase account privileges.",
   };
 }
 

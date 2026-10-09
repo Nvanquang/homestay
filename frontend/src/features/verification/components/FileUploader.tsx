@@ -21,7 +21,7 @@ export interface FileUploaderProps {
 export function FileUploader({
   purpose,
   label,
-  helperText = "PNG, JPG hoặc PDF (Tối đa 10MB)",
+  helperText,
   accept = "image/jpeg,image/png,image/webp,application/pdf",
   maxSizeMb = 10,
   existingAttachment,
@@ -30,6 +30,7 @@ export function FileUploader({
   disabled = false,
 }: FileUploaderProps) {
   const t = useTranslations("verification.uploader");
+  const resolvedHelperText = helperText || t("defaultHelperText");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -161,7 +162,7 @@ export function FileUploader({
                 <p className="text-sm font-semibold text-[var(--color-text-primary)]">
                   {t("dropOrClickPrompt")}
                 </p>
-                <p className="text-xs text-[var(--color-text-secondary)]">{helperText}</p>
+                <p className="text-xs text-[var(--color-text-secondary)]">{resolvedHelperText}</p>
               </div>
             )}
           </div>

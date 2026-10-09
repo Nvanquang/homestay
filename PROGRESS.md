@@ -11,9 +11,9 @@
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Slice FE-S04: Đã hoàn tất và vượt qua cổng xác minh Harness (Chờ xác nhận để chuyển FE-S05)`
+- **Active Task**: `Slice FE-S06: Tiện Nghi, Quy Tắc Lưu Trú, Giá & Phí (H04 Bước 4–6)`
 - **WIP Count**: `1 / 1` (Tuân thủ giới hạn WIP = 1)
-- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe` -> `PASS-STATE GATED (100%)`
+- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe` -> `PASSED (Exit code 0)`
 
 ---
 
@@ -65,13 +65,14 @@ Quy ước trạng thái:
 
 ### Slice FE-S05: Host Tạo Listing Nháp: Cơ Bản, Vị Trí, Ảnh (H03, H04 Bước 1–3)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s05-listing-draft/README.md`*
-- [ ] **S05 Listing Step 1-3 UI**: H03 (Danh sách listing), H04 Wizard (Bước 1: Loại phòng; Bước 2: Ghim vị trí bản đồ; Bước 3: Upload ảnh kèm dnd-kit sắp xếp): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [x] **S05 Listing Step 1-3 UI**: H03 (Danh sách listing), H04 Wizard (Bước 1: Loại phòng; Bước 2: Ghim vị trí bản đồ & vùng bảo vệ riêng tư BR-SRC-04; Bước 3: Upload ảnh kèm dnd-kit sắp xếp và hoàn tác 5s): `.\scripts\verify.ps1 -Target fe` -> `passing`
+- [x] **S05 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `passing`
 
 ---
 
 ### Slice FE-S06: Tiện Nghi, Quy Tắc Lưu Trú, Giá & Phí (H04 Bước 4–6)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s06-listing-amenities-pricing/README.md`*
-- [ ] **S06 Listing Step 4-6 UI**: H04 Wizard (Bước 4: Tiện nghi; Bước 5: Quy tắc lưu trú; Bước 6: Giá cơ bản & phí dọn dẹp kèm PriceBreakdown): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [-] **S06 Listing Step 4-6 UI**: H04 Wizard (Bước 4: Tiện nghi; Bước 5: Quy tắc lưu trú; Bước 6: Giá cơ bản & phí dọn dẹp kèm PriceBreakdown): `.\scripts\verify.ps1 -Target fe` -> `in_progress`
 
 ---
 

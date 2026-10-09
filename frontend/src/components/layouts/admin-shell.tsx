@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import { useLocale, useTranslations } from "next-intl";
+import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 
 export type AdminNavId = "identity-reviews" | "listing-reviews" | "staff" | "reports";
 
@@ -154,21 +155,7 @@ export function AdminShell({
         {/* Right: Language, Notifications & Admin Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Language Switcher */}
-          <button
-            type="button"
-            onClick={handleToggleLocale}
-            className="px-2.5 py-1.5 rounded-lg border border-[var(--color-border-default)] hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer"
-            aria-label={`Language (Current: ${locale === "vi" ? "Tiếng Việt" : "English"})`}
-            title={locale === "vi" ? "Chuyển sang English" : "Chuyển sang Tiếng Việt"}
-          >
-            <Globe className="w-3.5 h-3.5 text-neutral-500" />
-            <span className="font-bold text-[var(--color-text-primary)]">
-              {locale === "vi" ? "VI" : "EN"}
-            </span>
-            <span className="text-[10px] text-neutral-400 font-normal hidden sm:inline">
-              ({locale === "vi" ? "Tiếng Việt" : "English"})
-            </span>
-          </button>
+          <LocaleSwitcher />
 
           <button
             type="button"

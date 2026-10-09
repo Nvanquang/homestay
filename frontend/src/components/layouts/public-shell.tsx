@@ -15,6 +15,7 @@ import {
   Compass,
   Lock,
 } from "lucide-react";
+import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 
 export interface PublicShellProps {
   children: React.ReactNode;
@@ -110,15 +111,8 @@ export function PublicShell({
               {t("becomeHost")}
             </Link>
 
-            <button
-              type="button"
-              onClick={handleToggleLocale}
-              className="p-2.5 rounded-full hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)] transition-colors cursor-pointer"
-              aria-label={`Language (Current: ${locale === "vi" ? "Tiếng Việt" : "English"})`}
-              title={locale === "vi" ? "Switch to English" : "Chuyển sang Tiếng Việt"}
-            >
-              <Globe className="w-4 h-4" />
-            </button>
+            {/* Language Switcher */}
+            <LocaleSwitcher />
 
             {/* User Dropdown Trigger */}
             <div className="relative">

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Building2,
   ShieldCheck,
@@ -11,11 +12,11 @@ import {
   Lock,
   Menu,
   X,
-  Globe,
   ChevronDown,
   User,
   ChevronRight,
 } from "lucide-react";
+import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 
 export type HostNavId = "listings" | "verification" | "calendar" | "bookings" | "earnings";
 
@@ -37,52 +38,61 @@ export interface HostShellProps {
 export function HostShell({
   children,
   activeItem = "listings",
-  breadcrumbs = [{ label: "Bảng điều khiển Host", href: "/host" }],
+  breadcrumbs,
   title,
   actionButton,
   userName = "Chủ nhà",
   onSwitchToGuest,
 }: HostShellProps) {
+  const locale = useLocale();
+  const t = useTranslations("common");
+  const tHost = useTranslations("hostListings");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  const defaultBreadcrumbs: BreadcrumbItem[] = [
+    { label: "Bảng điều khiển Host", href: `/${locale}/host/listings` },
+  ];
+
+  const actualBreadcrumbs = breadcrumbs || defaultBreadcrumbs;
 
   const navigationItems = [
     {
       id: "listings" as const,
-      label: "Danh sách phòng",
-      href: "/host/listings",
+      label: locale === "vi" ? "Danh sách phòng" : "Listings",
+      href: `/${locale}/host/listings`,
       icon: Building2,
       locked: false,
     },
     {
       id: "verification" as const,
-      label: "Xác minh Host",
-      href: "/host/verification",
+      label: locale === "vi" ? "Xác minh Host" : "Host Verification",
+      href: `/${locale}/host/verification`,
       icon: ShieldCheck,
       locked: false,
     },
     {
       id: "calendar" as const,
-      label: "Lịch phòng",
-      href: "/host/calendar",
+      label: locale === "vi" ? "Lịch phòng" : "Calendar",
+      href: `/${locale}/host/calendar`,
       icon: Calendar,
       locked: false,
     },
     {
       id: "bookings" as const,
-      label: "Đặt phòng",
+      label: locale === "vi" ? "Đặt phòng" : "Reservations",
       href: "#",
       icon: Luggage,
       locked: true,
-      phaseNote: "Giai đoạn sau",
+      phaseNote: locale === "vi" ? "Giai đoạn sau" : "Next Phase",
     },
     {
       id: "earnings" as const,
-      label: "Thu nhập & Payout",
+      label: locale === "vi" ? "Thu nhập & Payout" : "Earnings & Payout",
       href: "#",
       icon: DollarSign,
       locked: true,
-      phaseNote: "Giai đoạn sau",
+      phaseNote: locale === "vi" ? "Giai đoạn sau" : "Next Phase",
     },
   ];
 
@@ -95,7 +105,7 @@ export function HostShell({
           <button
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)]"
+            className="md:hidden p-2 rounded-lg hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)] cursor-pointer"
             aria-label="Đóng mở menu Host"
             aria-expanded={isSidebarOpen}
           >
@@ -103,7 +113,7 @@ export function HostShell({
           </button>
 
           <Link
-            href="/host"
+            href={`/${locale}/host/listings`}
             className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gray-900)] rounded-md"
           >
             <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-50)] flex items-center justify-center text-[var(--color-brand-500)]">
@@ -116,23 +126,16 @@ export function HostShell({
         </div>
 
         {/* Right: Switch mode, locale, user */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          <button
-            type="button"
-            onClick={onSwitchToGuest}
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full bg-[var(--color-bg-subtle)] hover:bg-[var(--color-bg-muted)] border border-[var(--color-border-subtle)] transition-colors"
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href={`/${locale}/account/profile`}
+            className="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full bg-[var(--color-bg-subtle)] hover:bg-[var(--color-bg-muted)] border border-[var(--color-border-subtle)] transition-colors"
           >
-            <span>Chế độ Host</span>
-            <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
-          </button>
+            <span>{t("switchToGuest")}</span>
+          </Link>
 
-          <button
-            type="button"
-            className="p-2 rounded-full hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)] transition-colors"
-            aria-label="Chọn ngôn ngữ"
-          >
-            <Globe className="w-4 h-4" />
-          </button>
+          {/* Language Switcher */}
+          <LocaleSwitcher />
 
           {/* User profile dropdown trigger */}
           <div className="relative">
@@ -257,12 +260,12 @@ export function HostShell({
           <div className="max-w-6xl mx-auto space-y-6">
             {/* Breadcrumb & Title */}
             <div>
-              {breadcrumbs.length > 0 && (
+              {actualBreadcrumbs.length > 0 && (
                 <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)] mb-2">
-                  {breadcrumbs.map((b, idx) => (
+                  {actualBreadcrumbs.map((b, idx) => (
                     <React.Fragment key={idx}>
                       {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-[var(--color-text-disabled)]" />}
-                      {b.href && idx < breadcrumbs.length - 1 ? (
+                      {b.href && idx < actualBreadcrumbs.length - 1 ? (
                         <Link href={b.href} className="hover:underline">
                           {b.label}
                         </Link>

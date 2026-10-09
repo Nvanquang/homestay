@@ -9,6 +9,7 @@ import {
 import {
   IdentityVerificationFormValues,
   identityVerificationSchema,
+  getIdentityVerificationSchema,
 } from "../schemas";
 import {
   saveVerificationDraft,
@@ -110,7 +111,8 @@ export function IdentityVerificationForm({
   };
 
   const handleValidateAndPrompt = () => {
-    const result = identityVerificationSchema.safeParse({
+    const schema = getIdentityVerificationSchema(locale);
+    const result = schema.safeParse({
       legalName,
       dateOfBirth,
       phone,
@@ -186,7 +188,9 @@ export function IdentityVerificationForm({
             {record.submittedAt && (
               <p className="text-xs text-sky-700 pt-1">
                 {t("submittedAtLabel", {
-                  time: new Date(record.submittedAt).toLocaleString("vi-VN"),
+                  time: new Date(record.submittedAt).toLocaleString(
+                    locale === "en" ? "en-US" : "vi-VN"
+                  ),
                 })}
               </p>
             )}

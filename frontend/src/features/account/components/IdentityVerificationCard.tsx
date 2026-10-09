@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui";
 import { ShieldCheck, ShieldAlert, ArrowRight } from "lucide-react";
 import { IdentityVerificationStatus } from "../types";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 export interface IdentityVerificationCardProps {
   status: IdentityVerificationStatus;
@@ -13,6 +13,7 @@ export interface IdentityVerificationCardProps {
 
 export function IdentityVerificationCard({ status }: IdentityVerificationCardProps) {
   const t = useTranslations("account.verification");
+  const locale = useLocale();
 
   const getBadge = () => {
     switch (status) {
@@ -86,7 +87,7 @@ export function IdentityVerificationCard({ status }: IdentityVerificationCardPro
 
       {details.showCta && (
         <Link
-          href="/account/verification"
+          href={`/${locale}/account/verification`}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-brand)] hover:underline mt-1"
         >
           <span>{details.ctaText}</span>

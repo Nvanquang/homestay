@@ -24,7 +24,7 @@ export const profileSchema = z.object({
     .optional()
     .or(z.literal("")),
   language: z.enum(["vi", "en"]),
-  displayCurrency: z.enum(["VND", "USD"]),
+  displayCurrency: z.enum(["VND", "USD", "EUR", "JPY", "GBP"]),
 });
 
 export type ProfileInput = z.infer<typeof profileSchema>;

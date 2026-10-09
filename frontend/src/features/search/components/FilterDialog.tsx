@@ -6,6 +6,7 @@ import { X, SlidersHorizontal, Check, Sparkles } from "lucide-react";
 import { SearchFilterState, CancellationPolicyType, PropertyType } from "../types";
 import { getSearchCount } from "../api/mock-search";
 import { formatMoney } from "@/lib/format";
+import { useCurrency } from "@/features/currency";
 
 interface FilterDialogProps {
   isOpen: boolean;
@@ -37,6 +38,7 @@ export function FilterDialog({
 }: FilterDialogProps) {
   const t = useTranslations("search.filters");
   const isEn = locale === "en";
+  const { convert, currency } = useCurrency();
 
   const [minPrice, setMinPrice] = useState(filters.minPrice || 0);
   const [maxPrice, setMaxPrice] = useState(filters.maxPrice || 15000000);
@@ -176,7 +178,9 @@ export function FilterDialog({
                   className="w-full mt-1 font-bold text-sm bg-transparent focus:outline-hidden"
                 />
                 <span className="text-xs text-primary font-semibold">
-                  {formatMoney(minPrice, "VND", locale)}
+                  {currency === "VND"
+                    ? formatMoney(minPrice, "VND", locale)
+                    : `${convert(minPrice).formatted} (${formatMoney(minPrice, "VND", locale)})`}
                 </span>
               </div>
               <div className="p-3 rounded-2xl border border-gray-300 dark:border-gray-600">
@@ -192,7 +196,9 @@ export function FilterDialog({
                   className="w-full mt-1 font-bold text-sm bg-transparent focus:outline-hidden"
                 />
                 <span className="text-xs text-primary font-semibold">
-                  {formatMoney(maxPrice, "VND", locale)}
+                  {currency === "VND"
+                    ? formatMoney(maxPrice, "VND", locale)
+                    : `${convert(maxPrice).formatted} (${formatMoney(maxPrice, "VND", locale)})`}
                 </span>
               </div>
             </div>

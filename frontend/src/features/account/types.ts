@@ -13,7 +13,7 @@ export interface UserProfile {
   bio?: string;
   avatarUrl?: string;
   language: "vi" | "en";
-  displayCurrency: "VND" | "USD";
+  displayCurrency: "VND" | "USD" | "EUR" | "JPY" | "GBP";
   verificationStatus: IdentityVerificationStatus;
   isHost: boolean;
   createdAt: string;

@@ -355,9 +355,9 @@ describe("Slice FE-S02: Account Feature Test Suite", () => {
       expect(screen.getByText("Cài đặt thông báo")).toBeDefined();
       expect(screen.getByText("Chế độ Chủ nhà (Host)")).toBeDefined();
 
-      // Currency is disabled
+      // Currency select is enabled and active in Slice S13
       const currencySelect = screen.getByDisplayValue("VND (₫) - Đồng Việt Nam");
-      expect((currencySelect as HTMLSelectElement).disabled).toBe(true);
+      expect((currencySelect as HTMLSelectElement).disabled).toBe(false);
     });
 
     it("submits password change and shows success banner", async () => {

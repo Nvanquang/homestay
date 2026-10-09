@@ -15,6 +15,7 @@ import {
   UserProfile,
   NotificationSettings,
 } from "@/features/account";
+import { useCurrency, CurrencyCode } from "@/features/currency";
 import { Globe, Lock, Bell, Home, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -80,6 +81,22 @@ export default function AccountSettingsPage() {
     }
   };
 
+  const { currency, setCurrency, supportedCurrencies, fxStatus } = useCurrency();
+
+  const handleCurrencyChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nextCur = e.target.value as CurrencyCode;
+    setCurrency(nextCur);
+    if (profile) {
+      setProfile({ ...profile, displayCurrency: nextCur });
+      try {
+        await updateAccountProfile({ displayCurrency: nextCur });
+        toast.success(t("saveSuccess") || "Đã lưu cài đặt tiền tệ");
+      } catch {
+        // silently fallback
+      }
+    }
+  };
+
   const handleHostModeChanged = (newIsHost: boolean) => {
     if (profile) {
       setProfile({ ...profile, isHost: newIsHost });
@@ -134,12 +151,13 @@ export default function AccountSettingsPage() {
               <Select
                 id="settings-currency"
                 label={t("currencyLabel")}
-                disabled
-                options={[
-                  { value: "VND", label: "VND (₫) - Đồng Việt Nam" },
-                  { value: "USD", label: "USD ($) - Đô la Mỹ" },
-                ]}
-                value={profile?.displayCurrency || "VND"}
+                disabled={fxStatus === "UNAVAILABLE"}
+                options={supportedCurrencies.map((c) => ({
+                  value: c.code,
+                  label: `${c.code} (${c.symbol}) - ${currentLocale === "en" ? c.nameEn : c.name}`,
+                }))}
+                value={currency}
+                onChange={handleCurrencyChange}
                 helperText={t("currencyHelper")}
               />
             </div>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { Heart, Star, ChevronLeft, ChevronRight, Zap, Award } from "lucide-react";
 import { formatMoney } from "@/lib/format";
+import { useCurrency } from "@/features/currency";
 import { ListingCardDTO } from "../types";
 
 export interface ListingCardProps {
@@ -35,6 +36,10 @@ export function ListingCard({
   const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
   const [isFavorite, setIsFavorite] = useState(listing.isFavorite ?? false);
   const [imgError, setImgError] = useState(false);
+
+  const { convert, currency, exchangeRates } = useCurrency();
+  const convertedTotal = listing.price.total ? convert(listing.price.total) : null;
+  const convertedNightly = convert(listing.price.nightlyAvg || 0);
 
   const photos = listing.photos && listing.photos.length > 0 ? listing.photos : [
     "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800&q=80"
@@ -203,31 +208,40 @@ export function ListingCard({
 
         {/* Pricing display */}
         <div className="pt-2 border-t border-[var(--color-border-subtle)] flex items-end justify-between">
-          {listing.price.mode === "TOTAL" && listing.price.total ? (
+          {listing.price.mode === "TOTAL" && listing.price.total && convertedTotal ? (
             <div>
               <div className="text-sm sm:text-base font-extrabold text-[var(--color-text-primary)]">
-                {formatMoney(listing.price.total, "VND", locale)}
+                {convertedTotal.isConverted ? convertedTotal.formatted : formatMoney(listing.price.total, "VND", locale)}
                 <span className="text-xs font-normal text-[var(--color-text-secondary)]">
                   {" "}
                   {t("totalForNights", { count: listing.price.nights || 1 })}
                 </span>
               </div>
               <div className="text-[11px] text-[var(--color-text-tertiary)]">
-                {formatMoney(listing.price.nightlyAvg || 0, "VND", locale)} / {t("night")} · {t("includesTaxes")}
+                {convertedNightly.isConverted ? convertedNightly.formatted : formatMoney(listing.price.nightlyAvg || 0, "VND", locale)} / {t("night")} · {t("includesTaxes")}
               </div>
+              {convertedTotal.isConverted && (
+                <div className="text-[10px] text-[var(--color-text-tertiary)] italic">
+                  Giá gốc {convertedTotal.formattedOriginal} · Tỷ giá {exchangeRates.asOf}
+                </div>
+              )}
             </div>
           ) : (
             <div>
               <div className="text-sm sm:text-base font-extrabold text-[var(--color-text-primary)]">
                 {t("fromPrice")}{" "}
-                {formatMoney(listing.price.nightlyAvg || 0, "VND", locale)}
+                {convertedNightly.isConverted ? convertedNightly.formatted : formatMoney(listing.price.nightlyAvg || 0, "VND", locale)}
                 <span className="text-xs font-normal text-[var(--color-text-secondary)]">
                   {" "}
                   / {t("night")}
                 </span>
               </div>
               <div className="text-[11px] text-[var(--color-text-tertiary)]">
-                {t("basePriceSub")}
+                {convertedNightly.isConverted ? (
+                  <span>Giá gốc {convertedNightly.formattedOriginal} · Tỷ giá {exchangeRates.asOf}</span>
+                ) : (
+                  t("basePriceSub")
+                )}
               </div>
             </div>
           )}

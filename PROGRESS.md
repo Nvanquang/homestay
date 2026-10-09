@@ -121,7 +121,14 @@ Quy ước trạng thái:
 
 ### Slice FE-S13: Đa Tiền Tệ & Bảng Tỷ Giá (C02, P02, P03 Mở Rộng)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s13-currency-exchange/README.md`*
-- [-] **S13 Currency Switcher UI**: Menu đổi tiền tệ (VND, USD, EUR...), chuyển đổi hiển thị định dạng số tự động: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `in_progress`
+- [x] **S13 Currency Switcher UI**: Menu đổi tiền tệ (VND, USD, EUR...), chuyển đổi hiển thị định dạng số tự động: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `passing` (2026-10-09)
+- [x] **S13 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `passing` (2026-10-09)
+
+---
+
+### Giai Đoạn Nghiệm Thu Cuối: Kiểm Thử Hành Trình Xuyên Suốt (E2E Journeys J1–J5)
+*Đặc tả: `frontend/docs/giai-doan-1/appendices/e2e-journeys.md`*
+- [-] **E2E Journeys Verification**: Kiểm thử 5 hành trình người dùng (J1–J5), bảo đảm tích hợp liền mạch giữa các module Giai đoạn 1: `.\scripts\verify.ps1 -Target fe` -> `in_progress`
 
 ---
 

@@ -1340,6 +1340,20 @@
     "specialCasesTitle": "Các trường hợp đặc biệt",
     "hostCancelTitle": "Khi Chủ nhà hủy phòng",
     "forceMajeureTitle": "Trường hợp bất khả kháng"
+  },
+  "currency": {
+    "switchCurrencyAria": "Thay đổi tiền tệ hiển thị",
+    "selectCurrencyTitle": "Chọn tiền tệ hiển thị",
+    "searchPlaceholder": "Tìm tiền tệ (VND, USD, EUR...)",
+    "noResults": "Không tìm thấy tiền tệ phù hợp",
+    "closeBtn": "Đóng",
+    "exchangeRateNotice": "Tỷ giá tham khảo cập nhật ngày {date} từ Ngân hàng Nhà nước.",
+    "convertedReferenceLabel": "Giá quy đổi chỉ để tham khảo. Bạn sẽ thanh toán bằng {currency}.",
+    "approximatePrefix": "≈",
+    "originalPriceTooltip": "Giá gốc {price} · Tỷ giá ngày {date}",
+    "fxStaleBanner": "Tỷ giá quy đổi chưa được cập nhật mới nhất. Số tiền hiển thị chỉ mang tính chất tham khảo.",
+    "fxUnavailableBanner": "Chưa thể quy đổi tiền tệ. Đang hiển thị theo tiền tệ gốc VND.",
+    "fxUnavailableToast": "Dịch vụ tỷ giá đang tạm gián đoạn. Vui lòng thử lại sau."
   }
 }
 

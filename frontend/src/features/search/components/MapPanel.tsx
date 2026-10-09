@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { MapPin, Navigation, Plus, Minus, RotateCcw, X, Layers } from "lucide-react";
+import { useCurrency } from "@/features/currency";
 import { ListingCardDTO } from "../types";
 
 interface MapPanelProps {
@@ -30,6 +31,7 @@ export function MapPanel({
 }: MapPanelProps) {
   const t = useTranslations("search.map");
   const locale = useLocale();
+  const { convert } = useCurrency();
 
   const [selectedListing, setSelectedListing] = useState<ListingCardDTO | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -180,10 +182,12 @@ export function MapPanel({
 
           const rawPrice =
             l.price.mode === "TOTAL" ? l.price.total || 0 : l.price.nightlyAvg || 0;
-          const shortPrice =
-            rawPrice >= 1000000
-              ? `${(rawPrice / 1000000).toFixed(1).replace(".0", "")}tr ₫`
-              : `${Math.round(rawPrice / 1000)}k ₫`;
+          const converted = convert(rawPrice);
+          const shortPrice = converted.isConverted
+            ? converted.formatted
+            : rawPrice >= 1000000
+            ? `${(rawPrice / 1000000).toFixed(1).replace(".0", "")}tr ₫`
+            : `${Math.round(rawPrice / 1000)}k ₫`;
 
           return (
             <div
@@ -246,8 +250,8 @@ export function MapPanel({
               </h4>
               <div className="mt-2 text-xs font-extrabold text-primary">
                 {selectedListing.price.mode === "TOTAL" && selectedListing.price.total
-                  ? `${selectedListing.price.total.toLocaleString("vi-VN")} ₫ tổng`
-                  : `Từ ${selectedListing.price.nightlyAvg?.toLocaleString("vi-VN")} ₫ / đêm`}
+                  ? `${convert(selectedListing.price.total).formatted} tổng`
+                  : `Từ ${convert(selectedListing.price.nightlyAvg || 0).formatted} / đêm`}
               </div>
             </div>
           </Link>

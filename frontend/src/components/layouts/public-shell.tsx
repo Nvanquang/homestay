@@ -16,6 +16,7 @@ import {
   Lock,
 } from "lucide-react";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
+import { CurrencySwitcher, CurrencyFxBanner } from "@/features/currency";
 
 export interface PublicShellProps {
   children: React.ReactNode;
@@ -49,6 +50,9 @@ export function PublicShell({
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
+      {/* FX Exchange Rate Alert Banner */}
+      <CurrencyFxBanner />
+
       {/* Top Header */}
       <header className="sticky top-0 z-40 bg-[var(--color-bg-surface)] border-b border-[var(--color-border-subtle)] shadow-[var(--shadow-1)]">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
@@ -103,13 +107,16 @@ export function PublicShell({
           </div>
 
           {/* Right Action Menu */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Link
               href={`/${locale}/become-host`}
               className="hidden sm:inline-flex text-sm font-medium px-3.5 py-2 rounded-full hover:bg-[var(--color-bg-subtle)] transition-colors"
             >
               {t("becomeHost")}
             </Link>
+
+            {/* Currency Switcher */}
+            <CurrencySwitcher />
 
             {/* Language Switcher */}
             <LocaleSwitcher />

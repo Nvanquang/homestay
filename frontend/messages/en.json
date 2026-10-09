@@ -1340,6 +1340,20 @@
     "specialCasesTitle": "Special Circumstances",
     "hostCancelTitle": "Host Cancellation",
     "forceMajeureTitle": "Extenuating Circumstances"
+  },
+  "currency": {
+    "switchCurrencyAria": "Change display currency",
+    "selectCurrencyTitle": "Select display currency",
+    "searchPlaceholder": "Search currency (USD, EUR, VND...)",
+    "noResults": "No matching currencies found",
+    "closeBtn": "Close",
+    "exchangeRateNotice": "Reference exchange rates as of {date} from State Bank of Vietnam.",
+    "convertedReferenceLabel": "Converted price is for reference only. You will be charged in {currency}.",
+    "approximatePrefix": "≈",
+    "originalPriceTooltip": "Original price {price} · Exchange rate as of {date}",
+    "fxStaleBanner": "Exchange rates may be out of date. Converted prices are for reference only.",
+    "fxUnavailableBanner": "Unable to convert currencies at this time. Displaying in original currency VND.",
+    "fxUnavailableToast": "Exchange rate service is temporarily unavailable. Please try again later."
   }
 }
 

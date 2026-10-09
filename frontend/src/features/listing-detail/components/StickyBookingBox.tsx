@@ -13,6 +13,7 @@ import {
   Info,
 } from "lucide-react";
 import { formatMoney } from "@/lib/format";
+import { useCurrency } from "@/features/currency";
 import { ListingDetailDTO, BookingQuoteResult } from "../types";
 import { calculateBookingQuote } from "../api/mock-listing-detail";
 
@@ -37,6 +38,7 @@ export function StickyBookingBox({
 }: StickyBookingBoxProps) {
   const t = useTranslations("listingDetail.bookingBox");
   const locale = useLocale();
+  const { convert, currency, exchangeRates } = useCurrency();
 
   const [checkin, setCheckin] = useState(initialCheckin);
   const [checkout, setCheckout] = useState(initialCheckout);
@@ -112,12 +114,19 @@ export function StickyBookingBox({
       <div className="flex items-baseline justify-between border-b border-[var(--color-border-subtle)] pb-4">
         <div>
           <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">
-            {formatMoney(listing.baseNightlyPrice, "VND", locale)}
+            {currency === "VND"
+              ? formatMoney(listing.baseNightlyPrice, "VND", locale)
+              : convert(listing.baseNightlyPrice).formatted}
           </span>
           <span className="text-xs text-[var(--color-text-secondary)] font-normal">
             {" "}
             / {t("night")}
           </span>
+          {currency !== "VND" && (
+            <div className="text-[11px] text-[var(--color-text-tertiary)]">
+              Giá gốc: {formatMoney(listing.baseNightlyPrice, "VND", locale)}
+            </div>
+          )}
         </div>
 
         <div className="text-xs font-semibold text-[var(--color-text-tertiary)]">
@@ -289,21 +298,26 @@ export function StickyBookingBox({
         </div>
       ) : quote && !quote.violations?.length ? (
         <div className="pt-4 border-t border-[var(--color-border-subtle)] space-y-3 text-xs">
-          {quote.lines.map((line, idx) => (
-            <div key={idx} className="flex items-center justify-between">
-              <span className="text-[var(--color-text-secondary)]">{line.label}</span>
-              <span
-                className={`font-semibold ${
-                  line.amount < 0
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-[var(--color-text-primary)]"
-                }`}
-              >
-                {line.amount < 0 ? "-" : ""}
-                {formatMoney(Math.abs(line.amount), "VND", locale)}
-              </span>
-            </div>
-          ))}
+          {quote.lines.map((line, idx) => {
+            const converted = convert(Math.abs(line.amount));
+            return (
+              <div key={idx} className="flex items-center justify-between">
+                <span className="text-[var(--color-text-secondary)]">{line.label}</span>
+                <span
+                  className={`font-semibold ${
+                    line.amount < 0
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-[var(--color-text-primary)]"
+                  }`}
+                >
+                  {line.amount < 0 ? "-" : ""}
+                  {currency === "VND"
+                    ? formatMoney(Math.abs(line.amount), "VND", locale)
+                    : converted.formatted}
+                </span>
+              </div>
+            );
+          })}
 
           {/* Toggle Nightly Breakdown */}
           {quote.nightlyBreakdown && quote.nightlyBreakdown.length > 0 && (
@@ -329,7 +343,9 @@ export function StickyBookingBox({
                         {nb.date} ({nb.source === "WEEKEND" ? t("weekend") : t("weekday")})
                       </span>
                       <span className="font-semibold text-[var(--color-text-primary)]">
-                        {formatMoney(nb.price, "VND", locale)}
+                        {currency === "VND"
+                          ? formatMoney(nb.price, "VND", locale)
+                          : convert(nb.price).formatted}
                       </span>
                     </div>
                   ))}
@@ -341,12 +357,29 @@ export function StickyBookingBox({
           {/* Grand Total */}
           <div className="pt-3 border-t border-[var(--color-border-subtle)] flex items-baseline justify-between text-sm sm:text-base font-extrabold text-[var(--color-text-primary)]">
             <span>{t("totalBeforeTaxes")}</span>
-            <span>{formatMoney(quote.total, "VND", locale)}</span>
+            <div className="text-right">
+              <span>
+                {currency === "VND"
+                  ? formatMoney(quote.total, "VND", locale)
+                  : convert(quote.total).formatted}
+              </span>
+              {currency !== "VND" && (
+                <div className="text-[11px] font-normal text-[var(--color-text-tertiary)]">
+                  Giá gốc: {formatMoney(quote.total, "VND", locale)}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="text-[10px] text-right text-[var(--color-text-tertiary)]">
             {t("includesFeesAndTaxesNotice")}
           </div>
+
+          {currency !== "VND" && (
+            <div className="pt-2 text-[10px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-xl border border-amber-200 dark:border-amber-900/50 leading-relaxed">
+              ⓘ Giá quy đổi chỉ để tham khảo. Bạn sẽ thanh toán bằng VND theo chính sách của chỗ nghỉ. Tỷ giá ngày {exchangeRates.asOf}.
+            </div>
+          )}
         </div>
       ) : (
         <div className="pt-2 text-center text-xs text-[var(--color-text-tertiary)]">

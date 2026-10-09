@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { ArrowRight, MapPin } from "lucide-react";
 import { PopularDestination } from "../types";
 import { formatMoney } from "@/lib/format";
+import { useCurrency } from "@/features/currency";
 
 interface PopularDestinationsProps {
   destinations: PopularDestination[];
@@ -14,6 +15,7 @@ interface PopularDestinationsProps {
 export function PopularDestinations({ destinations }: PopularDestinationsProps) {
   const t = useTranslations("home.popular");
   const locale = useLocale();
+  const { convert, currency } = useCurrency();
 
   if (!destinations || destinations.length === 0) return null;
 
@@ -56,7 +58,12 @@ export function PopularDestinations({ destinations }: PopularDestinationsProps) 
                 {dest.name}
               </h3>
               <span className="inline-block mt-2 text-[11px] font-semibold text-white/90 bg-white/20 backdrop-blur-xs px-2.5 py-1 rounded-full">
-                {t("fromPrice", { price: formatMoney(dest.startingPrice, "VND", locale) })}
+                {t("fromPrice", {
+                  price:
+                    currency === "VND"
+                      ? formatMoney(dest.startingPrice, "VND", locale)
+                      : convert(dest.startingPrice).formatted,
+                })}
               </span>
             </div>
           </Link>

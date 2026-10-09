@@ -46,3 +46,50 @@ export const lockStaffSchema = z.object({
 });
 
 export type LockStaffFormValues = z.infer<typeof lockStaffSchema>;
+
+// ==========================================
+// S08: LISTING REVIEW SCHEMAS (A04)
+// ==========================================
+
+export const reviewReasonItemSchema = z.object({
+  section: z.enum([
+    "PHOTOS",
+    "DESCRIPTION",
+    "LEGAL_DOCS",
+    "PRICING",
+    "LOCATION",
+    "AMENITIES",
+    "HOUSE_RULES",
+    "OTHER",
+  ]),
+  stepNumber: z.number().int().min(1).max(8),
+  note: z
+    .string()
+    .min(10, "Ghi chú hướng dẫn cho Host phải có ít nhất 10 ký tự"),
+});
+
+export const needsChangesDecisionSchema = z.object({
+  reasons: z
+    .array(reviewReasonItemSchema)
+    .min(1, "Vui lòng chọn ít nhất 1 phần cần yêu cầu chỉnh sửa"),
+  generalNote: z.string().optional(),
+});
+
+export type NeedsChangesFormValues = z.infer<typeof needsChangesDecisionSchema>;
+
+export const rejectDecisionSchema = z.object({
+  reason: z
+    .string()
+    .min(10, "Lý do từ chối bắt buộc có ít nhất 10 ký tự"),
+  notes: z.string().optional(),
+});
+
+export type RejectFormValues = z.infer<typeof rejectDecisionSchema>;
+
+export const approveDecisionSchema = z.object({
+  acknowledgedDuplicateAddress: z.boolean().optional(),
+  note: z.string().optional(),
+});
+
+export type ApproveFormValues = z.infer<typeof approveDecisionSchema>;
+

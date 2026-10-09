@@ -172,29 +172,33 @@ export default function HostListingsPage({
             ))}
           </div>
 
-          {/* Search bar */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="flex items-center gap-2 w-full md:w-72"
-          >
-            <div className="relative flex-1">
+          {/* Search bar & Reload Action */}
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <form
+              onSubmit={handleSearchSubmit}
+              className="relative flex-1 md:w-64"
+            >
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t("searchPlaceholder")}
-                className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-page)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
               />
-              <Search className="w-3.5 h-3.5 text-[var(--color-text-tertiary)] absolute left-3 top-2.5" />
-            </div>
+              <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-2.5" />
+            </form>
+
             <button
-              type="submit"
-              className="p-1.5 rounded-lg border border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] cursor-pointer"
-              title={t("searchPlaceholder")}
+              type="button"
+              onClick={() => loadData()}
+              disabled={isLoading}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-60 shrink-0"
+              title={t("refresh")}
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-gray-600 dark:text-gray-300 ${isLoading ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">{t("refresh")}</span>
             </button>
-          </form>
+          </div>
         </div>
 
         {/* Listings List */}

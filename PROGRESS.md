@@ -11,9 +11,9 @@
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Slice FE-S07: Chính Sách Hủy, Pháp Lý & Gửi Duyệt (H04 Bước 7–8, H05)` (Hoàn tất xác minh, chờ nghiệm thu)
-- **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
-- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe` -> `PASSED (Exit code 0)`
+- **Active Task**: `Slice FE-S09: Lịch Listing & Chống Đặt Trùng (H06)`
+- **WIP Count**: `1 / 1` (Tuân thủ giới hạn WIP = 1)
+- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe` -> `pending`
 
 ---
 
@@ -86,13 +86,15 @@ Quy ước trạng thái:
 
 ### Slice FE-S08: Admin Thẩm Định & Duyệt Listing (A04)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s08-admin-review-listing/README.md`*
-- [ ] **S08 Admin Review UI**: A04 (Chi tiết duyệt phòng, kiểm tra ảnh/tiện nghi, phê duyệt hoặc từ chối có lý do): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [x] **S08 Admin Review UI**: A04 (Hàng đợi duyệt, chi tiết duyệt phòng, lock banner, kiểm tra ảnh/tiện nghi/giấy tờ, phê duyệt hoặc từ chối có lý do): `.\scripts\verify.ps1 -Target fe` -> `passing`
+- [x] **S08 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `passing`
 
 ---
 
 ### Slice FE-S09: Lịch Listing & Chống Đặt Trùng (H06)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s09-listing-calendar/README.md`*
-- [ ] **S09 Host Calendar UI**: H06 (Lịch tháng, chọn khoảng ngày để chặn/mở, hiển thị trạng thái đã đặt, lưu tự động): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [-] **S09 Host Calendar UI**: H06 (Lịch tháng, chọn khoảng ngày để chặn/mở, hiển thị trạng thái đã đặt, lưu tự động): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `in_progress`
+- [ ] **S09 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `pending`
 
 ---
 

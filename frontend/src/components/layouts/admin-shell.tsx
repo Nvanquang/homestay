@@ -78,7 +78,7 @@ export function AdminShell({
     {
       id: "listing-reviews" as const,
       label: t("navListing"),
-      href: `/${locale}/admin/listings-review`,
+      href: `/${locale}/admin/listing-reviews`,
       icon: FileCheck2,
       locked: false,
     },

@@ -82,7 +82,7 @@ export function ListingCardHost({
           </Badge>
         );
       case "UNLISTED":
-        return <Badge variant="neutral">Tạm ẩn</Badge>;
+        return <Badge variant="neutral">{t("unlistedBadge")}</Badge>;
       case "DRAFT":
       default:
         return (
@@ -148,14 +148,15 @@ export function ListingCardHost({
               </div>
 
               {/* Action Menu ⋮ */}
-              <div className="relative">
+              <div className="relative shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  aria-label="Thao tác"
-                  className="p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
+                  aria-label={t("actions")}
+                  title={t("actions")}
+                  className="p-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-2xs transition-colors cursor-pointer flex items-center justify-center"
                 >
-                  <MoreVertical className="w-4 h-4" />
+                  <MoreVertical className="w-4 h-4 text-gray-700 dark:text-gray-200" />
                 </button>
 
                 {isMenuOpen && (

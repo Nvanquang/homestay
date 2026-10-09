@@ -1,0 +1,289 @@
+openapi: 3.1.0
+info:
+  title: Admin Listing Review API (S08 - A04)
+  description: API đặc tả cho phân hệ Thẩm định Chỗ nghỉ, Quản lý Hàng đợi, Khoá phiên CMP-31 và Nhật ký kiểm toán.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Backend Spring Boot Local Server
+
+paths:
+  /admin/listing-reviews:
+    get:
+      summary: Lấy danh sách hàng đợi chỗ nghỉ chờ thẩm định
+      operationId: getListingReviewQueue
+      tags:
+        - Admin Listing Reviews
+      parameters:
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: region
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: flag
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ALL, DUPLICATE_ONLY, CLEAN_ONLY]
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [PENDING_REVIEW, APPROVED, NEEDS_CHANGES, REJECTED]
+        - name: onlyMine
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Danh sách hàng đợi phân trang thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingReviewQueueResponse'
+
+  /admin/listing-reviews/{id}:
+    get:
+      summary: Lấy chi tiết thông tin chỗ nghỉ phục vụ thẩm định (A04)
+      operationId: getListingReviewDetail
+      tags:
+        - Admin Listing Reviews
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chi tiết chỗ nghỉ kèm thông tin cảnh báo trùng và khoá
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingReviewDetail'
+        '404':
+          description: Không tìm thấy hồ sơ
+
+  /admin/listing-reviews/{id}/lock:
+    post:
+      summary: Nhận quyền khoá thẩm định chỗ nghỉ (CMP-31)
+      operationId: acquireReviewLock
+      tags:
+        - Admin Listing Reviews
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Nhận quyền khoá thành công
+        '409':
+          description: Hồ sơ đang bị Admin khác xử lý
+
+    delete:
+      summary: Giải phóng quyền khoá thẩm định chỗ nghỉ
+      operationId: releaseReviewLock
+      tags:
+        - Admin Listing Reviews
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Mở khoá thành công
+
+  /admin/listing-reviews/{id}/heartbeat:
+    post:
+      summary: Gia hạn thời gian khoá (Heartbeat)
+      operationId: heartbeatReviewLock
+      tags:
+        - Admin Listing Reviews
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Gia hạn thành công
+        '409':
+          description: Khoá đã bị thu hồi hoặc hết hạn
+
+  /admin/listing-reviews/{id}/documents/{docId}/view:
+    post:
+      summary: Ghi nhận nhật ký kiểm toán khi Admin xem tài liệu mật (CMP-30)
+      operationId: logDocumentView
+      tags:
+        - Admin Listing Reviews
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: docId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ghi nhận log thành công
+
+  /admin/listing-reviews/{id}/decision:
+    post:
+      summary: Gửi quyết định thẩm định (Duyệt, Yêu cầu sửa, Từ chối)
+      operationId: submitReviewDecision
+      tags:
+        - Admin Listing Reviews
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListingReviewDecisionPayload'
+      responses:
+        '200':
+          description: Quyết định được áp dụng thành công
+        '422':
+          description: Lỗi dữ liệu thiếu lý do hoặc chưa xác nhận trùng địa chỉ
+
+components:
+  schemas:
+    ListingReviewQueueItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        coverPhotoUrl:
+          type: string
+        propertyType:
+          type: string
+        hostId:
+          type: string
+        hostName:
+          type: string
+        hostVerified:
+          type: boolean
+        regionName:
+          type: string
+        districtName:
+          type: string
+        exactAddress:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+        revisionNo:
+          type: integer
+        status:
+          type: string
+        flagDuplicateAddress:
+          type: boolean
+        basePrice:
+          type: number
+        currency:
+          type: string
+
+    ListingReviewQueueResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListingReviewQueueItem'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+
+    ListingReviewDetail:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        propertyType:
+          type: string
+        maxGuests:
+          type: integer
+        status:
+          type: string
+        flagDuplicateAddress:
+          type: boolean
+        revisionNo:
+          type: integer
+
+    ReviewReasonItem:
+      type: object
+      required:
+        - section
+        - stepNumber
+        - note
+      properties:
+        section:
+          type: string
+          enum: [PHOTOS, DESCRIPTION, LEGAL_DOCS, PRICING, LOCATION, AMENITIES, HOUSE_RULES, OTHER]
+        stepNumber:
+          type: integer
+        note:
+          type: string
+          minLength: 10
+
+    ListingReviewDecisionPayload:
+      type: object
+      required:
+        - decision
+      properties:
+        decision:
+          type: string
+          enum: [APPROVE, NEEDS_CHANGES, REJECT]
+        reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewReasonItem'
+        acknowledgedDuplicateAddress:
+          type: boolean
+        note:
+          type: string

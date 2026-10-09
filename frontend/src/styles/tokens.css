@@ -1,5 +1,6 @@
 /* Design Tokens phong cách Airbnb tuân thủ WCAG AA theo docs/giai-doan-1/00-foundations/design-tokens.md */
-@theme {
+
+:root {
   /* --- Primitive: Thương hiệu --- */
   --color-brand-50: #FFF0F3;
   --color-brand-100: #FFD9E0;
@@ -55,6 +56,7 @@
   /* --- Vai trò: Chữ (Typography) --- */
   --color-text-primary: #222222;
   --color-text-secondary: #6A6A6A;
+  --color-text-tertiary: #717171;
   --color-text-disabled: #B0B0B0;
   --color-text-inverse: #FFFFFF;
   --color-text-brand: #E00B41;
@@ -70,6 +72,109 @@
   --color-border-error: #C13515;
 
   /* --- Vai trò: Hành động (Actions) --- */
+  --color-primary: #FF385C;
+  --color-primary-subtle: #FFF0F3;
+  --color-action-primary-bg: #E00B41;
+  --color-action-primary-hover: #C20A38;
+  --color-action-primary-active: #A30830;
+  --color-action-primary-text: #FFFFFF;
+  --color-action-secondary-border: #222222;
+  --color-action-danger-bg: #C13515;
+  --color-action-danger-hover: #A82D12;
+  --color-action-danger-active: #8F250F;
+  --color-action-disabled-bg: #EBEBEB;
+  --color-action-disabled-text: #B0B0B0;
+
+  /* --- Bo góc (Radius) --- */
+  --radius-sm: 0.5rem;    /* 8px */
+  --radius-md: 0.75rem;   /* 12px */
+  --radius-lg: 1rem;      /* 16px */
+  --radius-xl: 1.5rem;    /* 24px */
+  --radius-pill: 9999px;
+
+  /* --- Độ cao & Bóng đổ (Shadows) --- */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.08), 0 1px 1px rgba(0, 0, 0, 0.04);
+  --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.08), 0 6px 16px rgba(0, 0, 0, 0.10);
+  --shadow-3: 0 8px 28px rgba(0, 0, 0, 0.18);
+
+  /* --- Typography --- */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+@theme {
+  /* --- Primitive: Thương hiệu --- */
+  --color-brand-50: #FFF0F3;
+  --color-brand-100: #FFD9E0;
+  --color-brand-500: #FF385C;
+  --color-brand-600: #E00B41;
+  --color-brand-700: #C20A38;
+  --color-brand-800: #A30830;
+
+  /* --- Primitive: Trung tính (Thang xám) --- */
+  --color-gray-0: #FFFFFF;
+  --color-gray-50: #F7F7F7;
+  --color-gray-100: #EBEBEB;
+  --color-gray-200: #DDDDDD;
+  --color-gray-400: #B0B0B0;
+  --color-gray-500: #6A6A6A;
+  --color-gray-700: #484848;
+  --color-gray-900: #222222;
+
+  /* --- Primitive: Ngữ nghĩa --- */
+  --color-success-fg: #00793A;
+  --color-success-bg: #E6F4EA;
+  --color-success-border: #A8D5B5;
+  --color-success-solid: #00793A;
+
+  --color-error-fg: #C13515;
+  --color-error-bg: #FFF0ED;
+  --color-error-border: #F2B8A8;
+  --color-error-solid: #C13515;
+
+  --color-warning-fg: #8A5A00;
+  --color-warning-bg: #FFF4D6;
+  --color-warning-border: #F0D58A;
+  --color-warning-solid: #8A5A00;
+
+  --color-attention-fg: #B34700;
+  --color-attention-bg: #FFEDE0;
+  --color-attention-border: #F5C9A6;
+  --color-attention-solid: #B34700;
+
+  --color-info-fg: #0B57D0;
+  --color-info-bg: #E8F0FE;
+  --color-info-border: #AECBFA;
+  --color-info-solid: #0B57D0;
+
+  /* --- Vai trò: Bề mặt (Surfaces) --- */
+  --color-bg-page: #FFFFFF;
+  --color-bg-canvas: #F7F7F7;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-subtle: #F7F7F7;
+  --color-bg-muted: #EBEBEB;
+  --color-bg-inverse: #222222;
+
+  /* --- Vai trò: Chữ (Typography) --- */
+  --color-text-primary: #222222;
+  --color-text-secondary: #6A6A6A;
+  --color-text-tertiary: #717171;
+  --color-text-disabled: #B0B0B0;
+  --color-text-inverse: #FFFFFF;
+  --color-text-brand: #E00B41;
+  --color-text-link: #222222;
+  --color-text-error: #C13515;
+  --color-text-success: #00793A;
+
+  /* --- Vai trò: Viền (Borders) --- */
+  --color-border-subtle: #EBEBEB;
+  --color-border-default: #DDDDDD;
+  --color-border-input: #6A6A6A;
+  --color-border-strong: #222222;
+  --color-border-error: #C13515;
+
+  /* --- Vai trò: Hành động (Actions) --- */
+  --color-primary: #FF385C;
+  --color-primary-subtle: #FFF0F3;
   --color-action-primary-bg: #E00B41;
   --color-action-primary-hover: #C20A38;
   --color-action-primary-active: #A30830;

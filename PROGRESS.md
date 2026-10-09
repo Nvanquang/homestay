@@ -12,7 +12,7 @@
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
 - **Active Task**: `Slice FE-S06: Tiện Nghi, Quy Tắc Lưu Trú, Giá & Phí (H04 Bước 4–6)`
-- **WIP Count**: `1 / 1` (Tuân thủ giới hạn WIP = 1)
+- **WIP Count**: `0 / 1` (FE-S06 hoàn tất, chờ nghiệm thu trước khi bắt đầu FE-S07)
 - **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe` -> `PASSED (Exit code 0)`
 
 ---
@@ -72,7 +72,8 @@ Quy ước trạng thái:
 
 ### Slice FE-S06: Tiện Nghi, Quy Tắc Lưu Trú, Giá & Phí (H04 Bước 4–6)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s06-listing-amenities-pricing/README.md`*
-- [-] **S06 Listing Step 4-6 UI**: H04 Wizard (Bước 4: Tiện nghi; Bước 5: Quy tắc lưu trú; Bước 6: Giá cơ bản & phí dọn dẹp kèm PriceBreakdown): `.\scripts\verify.ps1 -Target fe` -> `in_progress`
+- [x] **S06 Listing Step 4-6 UI**: H04 Wizard (Bước 4: Tiện nghi; Bước 5: Quy tắc lưu trú; Bước 6: Giá cơ bản & phí dọn dẹp kèm PriceBreakdown): `.\scripts\verify.ps1 -Target fe` -> `passing`
+- [x] **S06 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `passing`
 
 ---
 

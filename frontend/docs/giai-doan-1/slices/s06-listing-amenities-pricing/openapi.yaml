@@ -1,0 +1,384 @@
+openapi: 3.1.0
+info:
+  title: Listing Amenities, Rules, and Pricing Service API (Slice S06)
+  version: 1.0.0
+  description: API endpoints for Homestay Host listing wizard Step 4 (Amenities), Step 5 (Rules), and Step 6 (Pricing & Live Simulation).
+
+servers:
+  - url: /api/v1
+    description: Current Environment API Gateway
+
+paths:
+  /amenities:
+    get:
+      summary: Lấy danh mục tiện nghi chuẩn hệ thống
+      operationId: getAmenitiesCatalog
+      tags:
+        - Amenities
+      responses:
+        '200':
+          description: Danh sách tiện nghi theo nhóm danh mục
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AmenityItem'
+
+  /host/listings/{id}/amenities:
+    put:
+      summary: Cập nhật danh sách tiện nghi cho listing
+      operationId: updateListingAmenities
+      tags:
+        - Host Listing Wizard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amenityIds
+              properties:
+                amenityIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Cập nhật tiện nghi thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /host/listings/{id}/booking-rules:
+    put:
+      summary: Cập nhật quy tắc lưu trú và nội quy nhà
+      operationId: updateListingBookingRules
+      tags:
+        - Host Listing Wizard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRulesInput'
+      responses:
+        '200':
+          description: Cập nhật quy tắc lưu trú thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingResponse'
+        '400':
+          description: Vi phạm quy tắc dữ liệu (ví dụ minNights > maxNights)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /host/listings/{id}/pricing:
+    put:
+      summary: Cập nhật giá cơ bản, phí vệ sinh và chiết khấu
+      operationId: updateListingPricing
+      tags:
+        - Host Listing Wizard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PricingInput'
+      responses:
+        '200':
+          description: Cập nhật giá thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /host/listings/{id}/pricing-preview:
+    get:
+      summary: Xem trước bảng tính giá trực tiếp (PricingEngine Simulation)
+      operationId: getPricingPreview
+      tags:
+        - Host Listing Wizard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: checkIn
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: '2026-10-12'
+        - name: checkOut
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: '2026-10-15'
+        - name: guests
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          example: 3
+      responses:
+        '200':
+          description: Kết quả phân tích giá theo đêm và phụ phí
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingPreviewResult'
+
+components:
+  schemas:
+    AmenityItem:
+      type: object
+      required:
+        - id
+        - key
+        - nameVi
+        - nameEn
+        - category
+        - iconName
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        nameVi:
+          type: string
+        nameEn:
+          type: string
+        category:
+          type: string
+          enum: [ESSENTIAL, KITCHEN, BATHROOM, ENTERTAINMENT, SAFETY, OUTDOOR]
+        iconName:
+          type: string
+        descriptionVi:
+          type: string
+        descriptionEn:
+          type: string
+
+    HouseRules:
+      type: object
+      properties:
+        smoking:
+          type: boolean
+          default: false
+        pets:
+          type: boolean
+          default: false
+        parties:
+          type: boolean
+          default: false
+        quietHoursEnabled:
+          type: boolean
+          default: true
+        quietHoursFrom:
+          type: string
+          example: '22:00'
+        quietHoursTo:
+          type: string
+          example: '07:00'
+        notes:
+          type: string
+
+    BookingRulesInput:
+      type: object
+      required:
+        - minNights
+        - maxNights
+      properties:
+        minNights:
+          type: integer
+          minimum: 1
+          default: 1
+        maxNights:
+          type: integer
+          minimum: 1
+          default: 30
+        prepNights:
+          type: integer
+          minimum: 0
+          maximum: 3
+          default: 0
+        minNoticeHours:
+          type: integer
+          minimum: 0
+          default: 0
+        maxAdvanceMonths:
+          type: integer
+          minimum: 1
+          maximum: 24
+          default: 12
+        houseRules:
+          $ref: '#/components/schemas/HouseRules'
+
+    PricingInput:
+      type: object
+      required:
+        - baseNightlyPrice
+      properties:
+        baseNightlyPrice:
+          type: number
+          minimum: 10000
+        weekendNightlyPrice:
+          type: number
+          minimum: 0
+        cleaningFee:
+          type: number
+          minimum: 0
+          default: 0
+        baseGuests:
+          type: integer
+          minimum: 1
+          default: 2
+        extraGuestFee:
+          type: number
+          minimum: 0
+          default: 0
+        weeklyDiscountPct:
+          type: number
+          minimum: 0
+          maximum: 100
+          default: 0
+        monthlyDiscountPct:
+          type: number
+          minimum: 0
+          maximum: 100
+          default: 0
+        currency:
+          type: string
+          default: VND
+
+    NightlyPriceBreakdown:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        price:
+          type: number
+        source:
+          type: string
+          enum: [BASE, WEEKEND, SEASON, HOLIDAY, SPECIAL]
+
+    PricingViolation:
+      type: object
+      properties:
+        code:
+          type: string
+          enum: [MIN_NIGHTS, MAX_NIGHTS, NOTICE, ADVANCE]
+        message:
+          type: string
+
+    PricingPreviewResult:
+      type: object
+      properties:
+        nights:
+          type: integer
+        roomSubtotal:
+          type: number
+        extraGuestsCount:
+          type: integer
+        extraGuestTotal:
+          type: number
+        cleaningFee:
+          type: number
+        discountType:
+          type: string
+          enum: [WEEKLY, MONTHLY]
+        discountPct:
+          type: number
+        discountAmount:
+          type: number
+        hostTotal:
+          type: number
+        guestTotal:
+          type: number
+        platformFeeAmount:
+          type: number
+        nightlyBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/NightlyPriceBreakdown'
+        currency:
+          type: string
+        violations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricingViolation'
+
+    ListingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        version:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'

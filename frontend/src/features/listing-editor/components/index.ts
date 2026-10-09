@@ -6,3 +6,6 @@ export * from "./ListingCardHost";
 export * from "./Step1Basic";
 export * from "./Step2Location";
 export * from "./Step3Photos";
+export * from "./Step4Amenities";
+export * from "./Step5Rules";
+export * from "./Step6Pricing";

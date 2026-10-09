@@ -30,28 +30,36 @@ export function SaveIndicator({
   return (
     <div
       data-testid="save-indicator"
-      className={`flex items-center gap-2 text-xs font-medium ${className}`}
+      className={`flex items-center gap-2 text-xs font-medium whitespace-nowrap shrink-0 ${className}`}
       aria-live="polite"
     >
       {status === "saving" && (
         <span className="flex items-center gap-1.5 text-[var(--color-primary)] animate-pulse">
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          <span>{t("saving")}</span>
+          <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+          <span className="hidden xs:inline">{t("saving")}</span>
         </span>
       )}
 
       {status === "saved" && (
         <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-          <Check className="w-3.5 h-3.5" />
-          <span>{t("saved")} {lastSavedAt ? formatTime(lastSavedAt) : ""}</span>
+          <Check className="w-3.5 h-3.5 shrink-0" />
+          <span>
+            {t("saved")}
+            {lastSavedAt && (
+              <span className="hidden sm:inline ml-1 font-normal opacity-85">
+                {formatTime(lastSavedAt)}
+              </span>
+            )}
+          </span>
         </span>
       )}
 
       {status === "error" && (
-        <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-rose-600 dark:text-rose-400">
           <span className="flex items-center gap-1.5">
-            <AlertTriangle className="w-3.5 h-3.5" />
-            <span>{errorMessage || t("saveError")}</span>
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">{errorMessage || t("saveError")}</span>
+            <span className="sm:hidden">{t("saveError")}</span>
           </span>
           {onRetry && (
             <button
@@ -60,14 +68,14 @@ export function SaveIndicator({
               className="inline-flex items-center gap-1 underline font-semibold hover:text-rose-700 focus:outline-none focus:ring-1 focus:ring-rose-500 rounded px-1 cursor-pointer"
             >
               <RefreshCw className="w-3 h-3" />
-              {t("retry")}
+              <span className="hidden sm:inline">{t("retry")}</span>
             </button>
           )}
         </div>
       )}
 
       {status === "idle" && lastSavedAt && (
-        <span className="text-[var(--color-text-secondary)]">
+        <span className="text-[var(--color-text-secondary)] hidden sm:inline">
           {t("saved")} {formatTime(lastSavedAt)}
         </span>
       )}

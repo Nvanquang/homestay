@@ -26,9 +26,13 @@ import {
   basicInfoSchema,
   locationSchema,
   photosStepSchema,
+  getBookingRulesSchema,
+  getPricingSchema,
   ListingPhotoItem,
   BasicInfoData,
   LocationData,
+  BookingRulesData,
+  PricingData,
 } from "@/features/listing-editor";
 import {
   WizardNav,
@@ -41,9 +45,40 @@ import {
 import { Step1Basic } from "@/features/listing-editor/components/Step1Basic";
 import { Step2Location } from "@/features/listing-editor/components/Step2Location";
 import { Step3Photos } from "@/features/listing-editor/components/Step3Photos";
+import { Step4Amenities } from "@/features/listing-editor/components/Step4Amenities";
+import { Step5Rules } from "@/features/listing-editor/components/Step5Rules";
+import { Step6Pricing } from "@/features/listing-editor/components/Step6Pricing";
 import { useTranslations } from "next-intl";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 import { toast } from "sonner";
+
+const DEFAULT_BOOKING_RULES: BookingRulesData = {
+  minNights: 1,
+  maxNights: 30,
+  prepNights: 0,
+  minNoticeHours: 0,
+  maxAdvanceMonths: 12,
+  houseRules: {
+    smoking: false,
+    pets: false,
+    parties: false,
+    quietHoursEnabled: true,
+    quietHoursFrom: "22:00",
+    quietHoursTo: "07:00",
+    notes: "",
+  },
+};
+
+const DEFAULT_PRICING: PricingData = {
+  baseNightlyPrice: 1200000,
+  weekendNightlyPrice: 1400000,
+  cleaningFee: 200000,
+  baseGuests: 2,
+  extraGuestFee: 100000,
+  weeklyDiscountPct: 10,
+  monthlyDiscountPct: 20,
+  currency: "VND",
+};
 
 export default function ListingWizardStepPage({
   params,
@@ -68,6 +103,9 @@ export default function ListingWizardStepPage({
   const [basicInfo, setBasicInfo] = useState<BasicInfoData | null>(null);
   const [locationData, setLocationData] = useState<LocationData | null>(null);
   const [photos, setPhotos] = useState<ListingPhotoItem[]>([]);
+  const [amenityIds, setAmenityIds] = useState<string[]>([]);
+  const [bookingRules, setBookingRules] = useState<BookingRulesData>(DEFAULT_BOOKING_RULES);
+  const [pricing, setPricing] = useState<PricingData>(DEFAULT_PRICING);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Auto-save debounce timer
@@ -84,6 +122,9 @@ export default function ListingWizardStepPage({
       setBasicInfo(data.basicInfo);
       setLocationData(data.location);
       setPhotos(data.photos);
+      setAmenityIds(data.amenityIds || []);
+      setBookingRules(data.bookingRules || DEFAULT_BOOKING_RULES);
+      setPricing(data.pricing || DEFAULT_PRICING);
       setLastSavedAt(new Date(data.updatedAt));
       setSaveStatus("idle");
     } catch (err: any) {
@@ -113,6 +154,9 @@ export default function ListingWizardStepPage({
           basicInfo: basicInfo || undefined,
           location: locationData || undefined,
           photos: photos,
+          amenityIds: amenityIds,
+          bookingRules: bookingRules,
+          pricing: pricing,
           currentStep,
         },
         listing.version
@@ -123,7 +167,7 @@ export default function ListingWizardStepPage({
       setSaveStatus("saved");
       isDirtyRef.current = false;
       if (showToast) {
-        toast.success("Đã lưu thay đổi nháp thành công");
+        toast.success(locale === "en" ? "Draft saved successfully" : "Đã lưu thay đổi nháp thành công");
       }
       return true;
     } catch (err: any) {
@@ -290,6 +334,32 @@ export default function ListingWizardStepPage({
     toast.success("Đã thêm 5 ảnh mẫu chất lượng cao!");
   };
 
+  const handleAmenitiesChange = (newIds: string[]) => {
+    setAmenityIds(newIds);
+    triggerAutoSave();
+  };
+
+  const handleRulesChange = (partial: Partial<BookingRulesData>) => {
+    setBookingRules((prev) => ({ ...prev, ...partial }));
+    setValidationErrors((prev) => {
+      const next = { ...prev };
+      delete next.minNights;
+      delete next.maxNights;
+      return next;
+    });
+    triggerAutoSave();
+  };
+
+  const handlePricingChange = (partial: Partial<PricingData>) => {
+    setPricing((prev) => ({ ...prev, ...partial }));
+    setValidationErrors((prev) => {
+      const next = { ...prev };
+      delete next.baseNightlyPrice;
+      return next;
+    });
+    triggerAutoSave();
+  };
+
   // Navigation handlers
   const validateCurrentStep = (): boolean => {
     setValidationErrors({});
@@ -328,7 +398,46 @@ export default function ListingWizardStepPage({
       }
     }
 
-    // Step 3 photos: allow save draft even if < 5 photos (S05 AC: "Dưới 5 ảnh: không chặn Tiếp tục khi lưu nháp; chỉ chặn ở bước gửi duyệt")
+    // Step 5: Booking rules cross validation
+    if (currentStep === "rules" && bookingRules) {
+      const res = getBookingRulesSchema(locale).safeParse(bookingRules);
+      if (!res.success) {
+        const errs: Record<string, string> = {};
+        res.error.issues.forEach((iss) => {
+          errs[iss.path[0]?.toString() || "form"] = iss.message;
+        });
+        setValidationErrors(errs);
+        toast.error(
+          bookingRules.minNights > bookingRules.maxNights
+            ? (locale === "en"
+                ? "Minimum nights cannot be greater than maximum nights"
+                : "Đêm tối thiểu không được lớn hơn đêm tối đa")
+            : (locale === "en"
+                ? "Please check booking rules requirements"
+                : "Vui lòng hoàn thiện đúng các quy tắc lưu trú")
+        );
+        return false;
+      }
+    }
+
+    // Step 6: Pricing validation
+    if (currentStep === "pricing" && pricing) {
+      const res = getPricingSchema(locale).safeParse(pricing);
+      if (!res.success) {
+        const errs: Record<string, string> = {};
+        res.error.issues.forEach((iss) => {
+          errs[iss.path[0]?.toString() || "form"] = iss.message;
+        });
+        setValidationErrors(errs);
+        toast.error(
+          locale === "en"
+            ? "Please enter a valid base price per night (at least 10,000 VND)"
+            : "Vui lòng nhập giá cơ bản hợp lệ cho chỗ nghỉ (tối thiểu 10.000₫)"
+        );
+        return false;
+      }
+    }
+
     return true;
   };
 
@@ -339,7 +448,13 @@ export default function ListingWizardStepPage({
       case "location":
         return "photos";
       case "photos":
-        return "amenities"; // S06 placeholder
+        return "amenities";
+      case "amenities":
+        return "rules";
+      case "rules":
+        return "pricing";
+      case "pricing":
+        return "policy";
       default:
         return "basic";
     }
@@ -353,6 +468,12 @@ export default function ListingWizardStepPage({
         return "location";
       case "amenities":
         return "photos";
+      case "rules":
+        return "amenities";
+      case "pricing":
+        return "rules";
+      case "policy":
+        return "pricing";
       default:
         return null;
     }
@@ -365,11 +486,11 @@ export default function ListingWizardStepPage({
     if (!saved) return;
 
     const nextStep = getNextStepId();
-    if (nextStep === "amenities") {
+    if (nextStep === "policy") {
       toast.info(
         locale === "vi"
-          ? "Đã hoàn thành Bước 1-3 của Slice S05! Bước 4 Tiện nghi sẽ sẵn sàng trong Slice S06."
-          : "Steps 1-3 completed! Step 4 Amenities will be available in Slice S06."
+          ? "Đã hoàn thành Bước 1-6 của Slice S06! Bước 7 Chính sách sẽ sẵn sàng trong Slice S07."
+          : "Steps 1-6 completed! Step 7 Policies will be available in Slice S07."
       );
     }
     router.push(`/${locale}/host/listings/${id}/edit/${nextStep}`);
@@ -413,48 +534,81 @@ export default function ListingWizardStepPage({
   return (
     <div className="min-h-screen bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-[var(--color-bg-surface)] border-b border-[var(--color-border-subtle)] px-4 sm:px-8 py-3 flex items-center justify-between shadow-2xs">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleSaveAndExit}
-            className="p-1.5 rounded-lg hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] transition-colors cursor-pointer"
-            title={t("back")}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div className="min-w-0">
-            <h1 className="text-sm sm:text-base font-bold text-[var(--color-text-primary)] truncate max-w-xs sm:max-w-md">
-              {basicInfo.title || (locale === "vi" ? "Chỗ nghỉ chưa đặt tên" : "Untitled Listing")}
-            </h1>
-            <p className="text-[11px] text-[var(--color-text-tertiary)]">
-              {t("stepCounter", { step: currentStepDef?.stepNumber || 1 })} · {t((currentStepDef?.labelKey || "step1Label") as any)}
-            </p>
+      <header className="sticky top-0 z-40 bg-[var(--color-bg-surface)] border-b border-[var(--color-border-subtle)] shadow-2xs">
+        <div className="w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
+          {/* Left: Back button + Title */}
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <button
+              type="button"
+              onClick={handleSaveAndExit}
+              className="p-1.5 rounded-lg hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] transition-colors cursor-pointer shrink-0"
+              title={t("back")}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-base font-bold text-[var(--color-text-primary)] truncate max-w-[170px] xs:max-w-[240px] sm:max-w-sm md:max-w-md lg:max-w-lg">
+                {basicInfo.title || (locale === "vi" ? "Chỗ nghỉ chưa đặt tên" : "Untitled Listing")}
+              </h1>
+              <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">
+                {t("stepCounter", { step: currentStepDef?.stepNumber || 1 })} · {t((currentStepDef?.labelKey || "step1Label") as any)}
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <SaveIndicator
-            status={saveStatus}
-            lastSavedAt={lastSavedAt}
-            errorMessage={errorMessage || undefined}
-            onRetry={() => persistChanges(true)}
-          />
-          <LocaleSwitcher />
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleSaveAndExit}
-            className="text-xs px-3 py-1.5 font-medium cursor-pointer"
-          >
-            {t("saveAndExit")}
-          </Button>
+          {/* Right Actions: SaveIndicator + Locale + SaveAndExit */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <SaveIndicator
+              status={saveStatus}
+              lastSavedAt={lastSavedAt}
+              errorMessage={errorMessage || undefined}
+              onRetry={() => persistChanges(true)}
+            />
+            <div className="hidden sm:block">
+              <LocaleSwitcher />
+            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleSaveAndExit}
+              className="text-xs px-2.5 sm:px-3.5 py-1.5 font-medium cursor-pointer shrink-0"
+            >
+              <span className="hidden sm:inline">{t("saveAndExit")}</span>
+              <span className="sm:hidden">{locale === "vi" ? "Lưu" : "Save"}</span>
+            </Button>
+          </div>
         </div>
       </header>
 
+      {/* Mobile/Tablet Horizontal Step Tracker (< lg) */}
+      <div className="lg:hidden bg-[var(--color-bg-surface)] border-b border-[var(--color-border-subtle)]">
+        <div className="w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+              {currentStepDef?.stepNumber || 1}
+            </span>
+            <span className="font-semibold text-[var(--color-text-primary)] truncate">
+              {t((currentStepDef?.labelKey || "step1Label") as any)}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-[11px] font-bold text-[var(--color-primary)]">
+              {listing.draftProgress.completedSteps}/8 {locale === "vi" ? "bước" : "steps"}
+            </span>
+            <div className="w-16 sm:w-24 h-1.5 bg-[var(--color-bg-subtle)] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[var(--color-primary)] rounded-full transition-all duration-300"
+                style={{ width: `${(listing.draftProgress.completedSteps / 8) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 409 Conflict Banner */}
       {conflictError && (
-        <div className="max-w-6xl mx-auto px-4 mt-4">
+        <div className="w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 mt-4">
           <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs flex items-center justify-between gap-3 shadow-sm">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
@@ -463,7 +617,7 @@ export default function ListingWizardStepPage({
             <button
               type="button"
               onClick={fetchListing}
-              className="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-semibold hover:bg-rose-700 shrink-0"
+              className="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-semibold hover:bg-rose-700 shrink-0 cursor-pointer"
             >
               Tải lại trang ngay
             </button>
@@ -473,7 +627,7 @@ export default function ListingWizardStepPage({
 
       {/* Read-Only Status Banner */}
       {isReadOnly && (
-        <div className="max-w-6xl mx-auto px-4 mt-4">
+        <div className="w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 mt-4">
           <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-xs flex items-center gap-2">
             <Clock className="w-4 h-4 text-amber-600 shrink-0" />
             <span>
@@ -484,10 +638,10 @@ export default function ListingWizardStepPage({
       )}
 
       {/* Wizard Body Grid */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Wizard Navigation (4 cols) */}
-          <aside className="lg:col-span-4 sticky top-20 hidden md:block">
+      <main className="w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          {/* Left Column: Wizard Navigation (3 cols on xl, 4 on lg, hidden on mobile/tablet) */}
+          <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 sticky top-20">
             <WizardNav
               currentStep={currentStep}
               completedStepsCount={listing.draftProgress.completedSteps}
@@ -495,8 +649,8 @@ export default function ListingWizardStepPage({
             />
           </aside>
 
-          {/* Right Column: Step Content (8 cols) */}
-          <div className="lg:col-span-8 bg-[var(--color-bg-surface)] rounded-2xl border border-[var(--color-border-subtle)] p-6 sm:p-8 shadow-sm space-y-8">
+          {/* Right Column: Step Content (9 cols on xl, 8 on lg, full width on mobile) */}
+          <div className="lg:col-span-8 xl:col-span-9 bg-[var(--color-bg-surface)] rounded-2xl border border-[var(--color-border-subtle)] p-5 sm:p-7 lg:p-9 shadow-sm space-y-8">
             {/* Step Header */}
             <div>
               <div className="flex items-center justify-between">
@@ -547,8 +701,36 @@ export default function ListingWizardStepPage({
                 />
               )}
 
-              {/* Placeholders for subsequent steps (S06-S07) */}
-              {!["basic", "location", "photos"].includes(currentStep) && (
+              {currentStep === "amenities" && (
+                <Step4Amenities
+                  selectedAmenityIds={amenityIds}
+                  onChange={handleAmenitiesChange}
+                  isReadOnly={isReadOnly}
+                />
+              )}
+
+              {currentStep === "rules" && (
+                <Step5Rules
+                  data={bookingRules}
+                  onChange={handleRulesChange}
+                  crossFieldError={validationErrors.minNights}
+                  isReadOnly={isReadOnly}
+                />
+              )}
+
+              {currentStep === "pricing" && (
+                <Step6Pricing
+                  data={pricing}
+                  bookingRules={bookingRules}
+                  maxGuests={basicInfo?.maxGuests || 4}
+                  onChange={handlePricingChange}
+                  errors={validationErrors}
+                  isReadOnly={isReadOnly}
+                />
+              )}
+
+              {/* Placeholders for subsequent steps (S07+) */}
+              {!["basic", "location", "photos", "amenities", "rules", "pricing"].includes(currentStep) && (
                 <div className="py-12 border border-dashed border-[var(--color-border-subtle)] rounded-xl text-center p-6 space-y-3">
                   <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 flex items-center justify-center mx-auto">
                     <Sparkles className="w-6 h-6" />
@@ -558,15 +740,15 @@ export default function ListingWizardStepPage({
                   </h3>
                   <p className="text-xs text-[var(--color-text-secondary)] max-w-md mx-auto">
                     {locale === "vi"
-                      ? "Bước này thuộc về các Vertical Slice tiếp theo (S06 Tiện nghi, Quy tắc, Giá phòng hoặc S07 Chính sách, Duyệt gửi). Bạn có thể quay lại các bước 1-3 bất kỳ lúc nào."
-                      : "This step is part of subsequent Vertical Slices (S06 Amenities, Rules, Pricing or S07 Policies, Submit). You can navigate back to steps 1-3 anytime."}
+                      ? "Bước này thuộc về Vertical Slice tiếp theo (S07 Chính sách hủy & Gửi duyệt). Bạn có thể quay lại các bước trước bất kỳ lúc nào."
+                      : "This step is part of subsequent Vertical Slice (S07 Cancellation Policies & Submit). You can navigate back to earlier steps anytime."}
                   </p>
                   <Button
                     variant="secondary"
-                    onClick={() => router.push(`/${locale}/host/listings/${id}/edit/photos`)}
+                    onClick={() => router.push(`/${locale}/host/listings/${id}/edit/pricing`)}
                     className="text-xs cursor-pointer"
                   >
-                    ← {t("step3Label")}
+                    ← {locale === "vi" ? "Bước 6: Giá & Phí" : "Step 6: Pricing"}
                   </Button>
                 </div>
               )}
@@ -592,6 +774,12 @@ export default function ListingWizardStepPage({
                 <span>
                   {currentStep === "photos"
                     ? t("continueToAmenities")
+                    : currentStep === "amenities"
+                    ? t("continueToRules")
+                    : currentStep === "rules"
+                    ? t("continueToPricing")
+                    : currentStep === "pricing"
+                    ? t("continueToPolicies")
                     : t("continue")}
                 </span>
                 <ArrowRight className="w-4 h-4" />

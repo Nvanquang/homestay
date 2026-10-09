@@ -81,42 +81,47 @@ export default function NewListingPage({
   return (
     <div className="min-h-screen bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
       {/* Top Bar */}
-      <header className="sticky top-0 z-30 bg-[var(--color-bg-surface)] border-b border-[var(--color-border-subtle)] px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-2xs">
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/${locale}/host/listings`}
-            className="p-1.5 rounded-lg hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] transition-colors cursor-pointer"
-            title={t("back")}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-sm sm:text-base font-bold text-[var(--color-text-primary)]">
-              {t("newTitle")}
-            </h1>
-            <p className="text-[11px] text-[var(--color-text-tertiary)]">
-              {t("stepCounter", { step: 1 })} · {t("step1Label")}
-            </p>
+      <header className="sticky top-0 z-30 bg-[var(--color-bg-surface)] border-b border-[var(--color-border-subtle)] shadow-2xs">
+        <div className="w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <Link
+              href={`/${locale}/host/listings`}
+              className="p-1.5 rounded-lg hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] transition-colors cursor-pointer shrink-0"
+              title={t("back")}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-base font-bold text-[var(--color-text-primary)] truncate">
+                {t("newTitle")}
+              </h1>
+              <p className="text-[11px] text-[var(--color-text-tertiary)] truncate">
+                {t("stepCounter", { step: 1 })} · {t("step1Label")}
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <SaveIndicator status="idle" />
-          <LocaleSwitcher />
-          <Link
-            href={`/${locale}/host/listings`}
-            className="px-3 py-1.5 rounded-lg border border-[var(--color-border-subtle)] text-xs font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
-          >
-            {t("saveAndExit")}
-          </Link>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <SaveIndicator status="idle" />
+            <div className="hidden sm:block">
+              <LocaleSwitcher />
+            </div>
+            <Link
+              href={`/${locale}/host/listings`}
+              className="px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-[var(--color-border-subtle)] text-xs font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] shrink-0"
+            >
+              <span className="hidden sm:inline">{t("saveAndExit")}</span>
+              <span className="sm:hidden">{locale === "vi" ? "Thoát" : "Exit"}</span>
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* Main Content Layout */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Left Form: 2 cols */}
-          <div className="lg:col-span-2 bg-[var(--color-bg-surface)] rounded-2xl border border-[var(--color-border-subtle)] p-6 sm:p-8 shadow-sm space-y-8">
+      <main className="w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          {/* Left Form: 8 cols */}
+          <div className="lg:col-span-8 bg-[var(--color-bg-surface)] rounded-2xl border border-[var(--color-border-subtle)] p-5 sm:p-7 lg:p-9 shadow-sm space-y-8">
             <div>
               <h2 className="text-xl font-bold text-[var(--color-text-primary)]">
                 {t("step1Label")}
@@ -155,8 +160,8 @@ export default function NewListingPage({
             </div>
           </div>
 
-          {/* Right Tips Column */}
-          <div className="lg:col-span-1 space-y-4">
+          {/* Right Tips Column: 4 cols */}
+          <div className="lg:col-span-4 space-y-4">
             <div className="p-5 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] shadow-2xs space-y-3">
               <div className="flex items-center gap-2 text-[var(--color-primary)] font-semibold text-sm">
                 <HelpCircle className="w-4 h-4" />

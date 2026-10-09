@@ -5,6 +5,8 @@ import {
   LocationData,
   ListingPhotoItem,
   WizardStepId,
+  BookingRulesData,
+  PricingData,
 } from "../types";
 
 let mockListings: ListingItem[] = [
@@ -249,6 +251,9 @@ export async function updateListingDraft(
     basicInfo?: Partial<BasicInfoData>;
     location?: Partial<LocationData>;
     photos?: ListingPhotoItem[];
+    amenityIds?: string[];
+    bookingRules?: BookingRulesData;
+    pricing?: PricingData;
     currentStep?: WizardStepId;
   },
   expectedVersion?: number
@@ -282,6 +287,9 @@ export async function updateListingDraft(
       ...(stepData.location || {}),
     },
     photos: stepData.photos ?? current.photos,
+    amenityIds: stepData.amenityIds ?? current.amenityIds,
+    bookingRules: stepData.bookingRules ?? current.bookingRules,
+    pricing: stepData.pricing ?? current.pricing,
   };
 
   if (updated.photos.length > 0) {
@@ -293,6 +301,9 @@ export async function updateListingDraft(
   if (updated.basicInfo.title.length >= 10) completed += 1;
   if (updated.location.exactAddress.length >= 5) completed += 1;
   if (updated.photos.length >= 1) completed += 1;
+  if (updated.amenityIds && updated.amenityIds.length > 0) completed += 1;
+  if (updated.bookingRules) completed += 1;
+  if (updated.pricing && updated.pricing.baseNightlyPrice > 0) completed += 1;
 
   updated.draftProgress.completedSteps = Math.max(
     updated.draftProgress.completedSteps,
@@ -407,6 +418,27 @@ export async function deleteDraftListing(id: string): Promise<void> {
   }
 
   mockListings = mockListings.filter((item) => item.id !== id);
+}
+
+export async function updateListingAmenities(
+  listingId: string,
+  amenityIds: string[]
+): Promise<ListingItem> {
+  return updateListingDraft(listingId, { amenityIds, currentStep: "amenities" });
+}
+
+export async function updateListingBookingRules(
+  listingId: string,
+  rules: BookingRulesData
+): Promise<ListingItem> {
+  return updateListingDraft(listingId, { bookingRules: rules, currentStep: "rules" });
+}
+
+export async function updateListingPricing(
+  listingId: string,
+  pricing: PricingData
+): Promise<ListingItem> {
+  return updateListingDraft(listingId, { pricing, currentStep: "pricing" });
 }
 
 export function _resetListingsDatabase(): void {

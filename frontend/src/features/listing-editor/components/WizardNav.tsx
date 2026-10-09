@@ -29,7 +29,7 @@ export const WIZARD_STEPS: {
   labelKey: string;
   subLabelKey: string;
   icon: React.ComponentType<{ className?: string }>;
-  isImplementedInS05: boolean;
+  isImplemented: boolean;
 }[] = [
   {
     id: "basic",
@@ -37,7 +37,7 @@ export const WIZARD_STEPS: {
     labelKey: "step1Label",
     subLabelKey: "step1Sub",
     icon: FileText,
-    isImplementedInS05: true,
+    isImplemented: true,
   },
   {
     id: "location",
@@ -45,7 +45,7 @@ export const WIZARD_STEPS: {
     labelKey: "step2Label",
     subLabelKey: "step2Sub",
     icon: MapPin,
-    isImplementedInS05: true,
+    isImplemented: true,
   },
   {
     id: "photos",
@@ -53,7 +53,7 @@ export const WIZARD_STEPS: {
     labelKey: "step3Label",
     subLabelKey: "step3Sub",
     icon: Camera,
-    isImplementedInS05: true,
+    isImplemented: true,
   },
   {
     id: "amenities",
@@ -61,7 +61,7 @@ export const WIZARD_STEPS: {
     labelKey: "step4Label",
     subLabelKey: "step4Sub",
     icon: Coffee,
-    isImplementedInS05: false,
+    isImplemented: true,
   },
   {
     id: "rules",
@@ -69,7 +69,7 @@ export const WIZARD_STEPS: {
     labelKey: "step5Label",
     subLabelKey: "step5Sub",
     icon: ShieldAlert,
-    isImplementedInS05: false,
+    isImplemented: true,
   },
   {
     id: "pricing",
@@ -77,7 +77,7 @@ export const WIZARD_STEPS: {
     labelKey: "step6Label",
     subLabelKey: "step6Sub",
     icon: DollarSign,
-    isImplementedInS05: false,
+    isImplemented: true,
   },
   {
     id: "policy",
@@ -85,7 +85,7 @@ export const WIZARD_STEPS: {
     labelKey: "step7Label",
     subLabelKey: "step7Sub",
     icon: FileCheck2,
-    isImplementedInS05: false,
+    isImplemented: false,
   },
   {
     id: "legal",
@@ -93,7 +93,7 @@ export const WIZARD_STEPS: {
     labelKey: "step8Label",
     subLabelKey: "step8Sub",
     icon: Send,
-    isImplementedInS05: false,
+    isImplemented: false,
   },
 ];
 
@@ -132,7 +132,7 @@ export function WizardNav({
           const isActive = step.id === currentStep;
           const isCompleted = idx < completedStepsCount;
           const isUnlocked =
-            step.isImplementedInS05 &&
+            step.isImplemented &&
             (idx <= completedStepsCount || idx <= currentIndex + 1);
           const isLocked = !isUnlocked;
           const IconComponent = step.icon;
@@ -179,9 +179,9 @@ export function WizardNav({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className="truncate block">{t(step.labelKey as any)}</span>
-                    {!step.isImplementedInS05 && (
+                    {!step.isImplemented && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--color-bg-subtle)] text-[var(--color-text-tertiary)] font-normal ml-1">
-                        S06-S07
+                        S07
                       </span>
                     )}
                   </div>

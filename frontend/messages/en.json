@@ -1084,6 +1084,156 @@
       "saveRuleSuccess": "Price rule saved successfully",
       "deleteRuleSuccess": "Price rule deleted successfully"
     }
+  },
+  "home": {
+    "heroBadge": "Explore Vietnam like a local",
+    "heroTitle": "Find unique stays, unforgettable journeys",
+    "heroSubtitle": "Thousands of picturesque homestays, vacation villas, and rustic chalets await your next adventure.",
+    "popular": {
+      "eyebrow": "Trending Destinations",
+      "title": "Most Loved Places",
+      "subtitle": "Discover destinations highly rated and frequently visited by our travelers community",
+      "listingCount": "{count} stays",
+      "fromPrice": "From {price}/night"
+    },
+    "featured": {
+      "eyebrow": "Curated Stays",
+      "title": "Exceptional Homestays",
+      "subtitle": "Quality verified listings offering prime locations and attentive hospitality",
+      "viewAll": "View all"
+    },
+    "hostBanner": {
+      "badge": "Host Opportunity",
+      "title": "Have an available space? Become a Host today",
+      "description": "Generate sustainable income and connect with passionate travelers exploring Vietnam.",
+      "ctaBtn": "Start hosting"
+    },
+    "howItWorks": {
+      "eyebrow": "Simple Journey",
+      "title": "Book smoothly in 3 simple steps",
+      "subtitle": "Experience your ideal getaway with zero hassle and absolute peace of mind",
+      "step1Title": "1. Search & Filter effortlessly",
+      "step1Desc": "Pick your destination, travel dates, and refine by amenities, budget, and styles.",
+      "step2Title": "2. Instant book or request",
+      "step2Desc": "Confirm right away with Instant Book or discuss custom requests directly with the Host.",
+      "step3Title": "3. Live like a local",
+      "step3Desc": "Receive check-in guidelines directly from your host and embrace authentic local living."
+    }
+  },
+  "search": {
+    "resultsForDestination": "{count} stays in \"{destination}\"",
+    "allResultsCount": "{count} stays",
+    "guests": "guests",
+    "emptyTitle": "No matching stays found",
+    "emptySubtitle": "Try broadening your price range, changing your dates, or exploring nearby regions.",
+    "clearAllFiltersBtn": "Clear all filters",
+    "tryDifferentDates": "Try different dates",
+    "viewingCount": "Showing {current} of {total} stays",
+    "showMoreBtn": "Show more",
+    "viewMapBtn": "Map View",
+    "viewListBtn": "List View",
+    "searchBar": {
+      "searchBtn": "Search",
+      "destinationRequired": "Please enter a destination",
+      "whereLabel": "Where to?",
+      "destinationPlaceholder": "Da Lat, Hoi An, Sa Pa...",
+      "datesLabel": "Stay dates",
+      "checkin": "Check-in",
+      "checkout": "Check-out",
+      "guestsLabel": "Guests count",
+      "mobileWhereTo": "Where are you going?",
+      "mobileAnytime": "Any week",
+      "mobileGuests": "guests",
+      "mobileSearchTitle": "Search homestays"
+    },
+    "destinationPicker": {
+      "label": "Location",
+      "placeholder": "Where are you going?",
+      "recentTitle": "Recent searches",
+      "clearRecent": "Clear history",
+      "popularTitle": "Popular destinations",
+      "suggestionsTitle": "Destination suggestions"
+    },
+    "datePicker": {
+      "label": "Dates",
+      "addDates": "Add dates",
+      "nights": "nights",
+      "title": "Select check-in & check-out dates",
+      "clear": "Clear dates",
+      "checkinLabel": "Check-in",
+      "checkoutLabel": "Check-out",
+      "stayDuration": "Duration: {count} nights",
+      "applyBtn": "Apply dates"
+    },
+    "guestPicker": {
+      "label": "Guests",
+      "oneGuest": "1 guest",
+      "guestsCount": "{count} guests",
+      "infantsCount": "{count} infants",
+      "adultsTitle": "Adults",
+      "adultsSub": "Age 13 or above",
+      "childrenTitle": "Children",
+      "childrenSub": "Ages 2–12",
+      "infantsTitle": "Infants",
+      "infantsSub": "Under 2",
+      "applyBtn": "Confirm guests"
+    },
+    "listingCard": {
+      "superhost": "Superhost",
+      "instant": "Instant Book",
+      "addToWishlist": "Add to wishlist",
+      "removeFromWishlist": "Remove from wishlist",
+      "bedrooms": "bedrooms",
+      "beds": "beds",
+      "maxGuests": "Up to {count} guests",
+      "totalForNights": "total · {count} nights",
+      "night": "night",
+      "includesTaxes": "Includes taxes & fees",
+      "fromPrice": "From",
+      "basePriceSub": "Base nightly rate"
+    },
+    "filters": {
+      "title": "All Filters",
+      "priceRangeTitle": "Price Range (per night)",
+      "priceRangeSub": "In Vietnamese Dong (VND), taxes and fees included",
+      "minPriceLabel": "Minimum price",
+      "maxPriceLabel": "Maximum price",
+      "typeTitle": "Property Type",
+      "typeAll": "All",
+      "typeEntire": "Entire place",
+      "typePrivate": "Private room",
+      "bedroomsTitle": "Bedrooms",
+      "anyCount": "Any",
+      "instantBookTitle": "Instant Book",
+      "instantBookSub": "Listings you can book without waiting for host approval",
+      "amenitiesTitle": "Amenities & Services",
+      "policyTitle": "Cancellation Policy",
+      "policyFlexible": "Flexible",
+      "policyModerate": "Moderate",
+      "policyStrict": "Strict",
+      "clearAllBtn": "Clear all",
+      "showResults": "Show results",
+      "showResultsCount": "Show {count} stays"
+    },
+    "filterBar": {
+      "allFiltersBtn": "Filters",
+      "priceLabel": "Price",
+      "priceFiltered": "Filtered price",
+      "typeLabel": "Property type",
+      "typeEntire": "Entire place",
+      "typePrivate": "Private room",
+      "instantLabel": "Instant Book",
+      "sortPrefix": "Sort by",
+      "sortRelevance": "Relevance",
+      "sortPriceAsc": "Price: Low to High",
+      "sortPriceDesc": "Price: High to Low",
+      "sortNewest": "Newest"
+    },
+    "map": {
+      "mapAreaFilter": "Map Area",
+      "searchAsMove": "Search as I move the map",
+      "searchThisArea": "Search this area"
+    }
   }
 }
 

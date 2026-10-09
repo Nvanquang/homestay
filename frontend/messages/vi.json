@@ -1084,6 +1084,156 @@
       "saveRuleSuccess": "Đã lưu quy tắc giá thành công",
       "deleteRuleSuccess": "Đã xóa quy tắc giá thành công"
     }
+  },
+  "home": {
+    "heroBadge": "Khám phá Việt Nam theo cách bản địa",
+    "heroTitle": "Tìm chỗ ở độc đáo, trọn vẹn trải nghiệm",
+    "heroSubtitle": "Hàng ngàn homestay view đẹp, biệt thự nghỉ dưỡng và nhà gỗ thơ mộng đang chờ đón chuyến đi của bạn.",
+    "popular": {
+      "eyebrow": "Điểm đến thịnh hành",
+      "title": "Những nơi được yêu thích nhất",
+      "subtitle": "Khám phá các điểm đến được cộng đồng du khách check-in và đánh giá cao nhất",
+      "listingCount": "{count} chỗ ở",
+      "fromPrice": "Từ {price}/đêm"
+    },
+    "featured": {
+      "eyebrow": "Tuyển chọn đặc biệt",
+      "title": "Chỗ ở nổi bật đáng trải nghiệm",
+      "subtitle": "Các homestay đạt chuẩn chất lượng với vị trí đắc địa và dịch vụ chu đáo",
+      "viewAll": "Xem tất cả"
+    },
+    "hostBanner": {
+      "badge": "Cơ hội kinh doanh",
+      "title": "Bạn có không gian trống? Hãy trở thành Host ngay hôm nay",
+      "description": "Tạo nguồn thu nhập bền vững và kết nối cùng hàng vạn du khách yêu mến du lịch trải nghiệm tại Việt Nam.",
+      "ctaBtn": "Bắt đầu đăng chỗ ở"
+    },
+    "howItWorks": {
+      "eyebrow": "Quy trình thuận tiện",
+      "title": "Đặt phòng đơn giản chỉ với 3 bước",
+      "subtitle": "Trải nghiệm kỳ nghỉ hoàn hảo mà không cần lo lắng về thủ tục rườm rà",
+      "step1Title": "1. Tìm kiếm & Lọc theo ý muốn",
+      "step1Desc": "Chọn điểm đến, thời gian lưu trú và lọc theo tiện nghi, khoảng giá phù hợp với ngân sách.",
+      "step2Title": "2. Đặt ngay hoặc gửi yêu cầu",
+      "step2Desc": "Xác nhận tức thì qua Instant Book hoặc trao đổi thêm với Host về nhu cầu đặc biệt.",
+      "step3Title": "3. Tận hưởng kỳ nghỉ trọn vẹn",
+      "step3Desc": "Nhận hướng dẫn check-in trực tiếp từ Host và trải nghiệm cuộc sống như người bản địa."
+    }
+  },
+  "search": {
+    "resultsForDestination": "{count} chỗ ở tại \"{destination}\"",
+    "allResultsCount": "{count} chỗ ở",
+    "guests": "khách",
+    "emptyTitle": "Không tìm thấy chỗ ở phù hợp",
+    "emptySubtitle": "Hãy thử nới lỏng bộ lọc khoảng giá, đổi ngày lưu trú hoặc tìm kiếm khu vực lân cận.",
+    "clearAllFiltersBtn": "Xóa tất cả bộ lọc",
+    "tryDifferentDates": "Thử ngày khác",
+    "viewingCount": "Đang xem {current} / {total} chỗ ở",
+    "showMoreBtn": "Hiển thị thêm",
+    "viewMapBtn": "Xem Bản đồ",
+    "viewListBtn": "Xem Danh sách",
+    "searchBar": {
+      "searchBtn": "Tìm kiếm",
+      "destinationRequired": "Vui lòng nhập điểm đến",
+      "whereLabel": "Bạn muốn đi đâu?",
+      "destinationPlaceholder": "Đà Lạt, Hội An, Sa Pa...",
+      "datesLabel": "Thời gian lưu trú",
+      "checkin": "Nhận phòng",
+      "checkout": "Trả phòng",
+      "guestsLabel": "Số lượng khách",
+      "mobileWhereTo": "Bạn muốn đi đâu?",
+      "mobileAnytime": "Ngày bất kỳ",
+      "mobileGuests": "khách",
+      "mobileSearchTitle": "Tìm kiếm homestay"
+    },
+    "destinationPicker": {
+      "label": "Địa điểm",
+      "placeholder": "Bạn muốn đi đâu?",
+      "recentTitle": "Tìm kiếm gần đây",
+      "clearRecent": "Xóa lịch sử",
+      "popularTitle": "Điểm đến phổ biến",
+      "suggestionsTitle": "Gợi ý điểm đến"
+    },
+    "datePicker": {
+      "label": "Thời gian",
+      "addDates": "Thêm ngày",
+      "nights": "đêm",
+      "title": "Chọn ngày nhận & trả phòng",
+      "clear": "Xóa ngày",
+      "checkinLabel": "Nhận phòng",
+      "checkoutLabel": "Trả phòng",
+      "stayDuration": "Khoảng thời gian: {count} đêm",
+      "applyBtn": "Áp dụng ngày"
+    },
+    "guestPicker": {
+      "label": "Số khách",
+      "oneGuest": "1 khách",
+      "guestsCount": "{count} khách",
+      "infantsCount": "{count} em bé",
+      "adultsTitle": "Người lớn",
+      "adultsSub": "Từ 13 tuổi trở lên",
+      "childrenTitle": "Trẻ em",
+      "childrenSub": "Độ tuổi 2–12",
+      "infantsTitle": "Em bé",
+      "infantsSub": "Dưới 2 tuổi",
+      "applyBtn": "Xác nhận số khách"
+    },
+    "listingCard": {
+      "superhost": "Superhost",
+      "instant": "Đặt ngay",
+      "addToWishlist": "Thêm vào danh sách yêu thích",
+      "removeFromWishlist": "Xóa khỏi danh sách yêu thích",
+      "bedrooms": "phòng ngủ",
+      "beds": "giường",
+      "maxGuests": "Tối đa {count} khách",
+      "totalForNights": "tổng · {count} đêm",
+      "night": "đêm",
+      "includesTaxes": "Đã gồm phí & thuế",
+      "fromPrice": "Từ",
+      "basePriceSub": "Giá cơ bản mỗi đêm"
+    },
+    "filters": {
+      "title": "Bộ lọc nâng cao",
+      "priceRangeTitle": "Khoảng giá (mỗi đêm)",
+      "priceRangeSub": "Đơn vị Việt Nam Đồng (VND), đã bao gồm thuế & phí",
+      "minPriceLabel": "Giá tối thiểu",
+      "maxPriceLabel": "Giá tối đa",
+      "typeTitle": "Loại chỗ ở",
+      "typeAll": "Tất cả",
+      "typeEntire": "Nguyên căn",
+      "typePrivate": "Phòng riêng",
+      "bedroomsTitle": "Phòng ngủ",
+      "anyCount": "Bất kỳ",
+      "instantBookTitle": "Đặt ngay (Instant Book)",
+      "instantBookSub": "Chỗ ở có thể đặt lập tức mà không cần chờ Host phê duyệt",
+      "amenitiesTitle": "Tiện nghi & Dịch vụ",
+      "policyTitle": "Chính sách hủy phòng",
+      "policyFlexible": "Linh hoạt",
+      "policyModerate": "Tiêu chuẩn",
+      "policyStrict": "Nghiêm ngặt",
+      "clearAllBtn": "Xóa tất cả",
+      "showResults": "Hiển thị kết quả",
+      "showResultsCount": "Hiển thị {count} chỗ ở"
+    },
+    "filterBar": {
+      "allFiltersBtn": "Bộ lọc",
+      "priceLabel": "Giá",
+      "priceFiltered": "Khoảng giá đã chọn",
+      "typeLabel": "Loại chỗ ở",
+      "typeEntire": "Nguyên căn",
+      "typePrivate": "Phòng riêng",
+      "instantLabel": "Đặt ngay",
+      "sortPrefix": "Sắp xếp",
+      "sortRelevance": "Độ liên quan",
+      "sortPriceAsc": "Giá: Thấp đến cao",
+      "sortPriceDesc": "Giá: Cao đến thấp",
+      "sortNewest": "Mới nhất"
+    },
+    "map": {
+      "mapAreaFilter": "Khu vực bản đồ",
+      "searchAsMove": "Tìm khi di chuyển bản đồ",
+      "searchThisArea": "Tìm trong khu vực này"
+    }
   }
 }
 

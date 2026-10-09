@@ -1,0 +1,325 @@
+openapi: 3.1.0
+info:
+  title: Homestay Booking - Search & Homepage API
+  description: API Contracts for Slice S11 - Homepage, Search and Mapbox integration
+  version: 1.0.0
+
+paths:
+  /api/v1/search/suggest:
+    get:
+      summary: Lấy danh sách gợi ý điểm đến tự động hoàn thành (Autocomplete)
+      operationId: getDestinationSuggestions
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Từ khóa tìm kiếm (hỗ trợ tiếng Việt có dấu/không dấu)
+      responses:
+        '200':
+          description: Danh sách gợi ý điểm đến thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DestinationSuggestionDTO'
+
+  /api/v1/search/popular-destinations:
+    get:
+      summary: Lấy danh sách điểm đến thịnh hành trên Trang chủ (P01)
+      operationId: getPopularDestinations
+      responses:
+        '200':
+          description: Danh sách điểm đến phổ biến
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PopularDestinationDTO'
+
+  /api/v1/search/featured:
+    get:
+      summary: Lấy danh sách chỗ ở nổi bật trên Trang chủ
+      operationId: getFeaturedListings
+      responses:
+        '200':
+          description: Danh sách listing nổi bật
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListingCardDTO'
+
+  /api/v1/search/listings:
+    get:
+      summary: Tìm kiếm chỗ ở theo bộ lọc, toạ độ Bounding Box và khoảng thời gian
+      operationId: searchListings
+      parameters:
+        - name: destination
+          in: query
+          schema:
+            type: string
+        - name: checkin
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: checkout
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: adults
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: children
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [ALL, ENTIRE_PLACE, PRIVATE_ROOM]
+        - name: bedrooms
+          in: query
+          schema:
+            type: integer
+        - name: amenities
+          in: query
+          schema:
+            type: string
+          description: Danh sách amenity codes phân cách bằng dấu phẩy
+        - name: instant
+          in: query
+          schema:
+            type: boolean
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [RELEVANCE, PRICE_ASC, PRICE_DESC, NEWEST]
+            default: RELEVANCE
+        - name: bbox
+          in: query
+          schema:
+            type: string
+          description: Khung nhìn bản đồ minLng,minLat,maxLng,maxLat
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 24
+      responses:
+        '200':
+          description: Kết quả tìm kiếm danh sách homestay và toạ độ markers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResultsResponse'
+        '400':
+          description: Tham số tìm kiếm không hợp lệ
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/v1/search/count:
+    get:
+      summary: Đếm số lượng kết quả phù hợp (realtime debounce cho Filter Dialog)
+      operationId: getSearchCount
+      parameters:
+        - name: destination
+          in: query
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: bedrooms
+          in: query
+          schema:
+            type: integer
+        - name: amenities
+          in: query
+          schema:
+            type: string
+        - name: instant
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Số lượng kết quả
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+
+components:
+  schemas:
+    DestinationSuggestionDTO:
+      type: object
+      required: [id, label, sublabel, type]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        sublabel:
+          type: string
+        type:
+          type: string
+          enum: [REGION, LISTING]
+        listingCount:
+          type: integer
+
+    PopularDestinationDTO:
+      type: object
+      required: [id, regionId, name, imageUrl, listingCount, startingPrice]
+      properties:
+        id:
+          type: string
+        regionId:
+          type: string
+        name:
+          type: string
+        imageUrl:
+          type: string
+        listingCount:
+          type: integer
+        startingPrice:
+          type: number
+
+    ListingCardDTO:
+      type: object
+      required: [id, title, propertyType, areaLabel, photos, maxGuests, bedrooms, beds, bookingMode, price, map, rating]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        propertyType:
+          type: string
+          enum: [ENTIRE_PLACE, PRIVATE_ROOM, SHARED_ROOM, HOTEL_ROOM]
+        areaLabel:
+          type: string
+        photos:
+          type: array
+          items:
+            type: string
+        maxGuests:
+          type: integer
+        bedrooms:
+          type: integer
+        beds:
+          type: integer
+        bookingMode:
+          type: string
+          enum: [INSTANT, REQUEST]
+        price:
+          type: object
+          properties:
+            mode:
+              type: string
+              enum: [TOTAL, FROM_NIGHTLY]
+            total:
+              type: number
+            nightlyAvg:
+              type: number
+            nights:
+              type: integer
+            includesFeesAndTaxes:
+              type: boolean
+        map:
+          type: object
+          properties:
+            lat:
+              type: number
+            lng:
+              type: number
+        rating:
+          type: number
+        reviewCount:
+          type: integer
+        isSuperhost:
+          type: boolean
+        isFavorite:
+          type: boolean
+
+    SearchResultsResponse:
+      type: object
+      required: [items, total, page, limit, hasMore, mapMarkers]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListingCardDTO'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        hasMore:
+          type: boolean
+        mapMarkers:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              lat:
+                type: number
+              lng:
+                type: number
+              priceLabel:
+                type: string
+
+    ProblemDetail:
+      type: object
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string

@@ -107,13 +107,14 @@ Quy ước trạng thái:
 
 ### Slice FE-S11: Trang Chủ, Tìm Kiếm & Bản Đồ (P01, P02)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s11-home-search/README.md`*
-- [-] **S11 Home & Search UI**: P01 (Trang chủ, thanh tìm kiếm viên thuốc), P02 (Kết quả tìm kiếm, bộ lọc nuqs URL, danh sách + bản đồ Mapbox marker giá): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `in_progress`
+- [x] **S11 Home & Search UI**: P01 (Trang chủ, thanh tìm kiếm viên thuốc), P02 (Kết quả tìm kiếm, bộ lọc URL, danh sách + bản đồ marker giá): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `passing` (2026-10-09)
+- [x] **S11 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `passing` (2026-10-09)
 
 ---
 
 ### Slice FE-S12: Chi Tiết Listing, Hồ Sơ Host & Chính Sách Hủy (P03, P04, P05)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s12-listing-detail/README.md`*
-- [ ] **S12 Listing Detail UI**: P03 (Lưới ảnh 1+4, Sticky Booking Box, tính giá qua Mock API), P04 (Hồ sơ Host công khai), P05 (Trang chính sách hủy): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [-] **S12 Listing Detail UI**: P03 (Lưới ảnh 1+4, Sticky Booking Box, tính giá qua Mock API), P04 (Hồ sơ Host công khai), P05 (Trang chính sách hủy): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `in_progress`
 
 ---
 

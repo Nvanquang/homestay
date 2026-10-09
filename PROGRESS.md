@@ -11,9 +11,9 @@
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Không có (Đã hoàn thành FE-S02; Sẵn sàng nhận nhiệm vụ tiếp theo)`
-- **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
-- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe`
+- **Active Task**: `Slice FE-S04: Đã hoàn tất và vượt qua cổng xác minh Harness (Chờ xác nhận để chuyển FE-S05)`
+- **WIP Count**: `1 / 1` (Tuân thủ giới hạn WIP = 1)
+- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe` -> `PASS-STATE GATED (100%)`
 
 ---
 
@@ -58,7 +58,8 @@ Quy ước trạng thái:
 
 ### Slice FE-S04: Xác Minh Danh Tính Host (P10, H02, C03, A03)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s04-host-verification/README.md`*
-- [ ] **S04 Host Onboarding UI**: P10 (Trang giới thiệu Host), H02/C03 (Tải giấy tờ CCCD/Passport), A03 (Admin duyệt danh tính kèm SecureImageViewer): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [x] **S04 Host Onboarding UI**: P10 (Trang giới thiệu Host), H02/C03 (Tải giấy tờ CCCD/Passport), A03 (Admin duyệt danh tính kèm SecureImageViewer, Soft lock, Watermark): `.\scripts\verify.ps1 -Target fe` -> `passing`
+- [x] **S04 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `passing`
 
 ---
 

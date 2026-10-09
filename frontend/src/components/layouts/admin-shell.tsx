@@ -70,7 +70,7 @@ export function AdminShell({
     {
       id: "identity-reviews" as const,
       label: t("navIdentity"),
-      href: `/${locale}/admin/identity-verification`,
+      href: `/${locale}/admin/identity-reviews`,
       icon: ShieldCheck,
       locked: false,
     },
@@ -157,12 +157,17 @@ export function AdminShell({
           <button
             type="button"
             onClick={handleToggleLocale}
-            className="p-1.5 sm:px-2.5 sm:py-1 rounded-full hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1.5 text-xs font-semibold transition-colors"
-            aria-label={t("switchLangAria")}
-            title={locale === "vi" ? "Switch to English" : "Chuyển sang Tiếng Việt"}
+            className="px-2.5 py-1.5 rounded-lg border border-[var(--color-border-default)] hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer"
+            aria-label={`Language (Current: ${locale === "vi" ? "Tiếng Việt" : "English"})`}
+            title={locale === "vi" ? "Chuyển sang English" : "Chuyển sang Tiếng Việt"}
           >
-            <Globe className="w-4 h-4" />
-            <span className="uppercase">{locale === "vi" ? "EN" : "VI"}</span>
+            <Globe className="w-3.5 h-3.5 text-neutral-500" />
+            <span className="font-bold text-[var(--color-text-primary)]">
+              {locale === "vi" ? "VI" : "EN"}
+            </span>
+            <span className="text-[10px] text-neutral-400 font-normal hidden sm:inline">
+              ({locale === "vi" ? "Tiếng Việt" : "English"})
+            </span>
           </button>
 
           <button

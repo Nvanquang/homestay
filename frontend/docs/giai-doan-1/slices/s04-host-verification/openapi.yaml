@@ -1,0 +1,498 @@
+openapi: 3.1.0
+info:
+  title: UrbanNest Identity Verification & Review API (Slice S04)
+  description: >
+    API đặc tả nghiệp vụ Xác minh danh tính cho Host / Guest và Quy trình xét duyệt
+    của Quản trị viên theo chuẩn phân hệ Bảo mật & Kiểm toán (BR-ACC-05, Soft lock, Signed URLs).
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: Backend API Gateway
+
+paths:
+  /host/verification:
+    get:
+      summary: Lấy thông tin hồ sơ xác minh của Host hiện tại
+      operationId: getHostVerification
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Thông tin hồ sơ xác minh
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityVerificationProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      summary: Lưu bản nháp hồ sơ xác minh Host
+      operationId: saveVerificationDraft
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveDraftRequest'
+      responses:
+        '200':
+          description: Bản nháp đã được cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityVerificationProfile'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /host/verification/submit:
+    post:
+      summary: Nộp hồ sơ xác minh Host chính thức để xét duyệt
+      operationId: submitVerification
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitVerificationRequest'
+      responses:
+        '200':
+          description: Hồ sơ đã được chuyển sang trạng thái PENDING
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityVerificationProfile'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          description: Hồ sơ đang trong trạng thái PENDING hoặc APPROVED không thể nộp lại
+
+  /host/verification/documents:
+    post:
+      summary: Tải lên tài liệu giấy tờ xác minh (CCCD / Giấy phép kinh doanh)
+      operationId: uploadDocumentFile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - purpose
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Tệp tin ảnh JPG/PNG/WEBP hoặc PDF (tối đa 10MB)
+                purpose:
+                  type: string
+                  enum: [ID_FRONT, ID_BACK, OPERATING_RIGHT]
+      responses:
+        '201':
+          description: Tải lên tài liệu thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentAttachment'
+        '400':
+          description: Định dạng hoặc kích thước tệp tin không hợp lệ
+
+  /admin/identity-reviews:
+    get:
+      summary: Hàng đợi duyệt hồ sơ danh tính dành cho Quản trị viên
+      operationId: getAdminReviewQueue
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, APPROVED, REJECTED, ALL]
+        - name: applicantType
+          in: query
+          schema:
+            type: string
+            enum: [HOST, GUEST, ALL]
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Danh sách hồ sơ chờ duyệt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewQueueResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/identity-reviews/{id}:
+    get:
+      summary: Chi tiết hồ sơ xác minh để rà soát
+      operationId: getAdminReviewDetail
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dữ liệu chi tiết hồ sơ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityReviewDetail'
+        '404':
+          description: Không tìm thấy hồ sơ
+
+  /admin/identity-reviews/{id}/lock:
+    post:
+      summary: Giữ khoá Soft Lock 5 phút đối với hồ sơ
+      operationId: lockReviewRecord
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Đã giữ khoá thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityReviewDetail'
+        '409':
+          description: Hồ sơ đang bị khoá bởi Quản trị viên khác
+
+  /admin/identity-reviews/{id}/unlock:
+    post:
+      summary: Giải phóng Soft Lock của hồ sơ
+      operationId: unlockReviewRecord
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Giải phóng khoá thành công
+
+  /admin/identity-reviews/{id}/documents/{documentId}/view:
+    post:
+      summary: Ghi nhận Audit Log và cấp Signed URL ngắn hạn (120 giây) xem tài liệu
+      operationId: viewSecureDocument
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cấp signed URL tạm thời
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signedUrl:
+                    type: string
+                    format: uri
+                  expiresInSeconds:
+                    type: integer
+                    example: 120
+
+  /admin/identity-reviews/{id}/decision:
+    post:
+      summary: Đưa ra quyết định Phê duyệt hoặc Từ chối hồ sơ
+      operationId: submitReviewDecision
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewDecisionPayload'
+      responses:
+        '200':
+          description: Đã xử lý quyết định thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityReviewDetail'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    IdentityVerificationProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        applicantType:
+          type: string
+          enum: [HOST, GUEST]
+        legalName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        phone:
+          type: string
+        idType:
+          type: string
+          enum: [CCCD, PASSPORT]
+        idNumberMasked:
+          type: string
+          example: '0791••••1234'
+        idFront:
+          $ref: '#/components/schemas/DocumentAttachment'
+        idBack:
+          $ref: '#/components/schemas/DocumentAttachment'
+        operatingRightDocs:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentAttachment'
+        status:
+          type: string
+          enum: [UNVERIFIED, PENDING, APPROVED, REJECTED]
+        submittedAt:
+          type: string
+          format: date-time
+        decidedAt:
+          type: string
+          format: date-time
+
+    DocumentAttachment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        fileSize:
+          type: integer
+        fileType:
+          type: string
+        purpose:
+          type: string
+          enum: [ID_FRONT, ID_BACK, OPERATING_RIGHT]
+        uploadedAt:
+          type: string
+          format: date-time
+
+    SaveDraftRequest:
+      type: object
+      properties:
+        legalName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        phone:
+          type: string
+        idType:
+          type: string
+          enum: [CCCD, PASSPORT]
+        idNumber:
+          type: string
+        idFrontDocId:
+          type: string
+          format: uuid
+        idBackDocId:
+          type: string
+          format: uuid
+        operatingRightDocIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    SubmitVerificationRequest:
+      type: object
+      required:
+        - legalName
+        - dateOfBirth
+        - phone
+        - idType
+        - idNumber
+        - idFrontDocId
+      properties:
+        legalName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        phone:
+          type: string
+        idType:
+          type: string
+          enum: [CCCD, PASSPORT]
+        idNumber:
+          type: string
+        idFrontDocId:
+          type: string
+          format: uuid
+        idBackDocId:
+          type: string
+          format: uuid
+        operatingRightDocIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    ReviewQueueResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityReviewDetail'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+
+    IdentityReviewDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        applicantType:
+          type: string
+          enum: [HOST, GUEST]
+        legalName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        phone:
+          type: string
+        idType:
+          type: string
+          enum: [CCCD, PASSPORT]
+        idNumber:
+          type: string
+        idFront:
+          $ref: '#/components/schemas/DocumentAttachment'
+        idBack:
+          $ref: '#/components/schemas/DocumentAttachment'
+        operatingRightDocs:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentAttachment'
+        status:
+          type: string
+          enum: [UNVERIFIED, PENDING, APPROVED, REJECTED]
+        flaggedDuplicate:
+          type: boolean
+        duplicateOfEmail:
+          type: string
+        lockedBy:
+          type: object
+          nullable: true
+          properties:
+            adminId:
+              type: string
+            adminName:
+              type: string
+            lockedUntil:
+              type: string
+              format: date-time
+        submittedAt:
+          type: string
+          format: date-time
+        decidedAt:
+          type: string
+          format: date-time
+
+    ReviewDecisionPayload:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum: [APPROVE, REJECT]
+        reasonCode:
+          type: string
+          enum:
+            - BLURRY_PHOTO
+            - EXPIRED_DOCUMENT
+            - NAME_MISMATCH
+            - DUPLICATE_ID
+            - SUSPECTED_FRAUD
+            - OTHER
+            - APPROVED_VALID
+        adminNotes:
+          type: string
+
+  responses:
+    Unauthorized:
+      description: Chưa đăng nhập hoặc phiên làm việc đã hết hạn
+    Forbidden:
+      description: Không có quyền truy cập chức năng xét duyệt quản trị
+    ValidationError:
+      description: Dữ liệu đầu vào không hợp lệ

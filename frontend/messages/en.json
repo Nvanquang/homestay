@@ -1234,6 +1234,112 @@
       "searchAsMove": "Search as I move the map",
       "searchThisArea": "Search this area"
     }
+  },
+  "listingDetail": {
+    "loadingListing": "Loading stay information...",
+    "notFoundTitle": "This stay is currently unavailable",
+    "notFoundSubtitle": "The homestay you are looking for might be temporarily closed or updating information.",
+    "browseOtherStaysBtn": "Explore other stays",
+    "backBtn": "Back",
+    "shareBtn": "Share",
+    "copied": "Link copied",
+    "saveBtn": "Save",
+    "linkCopiedToast": "Listing link copied to clipboard",
+    "addedToWishlistToast": "Saved to your wishlist",
+    "removedFromWishlistToast": "Removed from your wishlist",
+    "reviews": "reviews",
+    "entirePlaceTitle": "Entire private homestay place",
+    "privateRoomTitle": "Cozy private room in homestay",
+    "capacitySummary": "{guests} guests · {bedrooms} bedrooms · {beds} beds · {bathrooms} baths",
+    "highlightSelfCheckin": "Convenient self check-in",
+    "highlightSelfCheckinDesc": "Check in easily using smart lock or key lockbox.",
+    "highlightCleanliness": "Sparkling clean stay",
+    "highlightCleanlinessDesc": "Thoroughly sanitized following a rigorous 5-step cleaning protocol.",
+    "descriptionTitle": "About this space",
+    "houseRulesTitle": "House Rules & Check-in Hours",
+    "checkinTime": "Check-in after: {time}",
+    "checkoutTime": "Check-out before: {time}",
+    "reviewsTitle": "Guest Reviews",
+    "noReviewsYetPhase1": "No reviews for this listing yet. Be the first traveler to stay here!",
+    "gallery": {
+      "showAllPhotosBtn": "Show all {count} photos",
+      "lightboxTitle": "Listing Photo Gallery"
+    },
+    "hostCard": {
+      "hostedBy": "Hosted by {name}",
+      "verifiedBadge": "Identity Verified",
+      "joinedAt": "Joined in {date}",
+      "activeListingsCount": "{count} active stays",
+      "viewProfileBtn": "View profile"
+    },
+    "amenities": {
+      "title": "What this place offers",
+      "showAllBtn": "Show all {count} amenities",
+      "allAmenitiesModalTitle": "All amenities & services"
+    },
+    "policy": {
+      "title": "Cancellation Policy",
+      "viewFullPolicyBtn": "View policy details",
+      "refundFull": "✓ 100% room & fees refund",
+      "forfeitFirstNight": "First night non-refundable"
+    },
+    "location": {
+      "title": "Where you will be",
+      "exactAddressNotice": "Exact location provided after booking is confirmed."
+    },
+    "bookingBox": {
+      "night": "night",
+      "checkinLabel": "Check-in",
+      "checkoutLabel": "Check-out",
+      "guestsLabel": "Guests",
+      "guestsCount": "guests",
+      "adults": "Adults",
+      "adultsAge": "Age 13+",
+      "children": "Children",
+      "childrenAge": "Ages 2–12",
+      "maxCapacityNotice": "This listing accommodates up to {count} guests.",
+      "instantBookBtn": "Instant Book",
+      "requestBookBtn": "Request to Book",
+      "phase1DisabledNotice": "Online booking checkout will launch soon.",
+      "noChargeNotice": "You will not be charged yet",
+      "viewNightlyRates": "View nightly price breakdown",
+      "weekend": "Weekend",
+      "weekday": "Weekday",
+      "totalBeforeTaxes": "Total price",
+      "includesFeesAndTaxesNotice": "Includes all taxes and homestay fees",
+      "addDatesToSeeTotal": "Add dates to see total price"
+    }
+  },
+  "hostProfile": {
+    "backBtn": "Back",
+    "shareBtn": "Share",
+    "copied": "Copied",
+    "linkCopiedToast": "Host profile link copied to clipboard",
+    "notFoundTitle": "Host information not found",
+    "goBackBtn": "Go back",
+    "identityVerified": "Verified Identity",
+    "joinedDate": "Joined in {date}",
+    "activeListingsCount": "{count} active listings",
+    "listingsByHostTitle": "{name}'s Stays ({count})"
+  },
+  "cancellationPolicies": {
+    "backBtn": "Back",
+    "backToListingBtn": "Back to stay",
+    "appliedForThisStay": "Applies to this stay",
+    "pageTitle": "Cancellation Policies",
+    "pageSubtitle": "Clear and transparent refund rules for unexpected itinerary changes.",
+    "tabFlexible": "Flexible",
+    "tabModerate": "Moderate",
+    "tabStrict": "Strict",
+    "timeCalculationNotice": "Milestones are calculated based on the local check-in time of the listing.",
+    "refundMilestonesTableTitle": "Refund Percentage Milestones",
+    "colMilestone": "Cancellation Window",
+    "colRoomFee": "Room Fee",
+    "colCleaningFee": "Cleaning Fee",
+    "colServiceFee": "Service Fee",
+    "specialCasesTitle": "Special Circumstances",
+    "hostCancelTitle": "Host Cancellation",
+    "forceMajeureTitle": "Extenuating Circumstances"
   }
 }
 

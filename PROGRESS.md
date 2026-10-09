@@ -114,13 +114,14 @@ Quy ước trạng thái:
 
 ### Slice FE-S12: Chi Tiết Listing, Hồ Sơ Host & Chính Sách Hủy (P03, P04, P05)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s12-listing-detail/README.md`*
-- [-] **S12 Listing Detail UI**: P03 (Lưới ảnh 1+4, Sticky Booking Box, tính giá qua Mock API), P04 (Hồ sơ Host công khai), P05 (Trang chính sách hủy): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `in_progress`
+- [x] **S12 Listing Detail UI**: P03 (Lưới ảnh 1+4, Sticky Booking Box, tính giá qua Mock API), P04 (Hồ sơ Host công khai), P05 (Trang chính sách hủy): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `passing` (2026-10-09)
+- [x] **S12 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `passing` (2026-10-09)
 
 ---
 
 ### Slice FE-S13: Đa Tiền Tệ & Bảng Tỷ Giá (C02, P02, P03 Mở Rộng)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s13-currency-exchange/README.md`*
-- [ ] **S13 Currency Switcher UI**: Menu đổi tiền tệ (VND, USD, EUR...), chuyển đổi hiển thị định dạng số tự động: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [-] **S13 Currency Switcher UI**: Menu đổi tiền tệ (VND, USD, EUR...), chuyển đổi hiển thị định dạng số tự động: `.\scripts\verify.ps1 -Target fe -Tier 2` -> `in_progress`
 
 ---
 

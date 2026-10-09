@@ -1234,6 +1234,112 @@
       "searchAsMove": "Tìm khi di chuyển bản đồ",
       "searchThisArea": "Tìm trong khu vực này"
     }
+  },
+  "listingDetail": {
+    "loadingListing": "Đang tải thông tin chỗ ở...",
+    "notFoundTitle": "Chỗ ở này hiện không khả dụng",
+    "notFoundSubtitle": "Homestay bạn tìm kiếm có thể đã tạm đóng hoặc đang trong quá trình cập nhật.",
+    "browseOtherStaysBtn": "Khám phá chỗ ở khác",
+    "backBtn": "Quay lại",
+    "shareBtn": "Chia sẻ",
+    "copied": "Đã sao chép liên kết",
+    "saveBtn": "Lưu",
+    "linkCopiedToast": "Đã sao chép liên kết chỗ ở vào clipboard",
+    "addedToWishlistToast": "Đã lưu vào danh sách yêu thích",
+    "removedFromWishlistToast": "Đã xóa khỏi danh sách yêu thích",
+    "reviews": "đánh giá",
+    "entirePlaceTitle": "Toàn bộ căn nhà homestay riêng tư",
+    "privateRoomTitle": "Phòng riêng ấm cúng trong homestay",
+    "capacitySummary": "{guests} khách · {bedrooms} phòng ngủ · {beds} giường · {bathrooms} phòng tắm",
+    "highlightSelfCheckin": "Tự nhận phòng thuận tiện",
+    "highlightSelfCheckinDesc": "Nhận phòng dễ dàng với khóa thông minh hoặc hộp khóa an toàn.",
+    "highlightCleanliness": "Đạt chuẩn vệ sinh cao",
+    "highlightCleanlinessDesc": "Không gian được dọn dẹp kỹ lưỡng theo quy chuẩn 5 bước nghiêm ngặt.",
+    "descriptionTitle": "Giới thiệu về chỗ ở này",
+    "houseRulesTitle": "Nội quy & Giờ nhận/trả phòng",
+    "checkinTime": "Nhận phòng sau: {time}",
+    "checkoutTime": "Trả phòng trước: {time}",
+    "reviewsTitle": "Đánh giá từ khách",
+    "noReviewsYetPhase1": "Chỗ ở này chưa có đánh giá nào. Hãy là người đầu tiên trải nghiệm!",
+    "gallery": {
+      "showAllPhotosBtn": "Xem tất cả {count} ảnh",
+      "lightboxTitle": "Bộ sưu tập ảnh chỗ ở"
+    },
+    "hostCard": {
+      "hostedBy": "Chủ nhà: {name}",
+      "verifiedBadge": "Đã xác minh",
+      "joinedAt": "Tham gia từ {date}",
+      "activeListingsCount": "{count} chỗ ở đang mở",
+      "viewProfileBtn": "Xem hồ sơ"
+    },
+    "amenities": {
+      "title": "Nơi này có những gì cho bạn",
+      "showAllBtn": "Xem tất cả {count} tiện nghi",
+      "allAmenitiesModalTitle": "Tất cả tiện nghi & dịch vụ"
+    },
+    "policy": {
+      "title": "Chính sách hủy phòng",
+      "viewFullPolicyBtn": "Xem chi tiết chính sách",
+      "refundFull": "✓ Hoàn 100% tiền phòng & phí",
+      "forfeitFirstNight": "Mất phí đêm đầu"
+    },
+    "location": {
+      "title": "Vị trí & Khu vực xung quanh",
+      "exactAddressNotice": "Địa chỉ chính xác sẽ được cung cấp sau khi đặt phòng được xác nhận."
+    },
+    "bookingBox": {
+      "night": "đêm",
+      "checkinLabel": "Nhận phòng",
+      "checkoutLabel": "Trả phòng",
+      "guestsLabel": "Khách",
+      "guestsCount": "khách",
+      "adults": "Người lớn",
+      "adultsAge": "Từ 13 tuổi trở lên",
+      "children": "Trẻ em",
+      "childrenAge": "Độ tuổi 2–12",
+      "maxCapacityNotice": "Chỗ ở này tiếp đón tối đa {count} khách.",
+      "instantBookBtn": "Đặt phòng ngay",
+      "requestBookBtn": "Gửi yêu cầu đặt phòng",
+      "phase1DisabledNotice": "Tính năng đặt phòng trực tuyến sẽ sớm ra mắt.",
+      "noChargeNotice": "Bạn chưa bị trừ tiền ở bước này",
+      "viewNightlyRates": "Xem chi tiết giá từng đêm",
+      "weekend": "Cuối tuần",
+      "weekday": "Ngày trong tuần",
+      "totalBeforeTaxes": "Tổng tiền",
+      "includesFeesAndTaxesNotice": "Đã bao gồm toàn bộ thuế & phí dịch vụ",
+      "addDatesToSeeTotal": "Thêm ngày nhận & trả phòng để xem tổng giá"
+    }
+  },
+  "hostProfile": {
+    "backBtn": "Quay lại",
+    "shareBtn": "Chia sẻ",
+    "copied": "Đã sao chép",
+    "linkCopiedToast": "Đã sao chép liên kết hồ sơ Host",
+    "notFoundTitle": "Không tìm thấy thông tin Host",
+    "goBackBtn": "Quay lại",
+    "identityVerified": "Danh tính đã xác minh",
+    "joinedDate": "Tham gia từ {date}",
+    "activeListingsCount": "{count} chỗ ở đang hoạt động",
+    "listingsByHostTitle": "Chỗ ở của {name} ({count})"
+  },
+  "cancellationPolicies": {
+    "backBtn": "Quay lại",
+    "backToListingBtn": "Về chỗ ở",
+    "appliedForThisStay": "Áp dụng cho chỗ ở này",
+    "pageTitle": "Chính sách hủy đặt phòng",
+    "pageSubtitle": "Minh bạch và rõ ràng về quyền lợi hoàn tiền trong mọi trường hợp thay đổi kế hoạch chuyến đi.",
+    "tabFlexible": "Linh hoạt",
+    "tabModerate": "Tiêu chuẩn",
+    "tabStrict": "Nghiêm ngặt",
+    "timeCalculationNotice": "Thời điểm áp dụng được tính theo giờ check-in thực tế của chỗ nghỉ.",
+    "refundMilestonesTableTitle": "Bảng tỷ lệ hoàn tiền theo từng mốc thời gian",
+    "colMilestone": "Thời điểm hủy",
+    "colRoomFee": "Tiền phòng",
+    "colCleaningFee": "Phí vệ sinh",
+    "colServiceFee": "Phí dịch vụ",
+    "specialCasesTitle": "Các trường hợp đặc biệt",
+    "hostCancelTitle": "Khi Chủ nhà hủy phòng",
+    "forceMajeureTitle": "Trường hợp bất khả kháng"
   }
 }
 

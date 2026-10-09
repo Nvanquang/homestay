@@ -5,6 +5,7 @@ import {
   SearchFilterState,
   SearchResultsResponse,
 } from "../types";
+import { getStoredBlocks } from "../../calendar/api/mock-calendar";
 
 export const MOCK_POPULAR_DESTINATIONS: PopularDestination[] = [
   {
@@ -492,6 +493,29 @@ export async function searchListings(filters: Partial<SearchFilterState>): Promi
         item.areaLabel.toLowerCase().includes(dest) ||
         item.title.toLowerCase().includes(dest)
     );
+  }
+
+  // 1b. Check-in / Check-out Availability (Exclusion for blocked calendar nights)
+  if (filters.checkin && filters.checkout) {
+    const dStart = new Date(filters.checkin);
+    const dEnd = new Date(filters.checkout);
+    if (!isNaN(dStart.getTime()) && !isNaN(dEnd.getTime()) && dStart < dEnd) {
+      list = list.filter((item) => {
+        const blocks = getStoredBlocks(item.id);
+        const cur = new Date(dStart);
+        while (cur < dEnd) {
+          const y = cur.getFullYear();
+          const m = String(cur.getMonth() + 1).padStart(2, "0");
+          const d = String(cur.getDate()).padStart(2, "0");
+          const dateStr = `${y}-${m}-${d}`;
+          if (blocks[dateStr]?.blocked) {
+            return false;
+          }
+          cur.setDate(cur.getDate() + 1);
+        }
+        return true;
+      });
+    }
   }
 
   // 2. Guests

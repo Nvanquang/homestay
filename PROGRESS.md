@@ -11,7 +11,7 @@
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Slice FE-S10: Giá Theo Mùa & Ngày Lễ (H08)` (Hoàn tất xác minh, chờ nghiệm thu)
+- **Active Task**: `Hoàn thành 100% Giai Đoạn 1 (FE-S01 đến FE-S13 & Kiểm Thử Hành Trình Xuyên Suốt J1–J5)`
 - **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
 - **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe` -> `PASSED (Exit code 0)`
 
@@ -128,7 +128,7 @@ Quy ước trạng thái:
 
 ### Giai Đoạn Nghiệm Thu Cuối: Kiểm Thử Hành Trình Xuyên Suốt (E2E Journeys J1–J5)
 *Đặc tả: `frontend/docs/giai-doan-1/appendices/e2e-journeys.md`*
-- [-] **E2E Journeys Verification**: Kiểm thử 5 hành trình người dùng (J1–J5), bảo đảm tích hợp liền mạch giữa các module Giai đoạn 1: `.\scripts\verify.ps1 -Target fe` -> `in_progress`
+- [x] **E2E Journeys Verification**: Kiểm thử 5 hành trình người dùng (J1–J5: Onboarding Host mới -> Duyệt phòng, Khách đặt phòng -> Đa tiền tệ, Needs Changes phản hồi -> Duyệt lại, Host chặn lịch -> Khách tìm kiếm loại trừ phòng trùng, Host thiết lập giá lễ/mùa -> Bậc ưu tiên áp dụng), bảo đảm tích hợp liền mạch giữa các module Giai đoạn 1: `.\scripts\verify.ps1 -Target fe` -> `passing` (2026-10-09)
 
 ---
 

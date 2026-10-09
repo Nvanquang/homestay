@@ -17,7 +17,7 @@ const STORAGE_KEY_RULES = "homestay_calendar_rules_";
 const inMemoryBlocks: Record<string, Record<string, { blocked: boolean; reason?: string }>> = {};
 const inMemoryRules: Record<string, StayRules> = {};
 
-function getStoredBlocks(listingId: string): Record<string, { blocked: boolean; reason?: string }> {
+export function getStoredBlocks(listingId: string): Record<string, { blocked: boolean; reason?: string }> {
   if (typeof window !== "undefined" && window.localStorage) {
     try {
       const data = localStorage.getItem(`${STORAGE_KEY_BLOCKS}${listingId}`);

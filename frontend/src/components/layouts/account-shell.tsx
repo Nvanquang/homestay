@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { PublicShell } from "./public-shell";
 import { User, Settings, ShieldCheck } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 
 export type AccountTab = "profile" | "settings" | "verification";
 
@@ -19,31 +20,36 @@ export interface AccountShellProps {
 export function AccountShell({
   children,
   activeTab = "profile",
-  title = "Tài khoản của bạn",
-  description = "Quản lý thông tin cá nhân, cài đặt bảo mật và trạng thái xác minh danh tính.",
+  title,
+  description,
   userName = "Người dùng",
   onSwitchToHost,
 }: AccountShellProps) {
+  const t = useTranslations("common");
+  const locale = useLocale();
+
   const tabs = [
     {
       id: "profile" as const,
-      label: "Hồ sơ cá nhân",
-      href: "/account/profile",
+      label: t("profile"),
+      href: `/${locale}/account/profile`,
       icon: User,
     },
     {
       id: "settings" as const,
-      label: "Cài đặt & Bảo mật",
-      href: "/account/settings",
+      label: t("settings"),
+      href: `/${locale}/account/settings`,
       icon: Settings,
     },
     {
       id: "verification" as const,
-      label: "Xác minh danh tính",
-      href: "/account/verification",
+      label: t("verification"),
+      href: `/${locale}/account/profile#verification`,
       icon: ShieldCheck,
     },
   ];
+
+  const displayTitle = title || t("account");
 
   return (
     <PublicShell
@@ -56,7 +62,7 @@ export function AccountShell({
         {/* Page Header */}
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-gray-900)]">
-            {title}
+            {displayTitle}
           </h1>
           {description && (
             <p className="mt-1.5 text-sm text-[var(--color-text-secondary)]">
@@ -67,7 +73,7 @@ export function AccountShell({
 
         {/* Horizontal Sub-Navigation */}
         <nav
-          aria-label="Thanh điều hướng tài khoản"
+          aria-label={displayTitle}
           className="flex border-b border-[var(--color-border-default)] mb-6 overflow-x-auto no-scrollbar"
         >
           {tabs.map((tab) => {

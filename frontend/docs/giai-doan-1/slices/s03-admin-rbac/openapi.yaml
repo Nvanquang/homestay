@@ -1,0 +1,300 @@
+openapi: 3.1.0
+info:
+  title: Homestay Booking - Back-office & RBAC API
+  version: 1.0.0
+  description: >
+    Tệp hợp đồng kỹ thuật cho phân hệ đăng nhập nhân sự và phân quyền quản trị (Slice S03).
+    Sinh tự động bởi Harness Giai đoạn 1 sau khi hoàn tất xây dựng Frontend.
+paths:
+  /admin/auth/login:
+    post:
+      summary: Đăng nhập nhân sự Back-office (A01)
+      description: Xác thực danh tính nhân sự quản trị. Từ chối nếu tài khoản thuộc khách/chủ nhà thông thường hoặc đã bị khoá.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@homestay.local
+                password:
+                  type: string
+                  example: SecretAdmin123!
+      responses:
+        '200':
+          description: Đăng nhập thành công, thiết lập phiên session cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSession'
+        '401':
+          description: Sai thông tin email hoặc mật khẩu
+        '403':
+          description: Tài khoản không có quyền back-office hoặc bị khoá
+
+  /admin/auth/logout:
+    post:
+      summary: Đăng xuất phiên quản trị
+      responses:
+        '204':
+          description: Đã đăng xuất thành công
+
+  /admin/staff:
+    get:
+      summary: Lấy danh sách nhân sự (A18)
+      description: Hỗ trợ tìm kiếm, lọc theo vai trò và trạng thái, phân trang.
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [ALL, ADMIN, SUPPORT, ACCOUNTANT]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ALL, ACTIVE, INVITED, LOCKED]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StaffUser'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  pageSize:
+                    type: integer
+                  totalPages:
+                    type: integer
+        '403':
+          description: Chỉ tài khoản vai trò ADMIN mới có quyền truy cập
+    post:
+      summary: Tạo mới tài khoản nhân sự và gửi lời mời
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullName, email, staffRole]
+              properties:
+                fullName:
+                  type: string
+                  minLength: 2
+                  maxLength: 100
+                email:
+                  type: string
+                  format: email
+                staffRole:
+                  type: string
+                  enum: [ADMIN, SUPPORT, ACCOUNTANT]
+      responses:
+        '201':
+          description: Tạo thành công, trạng thái khởi tạo INVITED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffUser'
+        '409':
+          description: Email đã tồn tại trong danh sách nhân sự
+
+  /admin/staff/{id}/role:
+    patch:
+      summary: Thay đổi vai trò nhân sự (RBAC)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role, reason]
+              properties:
+                role:
+                  type: string
+                  enum: [ADMIN, SUPPORT, ACCOUNTANT]
+                reason:
+                  type: string
+                  minLength: 10
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffUser'
+        '409':
+          description: Lỗi vi phạm SELF_ACTION (tự hạ quyền) hoặc LAST_ADMIN (hạ quyền Admin cuối cùng)
+
+  /admin/staff/{id}/lock:
+    post:
+      summary: Vô hiệu hoá / Khoá tài khoản nhân sự
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  minLength: 10
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffUser'
+        '409':
+          description: Lỗi vi phạm SELF_ACTION (tự khoá) hoặc LAST_ADMIN (khoá Admin cuối cùng)
+
+  /admin/staff/{id}/unlock:
+    post:
+      summary: Kích hoạt lại tài khoản nhân sự
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  minLength: 10
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffUser'
+
+  /admin/staff/{id}/activity:
+    get:
+      summary: Lấy danh sách nhật ký kiểm toán của nhân sự
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StaffActivityLog'
+
+components:
+  schemas:
+    StaffRole:
+      type: string
+      enum: [ADMIN, SUPPORT, ACCOUNTANT]
+
+    StaffStatus:
+      type: string
+      enum: [ACTIVE, INVITED, LOCKED]
+
+    AdminSession:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        staffRole:
+          $ref: '#/components/schemas/StaffRole'
+
+    StaffUser:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        staffRole:
+          $ref: '#/components/schemas/StaffRole'
+        status:
+          $ref: '#/components/schemas/StaffStatus'
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    StaffActivityLog:
+      type: object
+      properties:
+        id:
+          type: string
+        staffId:
+          type: string
+        actorId:
+          type: string
+        actorName:
+          type: string
+        action:
+          type: string
+          enum: [CREATE, CHANGE_ROLE, LOCK, UNLOCK]
+        oldValue:
+          type: string
+          nullable: true
+        newValue:
+          type: string
+          nullable: true
+        reason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

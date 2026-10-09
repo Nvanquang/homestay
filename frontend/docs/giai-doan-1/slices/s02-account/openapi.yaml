@@ -1,0 +1,465 @@
+openapi: 3.0.3
+info:
+  title: Homestay Booking API - Phân hệ Hồ sơ & Cài đặt (Account & Settings)
+  description: |
+    API Contract chính thức cho Slice S02 (Account) thuộc hệ thống Homestay Marketplace.
+    Tài liệu này đóng vai trò là Nguồn Sự Thật Duy Nhất (Single Source of Truth - SSOT) cho giao tiếp Client-Server.
+    Các lỗi API tuân thủ tiêu chuẩn RFC 9457 (Problem Details for HTTP APIs).
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: API Gateway Reverse Proxy
+
+paths:
+  /me:
+    get:
+      summary: Lấy thông tin hồ sơ người dùng hiện tại (C01, C02)
+      operationId: getCurrentUserProfile
+      tags:
+        - Account Profile
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Lấy hồ sơ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+    patch:
+      summary: Cập nhật thông tin hồ sơ và tùy chọn ngôn ngữ/tiền tệ (C01)
+      operationId: updateCurrentUserProfile
+      tags:
+        - Account Profile
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công, trả về hồ sơ mới nhất
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /me/avatar:
+    post:
+      summary: Tải lên ảnh đại diện mới (C01)
+      description: |
+        Tải lên tệp ảnh đại diện (JPG, PNG, WebP ≤ 5MB).
+        Máy chủ lưu trữ vào MinIO/S3 và cập nhật đường dẫn avatar_url cho người dùng.
+      operationId: uploadAvatar
+      tags:
+        - Account Profile
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Tệp ảnh định dạng JPG, PNG hoặc WebP, dung lượng không quá 5MB.
+      responses:
+        '200':
+          description: Tải lên thành công, trả về URL ảnh
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - avatarUrl
+                properties:
+                  avatarUrl:
+                    type: string
+                    format: uri
+                    example: "https://minio.homestaybooking.local/avatars/usr_guest_01.webp"
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+    delete:
+      summary: Xoá ảnh đại diện (C01)
+      operationId: deleteAvatar
+      tags:
+        - Account Profile
+      security:
+        - sessionCookie: []
+      responses:
+        '204':
+          description: Đã xoá ảnh đại diện thành công
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /me/password:
+    post:
+      summary: Đổi mật khẩu tài khoản (C02)
+      description: |
+        Yêu cầu mật khẩu hiện tại và mật khẩu mới.
+        Khi đổi thành công, Backend tự động thu hồi/xoá toàn bộ các phiên đăng nhập khác trong Spring Session JDBC, giữ lại phiên hiện tại.
+      operationId: changePassword
+      tags:
+        - Account Settings
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '204':
+          description: Đổi mật khẩu thành công. Các phiên trên thiết bị khác đã bị huỷ.
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '422':
+          description: Mật khẩu hiện tại không chính xác (WRONG_CURRENT) hoặc mật khẩu mới trùng mật khẩu cũ
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              example:
+                type: "about:blank"
+                title: "Mật khẩu hiện tại không chính xác"
+                status: 422
+                code: "WRONG_CURRENT"
+                detail: "Mật khẩu hiện tại bạn cung cấp không chính xác."
+                fieldErrors:
+                  - field: "currentPassword"
+                    code: "WRONG_CURRENT"
+                    message: "Mật khẩu hiện tại không chính xác."
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /me/host-mode:
+    post:
+      summary: Kích hoạt chế độ Host trên nền tảng (C02)
+      description: |
+        Công tắc một chiều ở Giai đoạn 1. Sau khi bật, người dùng có quyền truy cập kênh Host,
+        và hệ thống yêu cầu hoàn tất xác minh danh tính để tạo listing nếu chưa được duyệt.
+      operationId: enableHostMode
+      tags:
+        - Account Settings
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Bật chế độ Host thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostModeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+  /me/notifications:
+    get:
+      summary: Lấy cấu hình thông báo (C02)
+      operationId: getNotificationSettings
+      tags:
+        - Account Settings
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Lấy cấu hình thông báo thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSettingsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+    put:
+      summary: Cập nhật cấu hình thông báo (C02)
+      operationId: updateNotificationSettings
+      tags:
+        - Account Settings
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationSettingsRequest'
+      responses:
+        '200':
+          description: Cập nhật cấu hình thông báo thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSettingsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '500':
+          $ref: '#/components/responses/InternalServerError500'
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: SESSION
+      description: Spring Session JDBC HttpOnly Cookie
+
+  schemas:
+    UserProfileResponse:
+      type: object
+      required:
+        - id
+        - email
+        - fullName
+        - emailVerified
+        - language
+        - displayCurrency
+        - verificationStatus
+        - isHost
+        - createdAt
+      properties:
+        id:
+          type: string
+          example: "usr_guest_01"
+        email:
+          type: string
+          format: email
+          example: "guest@demo.test"
+        fullName:
+          type: string
+          example: "Nguyễn Văn Khách"
+        emailVerified:
+          type: boolean
+          example: true
+        phone:
+          type: string
+          nullable: true
+          example: "0901234567"
+        bio:
+          type: string
+          nullable: true
+          example: "Xin chào! Tôi yêu thích khám phá các điểm homestay mộc mạc."
+        avatarUrl:
+          type: string
+          nullable: true
+          format: uri
+          example: "https://minio.homestaybooking.local/avatars/usr_guest_01.webp"
+        language:
+          type: string
+          enum: [vi, en]
+          example: "vi"
+        displayCurrency:
+          type: string
+          enum: [VND, USD]
+          example: "VND"
+        verificationStatus:
+          type: string
+          enum: [UNVERIFIED, PENDING, VERIFIED, REJECTED]
+          example: "UNVERIFIED"
+        isHost:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-01T00:00:00Z"
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 80
+          example: "Nguyễn Văn Khách"
+        phone:
+          type: string
+          nullable: true
+          pattern: '^(\+?[0-9]{9,15})?$'
+          example: "0901234567"
+        bio:
+          type: string
+          nullable: true
+          maxLength: 300
+          example: "Chia sẻ đôi nét về bạn..."
+        language:
+          type: string
+          enum: [vi, en]
+          example: "vi"
+        displayCurrency:
+          type: string
+          enum: [VND, USD]
+          example: "VND"
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          minLength: 1
+          example: "OldPassword123"
+        newPassword:
+          type: string
+          minLength: 8
+          maxLength: 128
+          pattern: '^(?=.*[a-zA-Z])(?=.*[0-9])'
+          example: "NewPassword456"
+
+    HostModeResponse:
+      type: object
+      required:
+        - isHost
+        - hostVerification
+      properties:
+        isHost:
+          type: boolean
+          example: true
+        hostVerification:
+          type: object
+          required:
+            - status
+          properties:
+            status:
+              type: string
+              enum: [UNVERIFIED, PENDING, VERIFIED, REJECTED]
+              example: "UNVERIFIED"
+
+    NotificationSettingsRequest:
+      type: object
+      required:
+        - emailNotifications
+        - smsNotifications
+        - bookingUpdates
+        - promoOffers
+      properties:
+        emailNotifications:
+          type: boolean
+          example: true
+        smsNotifications:
+          type: boolean
+          example: false
+        bookingUpdates:
+          type: boolean
+          example: true
+        promoOffers:
+          type: boolean
+          example: false
+
+    NotificationSettingsResponse:
+      type: object
+      required:
+        - emailNotifications
+        - smsNotifications
+        - bookingUpdates
+        - promoOffers
+      properties:
+        emailNotifications:
+          type: boolean
+          example: true
+        smsNotifications:
+          type: boolean
+          example: false
+        bookingUpdates:
+          type: boolean
+          example: true
+        promoOffers:
+          type: boolean
+          example: false
+
+    ProblemDetails:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        type:
+          type: string
+          format: uri
+          default: "about:blank"
+        title:
+          type: string
+        status:
+          type: integer
+        code:
+          type: string
+        detail:
+          type: string
+        instance:
+          type: string
+        traceId:
+          type: string
+        fieldErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - code
+              - message
+            properties:
+              field:
+                type: string
+              code:
+                type: string
+              message:
+                type: string
+
+  responses:
+    BadRequest400:
+      description: Dữ liệu gửi lên không đúng định dạng hoặc vi phạm ràng buộc
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+
+    Unauthorized401:
+      description: Phiên đăng nhập không tồn tại hoặc đã hết hạn
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+
+    InternalServerError500:
+      description: Lỗi máy chủ nội bộ
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'

@@ -4,3 +4,8 @@ export * from "./password-field";
 export * from "./select";
 export * from "./badge";
 export * from "./toaster";
+export * from "./switch";
+export * from "./textarea";
+export * from "./dialog";
+export * from "./confirm-dialog";
+export * from "./locale-switcher";

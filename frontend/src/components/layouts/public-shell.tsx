@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
 import {
   Search,
   Globe,
@@ -13,6 +15,8 @@ import {
   Compass,
   Lock,
 } from "lucide-react";
+import { LocaleSwitcher } from "@/components/ui/locale-switcher";
+import { CurrencySwitcher, CurrencyFxBanner } from "@/features/currency";
 
 export interface PublicShellProps {
   children: React.ReactNode;
@@ -29,18 +33,34 @@ export function PublicShell({
   onSwitchToHost,
   activeBottomTab = "explore",
 }: PublicShellProps) {
+  const t = useTranslations("common");
+  const tFooter = useTranslations("footer");
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  const handleToggleLocale = () => {
+    const nextLocale = locale === "vi" ? "en" : "vi";
+    if (pathname) {
+      const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`);
+      router.push(newPath);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-bg-page)] text-[var(--color-text-primary)]">
+      {/* FX Exchange Rate Alert Banner */}
+      <CurrencyFxBanner />
+
       {/* Top Header */}
       <header className="sticky top-0 z-40 bg-[var(--color-bg-surface)] border-b border-[var(--color-border-subtle)] shadow-[var(--shadow-1)]">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           {/* Brand Logo */}
           <Link
-            href="/"
+            href={`/${locale}`}
             className="flex items-center gap-2 flex-shrink-0 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gray-900)] rounded-md"
-            aria-label="Homestay Booking Trang chủ"
+            aria-label={`${t("appName")} ${t("explore")}`}
           >
             <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-50)] flex items-center justify-center text-[var(--color-brand-500)] group-hover:scale-105 transition-transform">
               <svg
@@ -64,54 +84,52 @@ export function PublicShell({
               type="button"
               className="text-sm font-semibold px-3 py-1 hover:text-[var(--color-brand-600)] transition-colors border-r border-[var(--color-border-subtle)]"
             >
-              Địa điểm bất kỳ
+              {t("searchAnywhere")}
             </button>
             <button
               type="button"
               className="text-sm font-semibold px-3 py-1 hover:text-[var(--color-brand-600)] transition-colors border-r border-[var(--color-border-subtle)]"
             >
-              Tuần bất kỳ
+              {t("searchAnyWeek")}
             </button>
             <button
               type="button"
               className="text-sm text-[var(--color-text-secondary)] px-3 py-1 hover:text-[var(--color-brand-600)] transition-colors"
             >
-              Thêm khách
+              {t("addGuests")}
             </button>
             <div
               className="w-8 h-8 rounded-full bg-[var(--color-brand-600)] flex items-center justify-center text-white ml-2 flex-shrink-0"
-              aria-label="Tìm kiếm"
+              aria-label={t("search")}
             >
               <Search className="w-4 h-4" />
             </div>
           </div>
 
           {/* Right Action Menu */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Link
-              href="/become-a-host"
+              href={`/${locale}/become-host`}
               className="hidden sm:inline-flex text-sm font-medium px-3.5 py-2 rounded-full hover:bg-[var(--color-bg-subtle)] transition-colors"
             >
-              Trở thành Host
+              {t("becomeHost")}
             </Link>
 
-            <button
-              type="button"
-              className="p-2.5 rounded-full hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-primary)] transition-colors"
-              aria-label="Chọn ngôn ngữ (Hiện tại: Tiếng Việt)"
-            >
-              <Globe className="w-4 h-4" />
-            </button>
+            {/* Currency Switcher */}
+            <CurrencySwitcher />
+
+            {/* Language Switcher */}
+            <LocaleSwitcher />
 
             {/* User Dropdown Trigger */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center gap-2.5 border border-[var(--color-border-default)] p-1.5 pl-3 rounded-full hover:shadow-[var(--shadow-2)] transition-all bg-[var(--color-bg-surface)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gray-900)]"
+                className="flex items-center gap-2.5 border border-[var(--color-border-default)] p-1.5 pl-3 rounded-full hover:shadow-[var(--shadow-2)] transition-all bg-[var(--color-bg-surface)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gray-900)] cursor-pointer"
                 aria-expanded={isUserMenuOpen}
                 aria-haspopup="menu"
-                aria-label="Menu tài khoản"
+                aria-label={t("account")}
               >
                 <Menu className="w-4 h-4 text-[var(--color-text-secondary)]" />
                 <div className="w-7 h-7 rounded-full bg-[var(--color-gray-900)] text-white flex items-center justify-center text-xs font-semibold">
@@ -134,67 +152,67 @@ export function PublicShell({
                     {!isLoggedIn ? (
                       <>
                         <Link
-                          href="/login"
+                          href={`/${locale}/login`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm font-semibold hover:bg-[var(--color-bg-subtle)]"
                         >
-                          Đăng nhập
+                          {t("login")}
                         </Link>
                         <Link
-                          href="/register"
+                          href={`/${locale}/register`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
                         >
-                          Đăng ký tài khoản
+                          {t("register")}
                         </Link>
                         <div className="my-1 border-t border-[var(--color-border-subtle)]" />
                         <Link
-                          href="/become-a-host"
+                          href={`/${locale}/become-host`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm hover:bg-[var(--color-bg-subtle)]"
                         >
-                          Cho thuê chỗ ở cùng Homestay
+                          {t("becomeHost")}
                         </Link>
                         <Link
-                          href="/help"
+                          href={`/${locale}/help`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm hover:bg-[var(--color-bg-subtle)]"
                         >
-                          Trung tâm trợ giúp
+                          {t("help")}
                         </Link>
                       </>
                     ) : (
                       <>
                         <div className="px-4 py-2 text-xs font-medium text-[var(--color-text-secondary)]">
-                          Đăng nhập với {userName}
+                          {userName}
                         </div>
                         <Link
-                          href="/account/profile"
+                          href={`/${locale}/account/profile`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm font-medium hover:bg-[var(--color-bg-subtle)]"
                         >
-                          Hồ sơ cá nhân
+                          {t("profile")}
                         </Link>
                         <Link
-                          href="/account/settings"
+                          href={`/${locale}/account/settings`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm hover:bg-[var(--color-bg-subtle)]"
                         >
-                          Cài đặt tài khoản
+                          {t("settings")}
                         </Link>
                         <Link
-                          href="/account/verification"
+                          href={`/${locale}/account/verification`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm hover:bg-[var(--color-bg-subtle)]"
                         >
-                          Xác minh danh tính
+                          {t("verification")}
                         </Link>
                         <div className="my-1 border-t border-[var(--color-border-subtle)]" />
                         <button
@@ -203,17 +221,17 @@ export function PublicShell({
                             setIsUserMenuOpen(false);
                             onSwitchToHost?.();
                           }}
-                          className="w-full text-left px-4 py-2.5 text-sm font-medium text-[var(--color-brand-600)] hover:bg-[var(--color-bg-subtle)]"
+                          className="w-full text-left px-4 py-2.5 text-sm font-medium text-[var(--color-brand-600)] hover:bg-[var(--color-bg-subtle)] cursor-pointer"
                         >
-                          Chuyển sang chế độ Host
+                          {t("switchToHost")}
                         </button>
                         <div className="my-1 border-t border-[var(--color-border-subtle)]" />
                         <button
                           type="button"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="w-full text-left px-4 py-2.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
+                          className="w-full text-left px-4 py-2.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] cursor-pointer"
                         >
-                          Đăng xuất
+                          {t("logout")}
                         </button>
                       </>
                     )}
@@ -232,11 +250,11 @@ export function PublicShell({
 
       {/* Mobile Bottom Navigation (Airbnb style) */}
       <nav
-        aria-label="Điều hướng chính trên điện thoại"
+        aria-label="Navigation"
         className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-bg-surface)] border-t border-[var(--color-border-subtle)] px-2 py-1.5 flex justify-around items-center"
       >
         <Link
-          href="/"
+          href={`/${locale}`}
           className={`flex flex-col items-center gap-1 py-1 px-2 text-xs font-medium ${
             activeBottomTab === "explore"
               ? "text-[var(--color-brand-600)] font-semibold"
@@ -244,7 +262,7 @@ export function PublicShell({
           }`}
         >
           <Compass className="w-5 h-5" />
-          <span>Khám phá</span>
+          <span>{t("explore")}</span>
         </Link>
 
         <button
@@ -252,13 +270,13 @@ export function PublicShell({
           disabled
           aria-disabled="true"
           className="flex flex-col items-center gap-1 py-1 px-2 text-xs text-[var(--color-text-disabled)] cursor-not-allowed opacity-60 relative"
-          title="Yêu thích (Giai đoạn sau)"
+          title={t("wishlist")}
         >
           <div className="relative">
             <Heart className="w-5 h-5" />
             <Lock className="w-2.5 h-2.5 absolute -top-1 -right-1 text-[var(--color-text-disabled)]" />
           </div>
-          <span>Yêu thích</span>
+          <span>{t("wishlist")}</span>
         </button>
 
         <button
@@ -266,13 +284,13 @@ export function PublicShell({
           disabled
           aria-disabled="true"
           className="flex flex-col items-center gap-1 py-1 px-2 text-xs text-[var(--color-text-disabled)] cursor-not-allowed opacity-60 relative"
-          title="Chuyến đi (Giai đoạn sau)"
+          title={t("trips")}
         >
           <div className="relative">
             <Luggage className="w-5 h-5" />
             <Lock className="w-2.5 h-2.5 absolute -top-1 -right-1 text-[var(--color-text-disabled)]" />
           </div>
-          <span>Chuyến đi</span>
+          <span>{t("trips")}</span>
         </button>
 
         <button
@@ -280,17 +298,17 @@ export function PublicShell({
           disabled
           aria-disabled="true"
           className="flex flex-col items-center gap-1 py-1 px-2 text-xs text-[var(--color-text-disabled)] cursor-not-allowed opacity-60 relative"
-          title="Hộp thư (Giai đoạn sau)"
+          title={t("inbox")}
         >
           <div className="relative">
             <MessageSquare className="w-5 h-5" />
             <Lock className="w-2.5 h-2.5 absolute -top-1 -right-1 text-[var(--color-text-disabled)]" />
           </div>
-          <span>Hộp thư</span>
+          <span>{t("inbox")}</span>
         </button>
 
         <Link
-          href="/account/profile"
+          href={`/${locale}/account/profile`}
           className={`flex flex-col items-center gap-1 py-1 px-2 text-xs font-medium ${
             activeBottomTab === "profile"
               ? "text-[var(--color-brand-600)] font-semibold"
@@ -298,7 +316,7 @@ export function PublicShell({
           }`}
         >
           <User className="w-5 h-5" />
-          <span>Tài khoản</span>
+          <span>{t("account")}</span>
         </Link>
       </nav>
 
@@ -307,46 +325,58 @@ export function PublicShell({
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 text-sm">
             <div>
-              <h3 className="font-semibold text-[var(--color-gray-900)] mb-3">Về Homestay</h3>
+              <h3 className="font-semibold text-[var(--color-gray-900)] mb-3">
+                {tFooter("aboutTitle")}
+              </h3>
               <ul className="space-y-2 text-[var(--color-text-secondary)]">
-                <li><Link href="/about" className="hover:underline">Giới thiệu</Link></li>
-                <li><Link href="/careers" className="hover:underline">Cơ hội việc làm</Link></li>
-                <li><Link href="/news" className="hover:underline">Tin tức</Link></li>
+                <li><Link href={`/${locale}/about`} className="hover:underline">{tFooter("aboutUs")}</Link></li>
+                <li><Link href={`/${locale}/careers`} className="hover:underline">{tFooter("careers")}</Link></li>
+                <li><Link href={`/${locale}/news`} className="hover:underline">{tFooter("news")}</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[var(--color-gray-900)] mb-3">Đón tiếp khách</h3>
+              <h3 className="font-semibold text-[var(--color-gray-900)] mb-3">
+                {tFooter("hostingTitle")}
+              </h3>
               <ul className="space-y-2 text-[var(--color-text-secondary)]">
-                <li><Link href="/become-a-host" className="hover:underline">Trở thành Host</Link></li>
-                <li><Link href="/host-insurance" className="hover:underline">Bảo hiểm cho Host</Link></li>
-                <li><Link href="/community" className="hover:underline">Cộng đồng Host</Link></li>
+                <li><Link href={`/${locale}/become-a-host`} className="hover:underline">{tFooter("becomeHost")}</Link></li>
+                <li><Link href={`/${locale}/host-insurance`} className="hover:underline">{tFooter("hostInsurance")}</Link></li>
+                <li><Link href={`/${locale}/community`} className="hover:underline">{tFooter("hostCommunity")}</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[var(--color-gray-900)] mb-3">Hỗ trợ</h3>
+              <h3 className="font-semibold text-[var(--color-gray-900)] mb-3">
+                {tFooter("supportTitle")}
+              </h3>
               <ul className="space-y-2 text-[var(--color-text-secondary)]">
-                <li><Link href="/help" className="hover:underline">Trung tâm trợ giúp</Link></li>
-                <li><Link href="/safety" className="hover:underline">Thông tin an toàn</Link></li>
-                <li><Link href="/cancellation-policies" className="hover:underline">Chính sách huỷ phòng</Link></li>
+                <li><Link href={`/${locale}/help`} className="hover:underline">{tFooter("helpCenter")}</Link></li>
+                <li><Link href={`/${locale}/safety`} className="hover:underline">{tFooter("safetyInfo")}</Link></li>
+                <li><Link href={`/${locale}/cancellation-policies`} className="hover:underline">{tFooter("cancellationPolicies")}</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-[var(--color-gray-900)] mb-3">Điều khoản & Pháp lý</h3>
+              <h3 className="font-semibold text-[var(--color-gray-900)] mb-3">
+                {tFooter("legalTitle")}
+              </h3>
               <ul className="space-y-2 text-[var(--color-text-secondary)]">
-                <li><Link href="/terms" className="hover:underline">Điều khoản dịch vụ</Link></li>
-                <li><Link href="/privacy" className="hover:underline">Chính sách quyền riêng tư</Link></li>
-                <li><Link href="/sitemap" className="hover:underline">Sơ đồ trang web</Link></li>
+                <li><Link href={`/${locale}/terms`} className="hover:underline">{tFooter("termsOfService")}</Link></li>
+                <li><Link href={`/${locale}/privacy`} className="hover:underline">{tFooter("privacyPolicy")}</Link></li>
+                <li><Link href={`/${locale}/sitemap`} className="hover:underline">{tFooter("sitemap")}</Link></li>
               </ul>
             </div>
           </div>
 
           <div className="pt-6 border-t border-[var(--color-border-subtle)] flex flex-col sm:flex-row items-center justify-between text-xs text-[var(--color-text-secondary)] gap-3">
             <div>
-              © 2026 Homestay Booking. Tất cả quyền được bảo lưu. Tuân thủ chuẩn WCAG 2.1 AA.
+              {tFooter("copyright")}
             </div>
             <div className="flex items-center gap-4">
-              <span className="font-medium text-[var(--color-gray-900)]">Tiếng Việt (VN)</span>
-              <span className="font-medium text-[var(--color-gray-900)]">₫ VND</span>
+              <span className="font-medium text-[var(--color-gray-900)]">
+                {tFooter("currentLanguage")}
+              </span>
+              <span className="font-medium text-[var(--color-gray-900)]">
+                {locale === "vi" ? tFooter("currencyVND") : tFooter("currencyUSD")}
+              </span>
             </div>
           </div>
         </div>

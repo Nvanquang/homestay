@@ -1,0 +1,163 @@
+openapi: 3.1.0
+info:
+  title: UrbanNest Currency Exchange API
+  version: 1.0.0
+  description: OpenAPI 3.1 Contract for Multi-Currency and Exchange Rates (Slice FE-S13)
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local Spring Boot Backend Server
+
+paths:
+  /config/currencies:
+    get:
+      summary: Lấy danh sách các loại tiền tệ được hệ thống hỗ trợ
+      operationId: getSupportedCurrencies
+      tags:
+        - Currency
+      responses:
+        '200':
+          description: Danh sách tiền tệ hợp lệ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CurrencyConfigDTO'
+
+  /currencies/rates:
+    get:
+      summary: Lấy snapshot tỷ giá hối đoái quy đổi từ VND mới nhất
+      operationId: getExchangeRateSnapshot
+      tags:
+        - Currency
+      responses:
+        '200':
+          description: Snapshot tỷ giá hiện tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeRateSnapshotDTO'
+
+  /account/preferences/currency:
+    get:
+      summary: Lấy tiền tệ hiển thị ưa thích của người dùng
+      operationId: getUserCurrencyPreference
+      tags:
+        - Currency
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Tiền tệ đã lưu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  displayCurrency:
+                    type: string
+                    example: USD
+    put:
+      summary: Cập nhật tiền tệ hiển thị ưa thích
+      operationId: updateUserCurrencyPreference
+      tags:
+        - Currency
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - displayCurrency
+              properties:
+                displayCurrency:
+                  type: string
+                  enum: [VND, USD, EUR, JPY, GBP]
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  displayCurrency:
+                    type: string
+                    example: USD
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+
+  schemas:
+    CurrencyConfigDTO:
+      type: object
+      required:
+        - code
+        - symbol
+        - nameVi
+        - nameEn
+        - decimalPlaces
+        - isActive
+      properties:
+        code:
+          type: string
+          example: USD
+        symbol:
+          type: string
+          example: $
+        nameVi:
+          type: string
+          example: Đô la Mỹ
+        nameEn:
+          type: string
+          example: US Dollar
+        decimalPlaces:
+          type: integer
+          example: 2
+        isActive:
+          type: boolean
+          example: true
+
+    ExchangeRateSnapshotDTO:
+      type: object
+      required:
+        - baseCurrency
+        - status
+        - rateDate
+        - rates
+      properties:
+        baseCurrency:
+          type: string
+          example: VND
+        status:
+          type: string
+          enum: [OK, STALE, UNAVAILABLE]
+          example: OK
+        rateDate:
+          type: string
+          format: date
+          example: "2026-10-09"
+        providerSource:
+          type: string
+          example: State Bank of Vietnam (SBV) Reference Rates
+        rates:
+          type: object
+          additionalProperties:
+            type: number
+          example:
+            VND: 1.0
+            USD: 0.00004
+            EUR: 0.000037
+            JPY: 0.0062
+            GBP: 0.000031

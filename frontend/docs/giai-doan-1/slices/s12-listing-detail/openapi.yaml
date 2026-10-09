@@ -1,0 +1,383 @@
+openapi: 3.1.0
+info:
+  title: Homestay Booking - Listing Detail, Host Profile & Cancellation Policies API
+  description: API Contracts for Slice S12 - Listing Detail P03, Host Profile P04 and Cancellation Policies P05
+  version: 1.0.0
+
+paths:
+  /api/v1/listings/{id}:
+    get:
+      summary: Lấy thông tin chi tiết công khai của một homestay listing (P03)
+      operationId: getListingDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: preview
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Bật cờ xem trước đối với Host chủ sở hữu hoặc Admin
+      responses:
+        '200':
+          description: Chi tiết listing đầy đủ thông tin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingDetailDTO'
+        '404':
+          description: Chỗ ở không tồn tại hoặc chưa công khai
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/v1/listings/{id}/quote:
+    get:
+      summary: Báo giá chi tiết từ Pricing Engine (Sticky Booking Box CMP-22)
+      operationId: calculateBookingQuote
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: checkin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: checkout
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: adults
+          in: query
+          required: true
+          schema:
+            type: integer
+            default: 1
+        - name: children
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Báo giá chi tiết kèm từng dòng phụ phí và phân rã theo đêm
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingQuoteResult'
+        '422':
+          description: Vi phạm quy định lưu trú (đêm tối thiểu, vượt sức chứa)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/v1/hosts/{id}:
+    get:
+      summary: Lấy hồ sơ công khai của Host (P04)
+      operationId: getHostPublicProfile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Hồ sơ công khai Host (bảo mật tuyệt đối email/SĐT/CCCD)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostPublicProfile'
+        '404':
+          description: Không tìm thấy Host
+
+  /api/v1/cancellation-policies:
+    get:
+      summary: Lấy danh sách chính sách hủy công khai (P05)
+      operationId: getCancellationPolicies
+      responses:
+        '200':
+          description: Danh sách 3 chính sách Linh hoạt, Tiêu chuẩn, Nghiêm ngặt
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CancellationPolicyDetail'
+
+components:
+  schemas:
+    ListingDetailDTO:
+      type: object
+      required:
+        - id
+        - title
+        - propertyType
+        - areaLabel
+        - description
+        - photos
+        - maxGuests
+        - bedrooms
+        - beds
+        - bathrooms
+        - bookingMode
+        - cancellationPolicy
+        - amenities
+        - stayRules
+        - checkInTime
+        - checkOutTime
+        - houseRules
+        - publicArea
+        - baseNightlyPrice
+        - cleaningFee
+        - host
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        propertyType:
+          type: string
+          enum: [ENTIRE_PLACE, PRIVATE_ROOM]
+        areaLabel:
+          type: string
+        description:
+          type: string
+        photos:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              url:
+                type: string
+              caption:
+                type: string
+              order:
+                type: integer
+        maxGuests:
+          type: integer
+        standardGuests:
+          type: integer
+        extraGuestFee:
+          type: number
+        bedrooms:
+          type: integer
+        beds:
+          type: integer
+        bathrooms:
+          type: integer
+        bookingMode:
+          type: string
+          enum: [INSTANT, REQUEST]
+        cancellationPolicy:
+          $ref: '#/components/schemas/CancellationPolicyDetail'
+        amenities:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              category:
+                type: string
+        stayRules:
+          type: object
+          properties:
+            minNights:
+              type: integer
+            maxNights:
+              type: integer
+            minNoticeHours:
+              type: integer
+            maxAdvanceMonths:
+              type: integer
+        checkInTime:
+          type: string
+        checkOutTime:
+          type: string
+        houseRules:
+          type: array
+          items:
+            type: string
+        publicArea:
+          type: object
+          properties:
+            centerLat:
+              type: number
+            centerLng:
+              type: number
+            radiusMeters:
+              type: number
+            label:
+              type: string
+        baseNightlyPrice:
+          type: number
+        weekendNightlyPrice:
+          type: number
+        cleaningFee:
+          type: number
+        weeklyDiscountPercent:
+          type: number
+        monthlyDiscountPercent:
+          type: number
+        ratingScore:
+          type: number
+        reviewCount:
+          type: integer
+        host:
+          $ref: '#/components/schemas/HostPublicProfile'
+
+    HostPublicProfile:
+      type: object
+      required:
+        - id
+        - displayName
+        - avatarUrl
+        - verified
+        - joinedAt
+        - activeListingCount
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+        bio:
+          type: string
+        verified:
+          type: boolean
+        joinedAt:
+          type: string
+        activeListingCount:
+          type: integer
+        responseRate:
+          type: number
+        responseTime:
+          type: string
+
+    CancellationPolicyDetail:
+      type: object
+      required:
+        - id
+        - key
+        - name
+        - summary
+        - milestones
+        - specialCases
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+          enum: [FLEXIBLE, MODERATE, STRICT]
+        name:
+          type: string
+        summary:
+          type: string
+        milestones:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              windowHours:
+                type: integer
+              roomRefundPercent:
+                type: number
+              cleaningRefundPercent:
+                type: number
+              serviceFeeRefundPercent:
+                type: number
+        specialCases:
+          type: object
+          properties:
+            hostCancel:
+              type: string
+            forceMajeure:
+              type: string
+
+    BookingQuoteResult:
+      type: object
+      required:
+        - nights
+        - guests
+        - lines
+        - total
+        - includesFeesAndTaxes
+      properties:
+        nights:
+          type: integer
+        guests:
+          type: integer
+        basePricePerNight:
+          type: number
+        lines:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+                enum: [ROOM, EXTRA_GUEST, CLEANING, DISCOUNT, SERVICE_FEE, TAX]
+              label:
+                type: string
+              amount:
+                type: number
+        nightlyBreakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              price:
+                type: number
+              source:
+                type: string
+        total:
+          type: number
+        includesFeesAndTaxes:
+          type: boolean
+        violations:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              message:
+                type: string
+
+    ProblemDetail:
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string

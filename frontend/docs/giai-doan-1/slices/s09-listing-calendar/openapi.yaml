@@ -1,0 +1,360 @@
+openapi: 3.1.0
+info:
+  title: Host Listing Calendar & Anti-Double Booking API
+  version: 1.0.0
+  description: >
+    API quản lý lịch phòng, chặn/mở ngày của Host và cấu hình quy tắc lưu trú
+    cho Slice FE-S09 (H06) tuân thủ quy tắc chống đặt trùng BR-CAL.
+servers:
+  - url: /api/v1
+    description: Mock & Local API Server
+
+paths:
+  /host/listings/{id}/calendar:
+    get:
+      summary: Lấy dữ liệu lịch tháng của chỗ nghỉ
+      operationId: getListingCalendar
+      tags:
+        - Host Calendar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: from
+          in: query
+          required: false
+          description: Ngày bắt đầu (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: false
+          description: Ngày kết thúc (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Dữ liệu lịch tháng thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarMonthResponse'
+        '404':
+          description: Chỗ nghỉ không tồn tại
+
+  /host/listings/{id}/calendar/blocks:
+    post:
+      summary: Chặn một khoảng ngày hoặc danh sách đêm (Atomic All-or-nothing)
+      operationId: blockListingDates
+      tags:
+        - Host Calendar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockDatesRequest'
+      responses:
+        '200':
+          description: Chặn ngày thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockDatesSuccessResponse'
+        '409':
+          description: Xung đột ngày với đơn đặt hoặc giữ chỗ hiện có (409 Conflict)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ConflictProblemDetails'
+
+    delete:
+      summary: Mở lại các ngày đã bị chặn
+      operationId: unblockListingDates
+      tags:
+        - Host Calendar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnblockDatesRequest'
+      responses:
+        '200':
+          description: Mở ngày thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnblockDatesSuccessResponse'
+
+  /host/listings/{id}/stay-rules:
+    patch:
+      summary: Cập nhật quy tắc lưu trú (min/max nights, prep time, advance notice)
+      operationId: updateStayRules
+      tags:
+        - Host Calendar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StayRulesDto'
+      responses:
+        '200':
+          description: Cập nhật quy tắc thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StayRulesDto'
+        '422':
+          description: Lỗi dữ liệu không hợp lệ (maxNights < minNights)
+
+components:
+  schemas:
+    CalendarDayState:
+      type: string
+      enum:
+        - AVAILABLE
+        - BOOKED
+        - HOLD
+        - PENDING_HOST
+        - BLOCKED
+        - PAST
+
+    CalendarDayDto:
+      type: object
+      required:
+        - date
+        - state
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-10-15'
+        state:
+          $ref: '#/components/schemas/CalendarDayState'
+        price:
+          type: integer
+          description: Giá đêm (VND)
+          example: 1200000
+        bookingRef:
+          type: string
+          example: 'BK-8921'
+        guestNameMasked:
+          type: string
+          example: 'Nguyễn V***'
+        guestCount:
+          type: integer
+          example: 2
+        checkIn:
+          type: string
+          format: date
+        checkOut:
+          type: string
+          format: date
+        note:
+          type: string
+        isPrepBuffer:
+          type: boolean
+        isOutsideBookingRules:
+          type: boolean
+
+    StayRulesDto:
+      type: object
+      required:
+        - minNights
+        - maxNights
+        - prepNights
+        - minNoticeHours
+        - maxAdvanceMonths
+      properties:
+        minNights:
+          type: integer
+          minimum: 1
+          maximum: 365
+          example: 1
+        maxNights:
+          type: integer
+          minimum: 1
+          maximum: 365
+          example: 30
+        prepNights:
+          type: integer
+          minimum: 0
+          maximum: 7
+          example: 1
+        minNoticeHours:
+          type: integer
+          minimum: 0
+          maximum: 168
+          example: 0
+        maxAdvanceMonths:
+          type: integer
+          minimum: 1
+          maximum: 24
+          example: 6
+
+    CalendarMonthResponse:
+      type: object
+      required:
+        - listingId
+        - listingTitle
+        - listingStatus
+        - timezone
+        - today
+        - days
+        - rules
+        - updatedAt
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        listingTitle:
+          type: string
+        listingStatus:
+          type: string
+        timezone:
+          type: string
+          example: 'Asia/Ho_Chi_Minh'
+        today:
+          type: string
+          format: date
+        basePrice:
+          type: integer
+        currency:
+          type: string
+          example: 'VND'
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarDayDto'
+        rules:
+          $ref: '#/components/schemas/StayRulesDto'
+        updatedAt:
+          type: string
+          format: date-time
+
+    BlockDatesRequest:
+      type: object
+      required:
+        - from
+        - to
+        - nights
+      properties:
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+        nights:
+          type: array
+          items:
+            type: string
+            format: date
+        reason:
+          type: string
+          maxLength: 200
+
+    BlockDatesSuccessResponse:
+      type: object
+      required:
+        - success
+        - blockedNights
+      properties:
+        success:
+          type: boolean
+          example: true
+        blockedNights:
+          type: array
+          items:
+            type: string
+            format: date
+
+    UnblockDatesRequest:
+      type: object
+      required:
+        - from
+        - to
+        - nights
+      properties:
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+        nights:
+          type: array
+          items:
+            type: string
+            format: date
+
+    UnblockDatesSuccessResponse:
+      type: object
+      required:
+        - success
+        - unblockedNights
+      properties:
+        success:
+          type: boolean
+          example: true
+        unblockedNights:
+          type: array
+          items:
+            type: string
+            format: date
+
+    ConflictProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - conflicts
+      properties:
+        type:
+          type: string
+          example: 'https://api.homestaybooking.vn/errors/calendar-conflict'
+        title:
+          type: string
+          example: '409 Conflict'
+        status:
+          type: integer
+          example: 409
+        detail:
+          type: string
+          example: 'Một số ngày vừa được đặt bởi khách khác.'
+        conflicts:
+          type: array
+          items:
+            type: string
+            format: date
+          example: ['2026-10-15', '2026-10-16']

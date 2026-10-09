@@ -11,9 +11,9 @@
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Slice FE-S09: Lịch Listing & Chống Đặt Trùng (H06)`
-- **WIP Count**: `1 / 1` (Tuân thủ giới hạn WIP = 1)
-- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe` -> `pending`
+- **Active Task**: `Slice FE-S09: Lịch Listing & Chống Đặt Trùng (H06)` (Hoàn tất xác minh, chờ nghiệm thu)
+- **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
+- **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe` -> `PASSED (Exit code 0)`
 
 ---
 
@@ -93,8 +93,8 @@ Quy ước trạng thái:
 
 ### Slice FE-S09: Lịch Listing & Chống Đặt Trùng (H06)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s09-listing-calendar/README.md`*
-- [-] **S09 Host Calendar UI**: H06 (Lịch tháng, chọn khoảng ngày để chặn/mở, hiển thị trạng thái đã đặt, lưu tự động): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `in_progress`
-- [ ] **S09 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `pending`
+- [x] **S09 Host Calendar UI**: H06 (Lịch tháng, chọn khoảng ngày để chặn/mở, hiển thị trạng thái đã đặt, lưu tự động): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `passing`
+- [x] **S09 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `passing`
 
 ---
 

@@ -183,23 +183,20 @@ export function ListingCardHost({
                       <span>{t("previewListing")}</span>
                     </button>
 
+                    <Link
+                      href={`/${locale}/host/listings/${id}/calendar`}
+                      className="flex items-center gap-2 px-3 py-2 text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)]"
+                    >
+                      <Calendar className="w-3.5 h-3.5 text-primary" />
+                      <span>{t("manageCalendar")}</span>
+                    </Link>
+
                     <div className="my-1 border-t border-[var(--color-border-subtle)]" />
 
                     <div className="px-3 py-1.5 text-[10px] text-[var(--color-text-tertiary)] flex items-center gap-1 font-semibold">
                       <Lock className="w-3 h-3" />
                       <span>{t("futureFeatures")}</span>
                     </div>
-
-                    <button
-                      type="button"
-                      disabled
-                      className="w-full flex items-center justify-between px-3 py-1.5 text-[var(--color-text-tertiary)] opacity-60 cursor-not-allowed text-left"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span>{t("calendarLocked")}</span>
-                      </span>
-                    </button>
 
                     <button
                       type="button"

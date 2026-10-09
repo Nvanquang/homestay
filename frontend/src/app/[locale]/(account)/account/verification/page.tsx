@@ -20,9 +20,24 @@ export async function generateMetadata({
   };
 }
 
-export default async function AccountVerificationPage() {
+export default async function AccountVerificationPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "account.verification" });
+
   return (
-    <AccountShell activeTab="verification">
+    <AccountShell
+      activeTab="verification"
+      title={t("title")}
+      description={
+        locale === "vi"
+          ? "Xác minh danh tính tài khoản để trở thành Host hoặc nâng cao quyền lợi tài khoản."
+          : "Verify your identity to become a host and access full platform privileges."
+      }
+    >
       <div className="space-y-6">
         <IdentityVerificationForm />
       </div>

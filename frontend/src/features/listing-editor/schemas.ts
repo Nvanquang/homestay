@@ -169,3 +169,59 @@ export function getPricingSchema(locale: string = "vi") {
 
 export const pricingSchema = getPricingSchema("vi");
 export type PricingFormValues = z.infer<typeof pricingSchema>;
+
+// S07 Policy Step Schema (Cancellation Policy & Booking Mode)
+export function getPolicyStepSchema(locale: string = "vi") {
+  const isEn = locale === "en";
+
+  return z.object({
+    cancellationPolicy: z.enum(["FLEXIBLE", "MODERATE", "STRICT"], {
+      error: isEn
+        ? "Please select a cancellation policy"
+        : "Vui lòng chọn một chính sách huỷ phòng",
+    }),
+    bookingMode: z.enum(["INSTANT", "REQUEST"], {
+      error: isEn
+        ? "Please select a booking mode"
+        : "Vui lòng chọn kiểu đặt phòng",
+    }),
+  });
+}
+
+export const policyStepSchema = getPolicyStepSchema("vi");
+export type PolicyFormValues = z.infer<typeof policyStepSchema>;
+
+// S07 Legal Step Schema (Operating Documents & Registration)
+export function getLegalStepSchema(locale: string = "vi") {
+  const isEn = locale === "en";
+
+  return z.object({
+    legalDocs: z
+      .array(
+        z.object({
+          id: z.string(),
+          type: z.enum([
+            "OPERATING_LICENSE",
+            "BUSINESS_REGISTRATION",
+            "FIRE_SAFETY",
+            "OTHER",
+          ]),
+          name: z.string(),
+          fileUrl: z.string(),
+          sizeBytes: z.number(),
+          uploadedAt: z.string(),
+        })
+      )
+      .min(
+        1,
+        isEn
+          ? "At least one operating legal document is required"
+          : "Cần tải lên ít nhất một giấy tờ chứng minh quyền khai thác"
+      ),
+    legalRegistrationNumber: z.string().optional(),
+  });
+}
+
+export const legalStepSchema = getLegalStepSchema("vi");
+export type LegalFormValues = z.infer<typeof legalStepSchema>;
+

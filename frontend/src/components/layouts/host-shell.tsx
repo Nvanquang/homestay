@@ -51,7 +51,7 @@ export function HostShell({
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const defaultBreadcrumbs: BreadcrumbItem[] = [
-    { label: "Bảng điều khiển Host", href: `/${locale}/host/listings` },
+    { label: locale === "vi" ? "Bảng điều khiển Host" : "Host Dashboard", href: `/${locale}/host/listings` },
   ];
 
   const actualBreadcrumbs = breadcrumbs || defaultBreadcrumbs;
@@ -166,26 +166,26 @@ export function HostShell({
                     Host: {userName}
                   </div>
                   <Link
-                    href="/"
+                    href={`/${locale}`}
                     onClick={() => setIsUserMenuOpen(false)}
                     className="block px-4 py-2 text-sm text-[var(--color-brand-600)] hover:bg-[var(--color-bg-subtle)] font-medium"
                   >
-                    Chuyển sang chế độ Guest
+                    {t("switchToGuest")}
                   </Link>
                   <Link
-                    href="/account/settings"
+                    href={`/${locale}/account/settings`}
                     onClick={() => setIsUserMenuOpen(false)}
                     className="block px-4 py-2 text-sm hover:bg-[var(--color-bg-subtle)]"
                   >
-                    Cài đặt tài khoản
+                    {t("settings")}
                   </Link>
                   <div className="my-1 border-t border-[var(--color-border-subtle)]" />
                   <button
                     type="button"
                     onClick={() => setIsUserMenuOpen(false)}
-                    className="w-full text-left px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
+                    className="w-full text-left px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] cursor-pointer"
                   >
-                    Đăng xuất
+                    {t("logout")}
                   </button>
                 </div>
               </>
@@ -210,11 +210,11 @@ export function HostShell({
           className={`fixed inset-y-0 left-0 z-30 w-64 bg-[var(--color-bg-surface)] border-r border-[var(--color-border-subtle)] pt-16 md:pt-0 transform transition-transform duration-200 ease-in-out md:static md:translate-x-0 ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
-          aria-label="Thanh điều hướng Host"
+          aria-label={locale === "vi" ? "Thanh điều hướng Host" : "Host Navigation"}
         >
           <div className="p-4 space-y-1">
             <div className="px-3 py-2 text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
-              Quản lý chỗ ở
+              {locale === "vi" ? "Quản lý chỗ ở" : "Manage Listings"}
             </div>
             {navigationItems.map((item) => {
               const isActive = activeItem === item.id;

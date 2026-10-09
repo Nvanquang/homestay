@@ -1,0 +1,297 @@
+openapi: 3.1.0
+info:
+  title: UrbanNest Marketplace - Listing Policy, Legal & Review Status API
+  version: 1.0.0
+  description: >
+    API Hợp đồng kỹ thuật (Handover Contract) cho Slice FE-S07:
+    Chính sách huỷ phòng, Kiểu đặt phòng, Giấy tờ pháp lý, Kiểm tra đủ điều kiện gửi duyệt, và Màn hình theo dõi trạng thái duyệt H05.
+paths:
+  /cancellation-policies:
+    get:
+      summary: Lấy danh sách chính sách huỷ phòng chuẩn và bảng mốc hoàn tiền
+      operationId: getCancellationPolicies
+      responses:
+        '200':
+          description: Danh sách chính sách kèm chi tiết tiers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CancellationPolicyDetail'
+
+  /host/listings/{id}/readiness:
+    get:
+      summary: Kiểm tra toàn diện danh sách điều kiện đủ để gửi duyệt chỗ nghỉ
+      operationId: checkListingReadiness
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Kết quả kiểm tra điều kiện (Readiness Checklist)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingReadinessResult'
+        '404':
+          description: Không tìm thấy listing
+
+  /host/listings/{id}/legal-docs:
+    post:
+      summary: Tải lên giấy tờ quyền khai thác / giấy phép lưu trú cho listing
+      operationId: uploadLegalDocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - docType
+              properties:
+                file:
+                  type: string
+                  format: binary
+                docType:
+                  type: string
+                  enum: [OPERATING_LICENSE, BUSINESS_REGISTRATION, FIRE_SAFETY, OTHER]
+      responses:
+        '201':
+          description: Tải lên tài liệu thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalDocItem'
+        '400':
+          description: Tệp quá lớn hoặc định dạng không hợp lệ
+
+  /host/listings/{id}/legal-docs/{docId}:
+    delete:
+      summary: Xoá tài liệu pháp lý của listing
+      operationId: deleteLegalDocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: docId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Xoá tài liệu thành công
+        '404':
+          description: Không tìm thấy tài liệu
+
+  /host/listings/{id}/submit:
+    post:
+      summary: Xác nhận gửi duyệt chỗ nghỉ cho ban quản trị
+      operationId: submitListingForReview
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Gửi duyệt thành công, chuyển sang PENDING_REVIEW
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: PENDING_REVIEW
+                  message:
+                    type: string
+                    example: Gửi duyệt thành công. Ban quản trị sẽ thẩm định trong vòng 24–48 giờ.
+        '403':
+          description: Host chưa hoàn tất xác minh danh tính (HOST_NOT_VERIFIED)
+        '422':
+          description: Chưa đủ điều kiện gửi duyệt (Thiếu ảnh, thiếu giấy tờ...)
+
+  /host/listings/{id}/withdraw:
+    post:
+      summary: Rút lại yêu cầu duyệt để tiếp tục chỉnh sửa (chỉ khi PENDING_REVIEW)
+      operationId: withdrawListingSubmission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Đã rút lại, trạng thái trở về DRAFT
+        '400':
+          description: Trạng thái không hợp lệ để rút lại
+
+  /host/listings/{id}/review-status:
+    get:
+      summary: Lấy dữ liệu trạng thái phê duyệt H05 kèm lịch sử và lý do từ Admin
+      operationId: getListingReviewStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chi tiết trạng thái phê duyệt H05
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingReviewStatusDetail'
+
+components:
+  schemas:
+    CancellationPolicyDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          enum: [FLEXIBLE, MODERATE, STRICT]
+        nameVi:
+          type: string
+        nameEn:
+          type: string
+        summaryVi:
+          type: string
+        summaryEn:
+          type: string
+        tiers:
+          type: array
+          items:
+            type: object
+            properties:
+              hoursBefore:
+                type: integer
+              refundPercent:
+                type: integer
+              noteVi:
+                type: string
+              noteEn:
+                type: string
+
+    LegalDocItem:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [OPERATING_LICENSE, BUSINESS_REGISTRATION, FIRE_SAFETY, OTHER]
+        name:
+          type: string
+        fileUrl:
+          type: string
+        sizeBytes:
+          type: integer
+        uploadedAt:
+          type: string
+          format: date-time
+
+    ListingReadinessResult:
+      type: object
+      properties:
+        canSubmit:
+          type: boolean
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              ok:
+                type: boolean
+              messageVi:
+                type: string
+              messageEn:
+                type: string
+              stepNumber:
+                type: integer
+              stepId:
+                type: string
+              linkUrl:
+                type: string
+        summary:
+          type: object
+          properties:
+            id:
+              type: string
+            title:
+              type: string
+            coverPhotoUrl:
+              type: string
+            baseNightlyPrice:
+              type: integer
+            cancellationPolicy:
+              type: string
+            bookingMode:
+              type: string
+
+    ListingReviewStatusDetail:
+      type: object
+      properties:
+        listingId:
+          type: string
+        title:
+          type: string
+        coverPhotoUrl:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, PENDING_REVIEW, PUBLISHED, ACTIVE, NEEDS_CHANGES, REJECTED, LOCKED]
+        submittedAt:
+          type: string
+          format: date-time
+        currentReview:
+          type: object
+          properties:
+            decidedAt:
+              type: string
+              format: date-time
+            reasons:
+              type: array
+              items:
+                type: object
+                properties:
+                  section:
+                    type: string
+                    enum: [PHOTOS, DESCRIPTION, LEGAL, PRICING, LOCATION, OTHER]
+                  note:
+                    type: string
+                  stepNumber:
+                    type: integer
+                  stepId:
+                    type: string
+        revisions:
+          type: array
+          items:
+            type: object
+            properties:
+              no:
+                type: integer
+              submittedAt:
+                type: string
+              result:
+                type: string
+                enum: [PENDING, APPROVED, NEEDS_CHANGES, REJECTED]

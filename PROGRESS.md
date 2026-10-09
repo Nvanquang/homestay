@@ -11,8 +11,8 @@
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Slice FE-S06: Tiện Nghi, Quy Tắc Lưu Trú, Giá & Phí (H04 Bước 4–6)`
-- **WIP Count**: `0 / 1` (FE-S06 hoàn tất, chờ nghiệm thu trước khi bắt đầu FE-S07)
+- **Active Task**: `Slice FE-S07: Chính Sách Hủy, Pháp Lý & Gửi Duyệt (H04 Bước 7–8, H05)` (Hoàn tất xác minh, chờ nghiệm thu)
+- **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
 - **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe` -> `PASSED (Exit code 0)`
 
 ---
@@ -79,7 +79,8 @@ Quy ước trạng thái:
 
 ### Slice FE-S07: Chính Sách Hủy, Pháp Lý & Gửi Duyệt (H04 Bước 7–8, H05)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s07-listing-policy-submit/README.md`*
-- [ ] **S07 Listing Step 7-8 UI**: H04 Wizard (Bước 7: Chính sách hủy & kiểu đặt; Bước 8: Giấy phép pháp lý; H05: Theo dõi trạng thái duyệt): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [x] **S07 Listing Step 7-8 UI**: H04 Wizard (Bước 7: Chính sách hủy & kiểu đặt; Bước 8: Giấy phép pháp lý; H05: Theo dõi trạng thái duyệt): `.\scripts\verify.ps1 -Target fe` -> `passing`
+- [x] **S07 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `passing`
 
 ---
 

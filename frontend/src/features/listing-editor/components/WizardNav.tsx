@@ -85,7 +85,7 @@ export const WIZARD_STEPS: {
     labelKey: "step7Label",
     subLabelKey: "step7Sub",
     icon: FileCheck2,
-    isImplemented: false,
+    isImplemented: true,
   },
   {
     id: "legal",
@@ -93,7 +93,7 @@ export const WIZARD_STEPS: {
     labelKey: "step8Label",
     subLabelKey: "step8Sub",
     icon: Send,
-    isImplemented: false,
+    isImplemented: true,
   },
 ];
 

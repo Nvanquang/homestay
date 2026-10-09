@@ -1,11 +1,15 @@
-export type PropertyType = "ENTIRE_PLACE" | "PRIVATE_ROOM";
+export type PropertyType = "ENTIRE_PLACE" | "PRIVATE_ROOM" | "ROOM" | "SHARED_ROOM";
 
 export type ListingStatus =
   | "DRAFT"
   | "PENDING_APPROVAL"
+  | "PENDING_REVIEW"
+  | "NEEDS_CHANGES"
   | "PUBLISHED"
+  | "ACTIVE"
   | "UNLISTED"
-  | "REJECTED";
+  | "REJECTED"
+  | "LOCKED";
 
 export type WizardStepId =
   | "basic"
@@ -152,6 +156,119 @@ export interface PricingPreviewResult {
   violations: PricingViolation[];
 }
 
+/* ----------------------------------------------------
+ * Slice FE-S07: Cancellation Policy, Booking Mode, Legal Docs & Review Status
+ * ---------------------------------------------------- */
+
+export type CancellationPolicyType = "FLEXIBLE" | "MODERATE" | "STRICT";
+export type BookingMode = "INSTANT" | "REQUEST";
+
+export interface PolicyData {
+  cancellationPolicy: CancellationPolicyType;
+  bookingMode: BookingMode;
+}
+
+export interface CancellationPolicyTier {
+  hoursBefore: number;
+  refundPercent: number;
+  noteVi: string;
+  noteEn: string;
+}
+
+export interface CancellationPolicyDetail {
+  id: CancellationPolicyType;
+  nameVi: string;
+  nameEn: string;
+  summaryVi: string;
+  summaryEn: string;
+  badgeVi: string;
+  badgeEn: string;
+  tiers: CancellationPolicyTier[];
+}
+
+export type LegalDocType =
+  | "OPERATING_LICENSE"
+  | "BUSINESS_REGISTRATION"
+  | "FIRE_SAFETY"
+  | "OTHER";
+
+export interface LegalDocItem {
+  id: string;
+  type: LegalDocType;
+  name: string;
+  fileUrl: string;
+  sizeBytes: number;
+  uploadedAt: string;
+}
+
+export interface LegalData {
+  legalDocs: LegalDocItem[];
+  legalRegistrationNumber?: string;
+}
+
+export interface ReadinessItem {
+  key: string;
+  ok: boolean;
+  messageVi: string;
+  messageEn: string;
+  stepNumber: number;
+  stepId: WizardStepId;
+  linkUrl: string;
+}
+
+export interface ListingReadinessResult {
+  canSubmit: boolean;
+  items: ReadinessItem[];
+  summary: {
+    id: string;
+    title: string;
+    coverPhotoUrl?: string;
+    baseNightlyPrice: number;
+    cancellationPolicy: CancellationPolicyType;
+    bookingMode: BookingMode;
+    province: string;
+    district: string;
+  };
+}
+
+export type ReviewSectionType =
+  | "PHOTOS"
+  | "DESCRIPTION"
+  | "LEGAL"
+  | "PRICING"
+  | "LOCATION"
+  | "OTHER";
+
+export interface ReviewReasonItem {
+  section: ReviewSectionType;
+  note: string;
+  stepNumber: number;
+  stepId: WizardStepId;
+}
+
+export interface ListingRevisionItem {
+  no: number;
+  submittedAt: string;
+  decidedAt?: string;
+  result: "PENDING" | "APPROVED" | "NEEDS_CHANGES" | "REJECTED";
+  reasons?: ReviewReasonItem[];
+}
+
+export interface ListingReviewStatusDetail {
+  listingId: string;
+  title: string;
+  coverPhotoUrl?: string;
+  status: ListingStatus;
+  submittedAt?: string;
+  currentReview?: {
+    reasons: ReviewReasonItem[];
+    decidedAt?: string;
+  };
+  revisions: ListingRevisionItem[];
+  lockReason?: string;
+  publicUrl?: string;
+}
+
 export interface ListingItem {
   id: string;
   hostId: string;
@@ -163,11 +280,19 @@ export interface ListingItem {
   amenityIds?: string[];
   bookingRules?: BookingRulesData;
   pricing?: PricingData;
+  policy?: PolicyData;
+  legal?: LegalData;
+  legalDocs?: LegalDocItem[];
+  legalRegistrationNumber?: string;
+  cancellationPolicy?: CancellationPolicyType;
+  bookingMode?: BookingMode;
   draftProgress: ListingDraftProgress;
   updatedAt: string;
   createdAt: string;
+  submittedAt?: string;
   coverPhotoUrl?: string;
   rejectionReason?: string;
+  reviewStatus?: ListingReviewStatusDetail;
   capabilities: {
     canEdit: boolean;
     canPreview: boolean;

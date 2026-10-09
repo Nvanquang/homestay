@@ -28,11 +28,17 @@ import {
   photosStepSchema,
   getBookingRulesSchema,
   getPricingSchema,
+  getPolicyStepSchema,
+  getLegalStepSchema,
   ListingPhotoItem,
   BasicInfoData,
   LocationData,
   BookingRulesData,
   PricingData,
+  PolicyData,
+  LegalData,
+  CancellationPolicyType,
+  BookingMode,
 } from "@/features/listing-editor";
 import {
   WizardNav,
@@ -48,9 +54,21 @@ import { Step3Photos } from "@/features/listing-editor/components/Step3Photos";
 import { Step4Amenities } from "@/features/listing-editor/components/Step4Amenities";
 import { Step5Rules } from "@/features/listing-editor/components/Step5Rules";
 import { Step6Pricing } from "@/features/listing-editor/components/Step6Pricing";
+import { Step7Policy } from "@/features/listing-editor/components/Step7Policy";
+import { Step8Legal } from "@/features/listing-editor/components/Step8Legal";
 import { useTranslations } from "next-intl";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 import { toast } from "sonner";
+
+const DEFAULT_POLICY: PolicyData = {
+  cancellationPolicy: "FLEXIBLE",
+  bookingMode: "INSTANT",
+};
+
+const DEFAULT_LEGAL: LegalData = {
+  legalDocs: [],
+  legalRegistrationNumber: "",
+};
 
 const DEFAULT_BOOKING_RULES: BookingRulesData = {
   minNights: 1,
@@ -89,8 +107,38 @@ export default function ListingWizardStepPage({
   const { locale, id, step } = resolvedParams;
   const router = useRouter();
   const t = useTranslations("listingWizard");
+  const resolveStepId = (raw: string): WizardStepId => {
+    switch (raw) {
+      case "1":
+      case "basic":
+        return "basic";
+      case "2":
+      case "location":
+        return "location";
+      case "3":
+      case "photos":
+        return "photos";
+      case "4":
+      case "amenities":
+        return "amenities";
+      case "5":
+      case "rules":
+        return "rules";
+      case "6":
+      case "pricing":
+        return "pricing";
+      case "7":
+      case "policy":
+        return "policy";
+      case "8":
+      case "legal":
+        return "legal";
+      default:
+        return "basic";
+    }
+  };
 
-  const currentStep = (step as WizardStepId) || "basic";
+  const currentStep = resolveStepId(step);
 
   const [listing, setListing] = useState<ListingItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,6 +154,8 @@ export default function ListingWizardStepPage({
   const [amenityIds, setAmenityIds] = useState<string[]>([]);
   const [bookingRules, setBookingRules] = useState<BookingRulesData>(DEFAULT_BOOKING_RULES);
   const [pricing, setPricing] = useState<PricingData>(DEFAULT_PRICING);
+  const [policy, setPolicy] = useState<PolicyData>(DEFAULT_POLICY);
+  const [legal, setLegal] = useState<LegalData>(DEFAULT_LEGAL);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Auto-save debounce timer
@@ -125,6 +175,16 @@ export default function ListingWizardStepPage({
       setAmenityIds(data.amenityIds || []);
       setBookingRules(data.bookingRules || DEFAULT_BOOKING_RULES);
       setPricing(data.pricing || DEFAULT_PRICING);
+      setPolicy({
+        cancellationPolicy:
+          data.cancellationPolicy || data.policy?.cancellationPolicy || "FLEXIBLE",
+        bookingMode: data.bookingMode || data.policy?.bookingMode || "INSTANT",
+      });
+      setLegal({
+        legalDocs: data.legalDocs || data.legal?.legalDocs || [],
+        legalRegistrationNumber:
+          data.legalRegistrationNumber || data.legal?.legalRegistrationNumber || "",
+      });
       setLastSavedAt(new Date(data.updatedAt));
       setSaveStatus("idle");
     } catch (err: any) {
@@ -139,7 +199,8 @@ export default function ListingWizardStepPage({
     fetchListing();
   }, [id]);
 
-  const isReadOnly = listing?.status === "PENDING_APPROVAL";
+  const isReadOnly =
+    listing?.status === "PENDING_APPROVAL" || listing?.status === "PENDING_REVIEW";
 
   // Perform save to API
   const persistChanges = async (showToast: boolean = false): Promise<boolean> => {
@@ -157,6 +218,12 @@ export default function ListingWizardStepPage({
           amenityIds: amenityIds,
           bookingRules: bookingRules,
           pricing: pricing,
+          policy: policy,
+          cancellationPolicy: policy.cancellationPolicy,
+          bookingMode: policy.bookingMode,
+          legal: legal,
+          legalDocs: legal.legalDocs,
+          legalRegistrationNumber: legal.legalRegistrationNumber,
           currentStep,
         },
         listing.version
@@ -360,6 +427,27 @@ export default function ListingWizardStepPage({
     triggerAutoSave();
   };
 
+  const handlePolicyChange = (partial: Partial<PolicyData>) => {
+    setPolicy((prev) => ({ ...prev, ...partial }));
+    setValidationErrors((prev) => {
+      const next = { ...prev };
+      delete next.cancellationPolicy;
+      delete next.bookingMode;
+      return next;
+    });
+    triggerAutoSave();
+  };
+
+  const handleLegalChange = (partial: Partial<LegalData>) => {
+    setLegal((prev) => ({ ...prev, ...partial }));
+    setValidationErrors((prev) => {
+      const next = { ...prev };
+      delete next.legalDocs;
+      return next;
+    });
+    triggerAutoSave();
+  };
+
   // Navigation handlers
   const validateCurrentStep = (): boolean => {
     setValidationErrors({});
@@ -438,6 +526,24 @@ export default function ListingWizardStepPage({
       }
     }
 
+    // Step 7: Policy & Booking mode validation
+    if (currentStep === "policy" && policy) {
+      const res = getPolicyStepSchema(locale).safeParse(policy);
+      if (!res.success) {
+        const errs: Record<string, string> = {};
+        res.error.issues.forEach((iss) => {
+          errs[iss.path[0]?.toString() || "form"] = iss.message;
+        });
+        setValidationErrors(errs);
+        toast.error(
+          locale === "en"
+            ? "Please choose cancellation policy and booking mode"
+            : "Vui lòng chọn chính sách huỷ và kiểu đặt phòng trước khi tiếp tục"
+        );
+        return false;
+      }
+    }
+
     return true;
   };
 
@@ -455,6 +561,8 @@ export default function ListingWizardStepPage({
         return "pricing";
       case "pricing":
         return "policy";
+      case "policy":
+        return "legal";
       default:
         return "basic";
     }
@@ -474,6 +582,8 @@ export default function ListingWizardStepPage({
         return "rules";
       case "policy":
         return "pricing";
+      case "legal":
+        return "policy";
       default:
         return null;
     }
@@ -486,13 +596,6 @@ export default function ListingWizardStepPage({
     if (!saved) return;
 
     const nextStep = getNextStepId();
-    if (nextStep === "policy") {
-      toast.info(
-        locale === "vi"
-          ? "Đã hoàn thành Bước 1-6 của Slice S06! Bước 7 Chính sách sẽ sẵn sàng trong Slice S07."
-          : "Steps 1-6 completed! Step 7 Policies will be available in Slice S07."
-      );
-    }
     router.push(`/${locale}/host/listings/${id}/edit/${nextStep}`);
   };
 
@@ -729,28 +832,24 @@ export default function ListingWizardStepPage({
                 />
               )}
 
-              {/* Placeholders for subsequent steps (S07+) */}
-              {!["basic", "location", "photos", "amenities", "rules", "pricing"].includes(currentStep) && (
-                <div className="py-12 border border-dashed border-[var(--color-border-subtle)] rounded-xl text-center p-6 space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 flex items-center justify-center mx-auto">
-                    <Sparkles className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-base font-bold text-[var(--color-text-primary)]">
-                    {t((currentStepDef?.labelKey || "step1Label") as any)}
-                  </h3>
-                  <p className="text-xs text-[var(--color-text-secondary)] max-w-md mx-auto">
-                    {locale === "vi"
-                      ? "Bước này thuộc về Vertical Slice tiếp theo (S07 Chính sách hủy & Gửi duyệt). Bạn có thể quay lại các bước trước bất kỳ lúc nào."
-                      : "This step is part of subsequent Vertical Slice (S07 Cancellation Policies & Submit). You can navigate back to earlier steps anytime."}
-                  </p>
-                  <Button
-                    variant="secondary"
-                    onClick={() => router.push(`/${locale}/host/listings/${id}/edit/pricing`)}
-                    className="text-xs cursor-pointer"
-                  >
-                    ← {locale === "vi" ? "Bước 6: Giá & Phí" : "Step 6: Pricing"}
-                  </Button>
-                </div>
+              {currentStep === "policy" && (
+                <Step7Policy
+                  data={policy}
+                  onChange={handlePolicyChange}
+                  errors={validationErrors}
+                  isReadOnly={isReadOnly}
+                />
+              )}
+
+              {currentStep === "legal" && (
+                <Step8Legal
+                  listingId={id}
+                  data={legal}
+                  onChange={handleLegalChange}
+                  onSubmitSuccess={() => router.push(`/${locale}/host/listings/${id}/status`)}
+                  errors={validationErrors}
+                  isReadOnly={isReadOnly}
+                />
               )}
             </div>
 
@@ -765,25 +864,37 @@ export default function ListingWizardStepPage({
                 <span>{getPrevStepId() ? t("back") : (locale === "vi" ? "Danh sách" : "Listings")}</span>
               </button>
 
-              <Button
-                type="button"
-                variant="primary"
-                onClick={handleNext}
-                className="inline-flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-semibold shadow-xs cursor-pointer"
-              >
-                <span>
-                  {currentStep === "photos"
-                    ? t("continueToAmenities")
-                    : currentStep === "amenities"
-                    ? t("continueToRules")
-                    : currentStep === "rules"
-                    ? t("continueToPricing")
-                    : currentStep === "pricing"
-                    ? t("continueToPolicies")
-                    : t("continue")}
-                </span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
+              {currentStep !== "legal" ? (
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={handleNext}
+                  className="inline-flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-semibold shadow-xs cursor-pointer"
+                >
+                  <span>
+                    {currentStep === "photos"
+                      ? t("continueToAmenities")
+                      : currentStep === "amenities"
+                      ? t("continueToRules")
+                      : currentStep === "rules"
+                      ? t("continueToPricing")
+                      : currentStep === "pricing"
+                      ? (locale === "vi" ? "Tiếp tục: Chính sách huỷ" : "Continue: Cancellation Policy")
+                      : currentStep === "policy"
+                      ? (locale === "vi" ? "Tiếp tục: Giấy tờ & Gửi duyệt" : "Continue: Legal & Review")
+                      : t("continue")}
+                  </span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Link
+                  href={`/${locale}/host/listings/${id}/status`}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)] hover:underline"
+                >
+                  <Eye className="w-4 h-4" />
+                  <span>{locale === "vi" ? "Xem trạng thái phê duyệt" : "View Review Status"}</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>

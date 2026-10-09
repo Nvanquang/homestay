@@ -54,7 +54,7 @@ export function PublicShell({
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           {/* Brand Logo */}
           <Link
-            href="/"
+            href={`/${locale}`}
             className="flex items-center gap-2 flex-shrink-0 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gray-900)] rounded-md"
             aria-label={`${t("appName")} ${t("explore")}`}
           >
@@ -105,7 +105,7 @@ export function PublicShell({
           {/* Right Action Menu */}
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
-              href="/become-a-host"
+              href={`/${locale}/become-host`}
               className="hidden sm:inline-flex text-sm font-medium px-3.5 py-2 rounded-full hover:bg-[var(--color-bg-subtle)] transition-colors"
             >
               {t("becomeHost")}
@@ -145,7 +145,7 @@ export function PublicShell({
                     {!isLoggedIn ? (
                       <>
                         <Link
-                          href="/login"
+                          href={`/${locale}/login`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm font-semibold hover:bg-[var(--color-bg-subtle)]"
@@ -153,7 +153,7 @@ export function PublicShell({
                           {t("login")}
                         </Link>
                         <Link
-                          href="/register"
+                          href={`/${locale}/register`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
@@ -162,7 +162,7 @@ export function PublicShell({
                         </Link>
                         <div className="my-1 border-t border-[var(--color-border-subtle)]" />
                         <Link
-                          href="/become-a-host"
+                          href={`/${locale}/become-host`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm hover:bg-[var(--color-bg-subtle)]"
@@ -170,7 +170,7 @@ export function PublicShell({
                           {t("becomeHost")}
                         </Link>
                         <Link
-                          href="/help"
+                          href={`/${locale}/help`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm hover:bg-[var(--color-bg-subtle)]"
@@ -184,7 +184,7 @@ export function PublicShell({
                           {userName}
                         </div>
                         <Link
-                          href="/account/profile"
+                          href={`/${locale}/account/profile`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm font-medium hover:bg-[var(--color-bg-subtle)]"
@@ -192,7 +192,7 @@ export function PublicShell({
                           {t("profile")}
                         </Link>
                         <Link
-                          href="/account/settings"
+                          href={`/${locale}/account/settings`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm hover:bg-[var(--color-bg-subtle)]"
@@ -200,7 +200,7 @@ export function PublicShell({
                           {t("settings")}
                         </Link>
                         <Link
-                          href="/account/verification"
+                          href={`/${locale}/account/verification`}
                           role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2.5 text-sm hover:bg-[var(--color-bg-subtle)]"

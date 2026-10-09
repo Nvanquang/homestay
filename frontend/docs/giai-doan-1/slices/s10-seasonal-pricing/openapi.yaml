@@ -1,0 +1,366 @@
+openapi: 3.1.0
+info:
+  title: Host Seasonal & Holiday Pricing Rules API
+  version: 1.0.0
+  description: >
+    API quản lý bảng giá cuối tuần, quy tắc giá theo mùa và ngày lễ của Host (H08)
+    với thuật toán phân giải giá đa tầng (PricingEngine Hierarchy).
+servers:
+  - url: /api/v1
+    description: Mock & Local API Server
+
+paths:
+  /host/listings/{id}/pricing-rules:
+    get:
+      summary: Lấy tổng quan quy tắc giá và thông tin giá cơ sở
+      operationId: getPricingRulesOverview
+      tags:
+        - Seasonal Pricing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingRulesOverviewDto'
+
+    post:
+      summary: Thêm mới quy tắc giá theo mùa hoặc ngày lễ
+      operationId: createPriceRule
+      tags:
+        - Seasonal Pricing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertPriceRuleRequest'
+      responses:
+        '201':
+          description: Tạo quy tắc thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceRuleDto'
+        '409':
+          description: Xung đột khoảng ngày với quy tắc cùng bậc ưu tiên (409 Conflict)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/PriceConflictProblemDetails'
+
+  /host/listings/{id}/pricing-rules/{ruleId}:
+    patch:
+      summary: Cập nhật quy tắc giá
+      operationId: updatePriceRule
+      tags:
+        - Seasonal Pricing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertPriceRuleRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceRuleDto'
+        '409':
+          description: Xung đột khoảng ngày cùng bậc
+
+    delete:
+      summary: Xóa quy tắc giá
+      operationId: deletePriceRule
+      tags:
+        - Seasonal Pricing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Đã xóa thành công
+
+  /host/listings/{id}/pricing-rules/weekend:
+    put:
+      summary: Cập nhật giá cuối tuần (Thứ Sáu & Thứ Bảy)
+      operationId: updateWeekendPrice
+      tags:
+        - Seasonal Pricing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nightlyPrice
+              properties:
+                nightlyPrice:
+                  type: integer
+                  minimum: 10000
+                  example: 1500000
+      responses:
+        '200':
+          description: Cập nhật giá cuối tuần thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  weekendNightlyPrice:
+                    type: integer
+                    example: 1500000
+
+  /host/listings/{id}/price-calendar:
+    get:
+      summary: Lấy lịch giá từng ngày theo tháng giải quyết bởi PricingEngine
+      operationId: getPriceCalendar
+      tags:
+        - Seasonal Pricing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Lịch giá thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalendarPriceDayDto'
+
+components:
+  schemas:
+    PriceRuleType:
+      type: string
+      enum:
+        - HOLIDAY
+        - SPECIAL
+        - SEASON
+
+    PriceRulePhase:
+      type: string
+      enum:
+        - UPCOMING
+        - ACTIVE
+        - PAST
+
+    PriceSource:
+      type: string
+      enum:
+        - BASE
+        - WEEKEND
+        - SEASON
+        - HOLIDAY
+        - SPECIAL
+
+    PriceRuleDto:
+      type: object
+      required:
+        - id
+        - listingId
+        - type
+        - name
+        - dateFrom
+        - dateTo
+        - nightlyPrice
+        - phase
+      properties:
+        id:
+          type: string
+        listingId:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/PriceRuleType'
+        name:
+          type: string
+          example: 'Tết Nguyên Đán 2027'
+        dateFrom:
+          type: string
+          format: date
+        dateTo:
+          type: string
+          format: date
+        nightlyPrice:
+          type: integer
+          example: 2400000
+        phase:
+          $ref: '#/components/schemas/PriceRulePhase'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PricingRulesOverviewDto:
+      type: object
+      required:
+        - listingId
+        - listingTitle
+        - baseNightlyPrice
+        - weekendNightlyPrice
+        - weekendNights
+        - rules
+        - currency
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        listingTitle:
+          type: string
+        baseNightlyPrice:
+          type: integer
+          example: 1200000
+        weekendNightlyPrice:
+          type: integer
+          example: 1500000
+        weekendNights:
+          type: array
+          items:
+            type: string
+            enum: ['FRI', 'SAT']
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceRuleDto'
+        currency:
+          type: string
+          example: 'VND'
+
+    UpsertPriceRuleRequest:
+      type: object
+      required:
+        - type
+        - name
+        - dateFrom
+        - dateTo
+        - nightlyPrice
+      properties:
+        type:
+          $ref: '#/components/schemas/PriceRuleType'
+        name:
+          type: string
+          maxLength: 60
+          example: 'Mùa Hè Đà Lạt'
+        dateFrom:
+          type: string
+          format: date
+        dateTo:
+          type: string
+          format: date
+        nightlyPrice:
+          type: integer
+          minimum: 10000
+          example: 1800000
+
+    CalendarPriceDayDto:
+      type: object
+      required:
+        - date
+        - price
+        - source
+      properties:
+        date:
+          type: string
+          format: date
+        price:
+          type: integer
+          example: 1800000
+        source:
+          $ref: '#/components/schemas/PriceSource'
+        sourceName:
+          type: string
+          example: 'Mùa Hè Đà Lạt'
+        ruleId:
+          type: string
+        isPast:
+          type: boolean
+
+    PriceConflictProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          example: 'https://api.homestaybooking.vn/errors/pricing-rule-conflict'
+        title:
+          type: string
+          example: '409 Conflict'
+        status:
+          type: integer
+          example: 409
+        detail:
+          type: string
+          example: 'Khoảng ngày này trùng với quy tắc cùng bậc ưu tiên.'
+        conflictingRuleIds:
+          type: array
+          items:
+            type: string

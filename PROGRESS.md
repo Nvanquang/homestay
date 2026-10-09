@@ -11,7 +11,7 @@
 
 ## 1. Công Việc Đang Thực Hiện (Current Active Task)
 
-- **Active Task**: `Slice FE-S09: Lịch Listing & Chống Đặt Trùng (H06)` (Hoàn tất xác minh, chờ nghiệm thu)
+- **Active Task**: `Slice FE-S10: Giá Theo Mùa & Ngày Lễ (H08)` (Hoàn tất xác minh, chờ nghiệm thu)
 - **WIP Count**: `0 / 1` (Tuân thủ giới hạn WIP = 1)
 - **Cổng xác minh hiện tại**: `.\scripts\verify.ps1 -Target fe` -> `PASSED (Exit code 0)`
 
@@ -100,13 +100,14 @@ Quy ước trạng thái:
 
 ### Slice FE-S10: Giá Theo Mùa & Ngày Lễ (H08)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s10-seasonal-pricing/README.md`*
-- [ ] **S10 Pricing Rules UI**: H08 (Bảng quy tắc giá theo mùa/lễ/cuối tuần, thứ tự ưu tiên áp dụng): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [x] **S10 Pricing Rules UI**: H08 (Bảng quy tắc giá theo mùa/lễ/cuối tuần, thứ tự ưu tiên áp dụng, định dạng tiền vi-VN): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `passing` (2026-10-09)
+- [x] **S10 DB Schema & OpenAPI Contract**: `db-design.md`, `openapi.yaml`: `Code-check` -> `passing` (2026-10-09)
 
 ---
 
 ### Slice FE-S11: Trang Chủ, Tìm Kiếm & Bản Đồ (P01, P02)
 *Đặc tả: `frontend/docs/giai-doan-1/slices/s11-home-search/README.md`*
-- [ ] **S11 Home & Search UI**: P01 (Trang chủ, thanh tìm kiếm viên thuốc), P02 (Kết quả tìm kiếm, bộ lọc nuqs URL, danh sách + bản đồ Mapbox marker giá): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `pending`
+- [-] **S11 Home & Search UI**: P01 (Trang chủ, thanh tìm kiếm viên thuốc), P02 (Kết quả tìm kiếm, bộ lọc nuqs URL, danh sách + bản đồ Mapbox marker giá): `.\scripts\verify.ps1 -Target fe -Tier 2` -> `in_progress`
 
 ---
 
